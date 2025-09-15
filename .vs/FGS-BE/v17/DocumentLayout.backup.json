@@ -1,0 +1,377 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B3A7CCF2-E4DE-4C2B-8EF6-2174E323B979}|FGS-BE\\FGS-BE.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B3A7CCF2-E4DE-4C2B-8EF6-2174E323B979}|FGS-BE\\FGS-BE.csproj|solutionrelative:fgs-be\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B3A7CCF2-E4DE-4C2B-8EF6-2174E323B979}|FGS-BE\\FGS-BE.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{B3A7CCF2-E4DE-4C2B-8EF6-2174E323B979}|FGS-BE\\FGS-BE.csproj|solutionrelative:fgs-be\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\data\\fgsdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\data\\fgsdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\entities\\users.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\entities\\users.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\entities\\tasks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\entities\\tasks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\entities\\taskassignment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\entities\\taskassignment.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\entities\\submissions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\entities\\submissions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\entities\\semesters.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\entities\\semesters.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\entities\\semestermembers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\entities\\semestermembers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\entities\\roles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\entities\\roles.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\entities\\projects.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\entities\\projects.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\entities\\projectpoints.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\entities\\projectpoints.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\entities\\payout.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\entities\\payout.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\entities\\notifications.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\entities\\notifications.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\entities\\milestones.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\entities\\milestones.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\entities\\levels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\entities\\levels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\entities\\items.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\entities\\items.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\entities\\groups.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\entities\\groups.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\entities\\conversionrates.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\entities\\conversionrates.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\entities\\cashredeemhistory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\entities\\cashredeemhistory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|c:\\users\\hoang\\onedrive\\desktop\\fgs-system\\fgs-be\\fgs-be.repo\\entities\\itemsredeemhistory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CB5AC224-E73A-4108-903F-9A1269A2C441}|FGS-BE.Repo\\FGS-BE.Repo.csproj|solutionrelative:fgs-be.repo\\entities\\itemsredeemhistory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE\\Program.cs",
+              "RelativeDocumentMoniker": "FGS-BE\\Program.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE\\Program.cs",
+              "RelativeToolTip": "FGS-BE\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T10:32:10.042Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE\\appsettings.json",
+              "RelativeDocumentMoniker": "FGS-BE\\appsettings.json",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE\\appsettings.json",
+              "RelativeToolTip": "FGS-BE\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAABTAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-09-15T10:30:19.597Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Projects.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Projects.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Entities\\Projects.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Projects.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Entities\\Projects.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAAwBEAAABYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T09:32:29.958Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Roles.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Roles.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Entities\\Roles.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Roles.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Entities\\Roles.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T09:38:19.328Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "SemesterMembers.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\SemesterMembers.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Entities\\SemesterMembers.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\SemesterMembers.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Entities\\SemesterMembers.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T09:31:45.927Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Semesters.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Semesters.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Entities\\Semesters.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Semesters.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Entities\\Semesters.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T09:42:45.897Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Submissions.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Submissions.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Entities\\Submissions.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Submissions.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Entities\\Submissions.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAYwBEAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T09:40:35.945Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "TaskAssignment.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\TaskAssignment.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Entities\\TaskAssignment.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\TaskAssignment.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Entities\\TaskAssignment.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAAwA8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T10:01:06.301Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Tasks.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Tasks.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Entities\\Tasks.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Tasks.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Entities\\Tasks.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAA5wBUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T09:32:55.473Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Users.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Users.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Entities\\Users.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Users.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Entities\\Users.cs",
+              "ViewState": "AgIAAB8AAAAAAAAAAAA2wC4AAABiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T09:31:11.667Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "FGSDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Data\\FGSDbContext.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Data\\FGSDbContext.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Data\\FGSDbContext.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Data\\FGSDbContext.cs",
+              "ViewState": "AgIAAGAAAAAAAAAAAAAYwAkAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T09:45:05.617Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "ProjectPoints.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\ProjectPoints.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Entities\\ProjectPoints.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\ProjectPoints.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Entities\\ProjectPoints.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T09:40:52.533Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "PayOut.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\PayOut.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Entities\\PayOut.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\PayOut.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Entities\\PayOut.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABAAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T09:38:04.104Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Notifications.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Notifications.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Entities\\Notifications.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Notifications.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Entities\\Notifications.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T09:43:34.043Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "Milestones.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Milestones.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Entities\\Milestones.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Milestones.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Entities\\Milestones.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T09:39:51.626Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "Levels.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Levels.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Entities\\Levels.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Levels.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Entities\\Levels.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T09:39:18.234Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "Items.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Items.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Entities\\Items.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Items.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Entities\\Items.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T09:30:17.666Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "Groups.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Groups.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Entities\\Groups.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\Groups.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Entities\\Groups.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T09:32:11.971Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "ConversionRates.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\ConversionRates.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Entities\\ConversionRates.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\ConversionRates.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Entities\\ConversionRates.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T09:35:16.867Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "CashRedeemHistory.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\CashRedeemHistory.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Entities\\CashRedeemHistory.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\CashRedeemHistory.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Entities\\CashRedeemHistory.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T10:02:12.153Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "ItemsRedeemHistory.cs",
+              "DocumentMoniker": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\ItemsRedeemHistory.cs",
+              "RelativeDocumentMoniker": "FGS-BE.Repo\\Entities\\ItemsRedeemHistory.cs",
+              "ToolTip": "C:\\Users\\hoang\\OneDrive\\Desktop\\FGS-System\\FGS-BE\\FGS-BE.Repo\\Entities\\ItemsRedeemHistory.cs",
+              "RelativeToolTip": "FGS-BE.Repo\\Entities\\ItemsRedeemHistory.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T10:01:45.856Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
