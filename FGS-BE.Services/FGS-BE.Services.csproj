@@ -4,11 +4,6 @@
     <ProjectReference Include="..\FGS-BE.Repo\FGS-BE.Repo.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Interfaces\" />
-    <Folder Include="Services\" />
-  </ItemGroup>
-
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <RootNamespace>FGS_BE.Services</RootNamespace>

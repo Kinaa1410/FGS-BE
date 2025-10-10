@@ -4,9 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FGS_BE.Repo.Entities
+namespace FGS_BE.Repo.Repositories.Interfaces;
+internal class FileName
 {
-    internal class RedeemHistory
-    {
-    }
 }
