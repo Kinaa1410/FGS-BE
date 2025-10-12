@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace FGS_BE.Repo.Data;
 
-public class FGSDbContext(DbContextOptions<FGSDbContext> options) : DbContext(options)
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
     public DbSet<Achievement> Achievements { get; set; }
     public DbSet<ChatMessage> ChatMessages { get; set; }

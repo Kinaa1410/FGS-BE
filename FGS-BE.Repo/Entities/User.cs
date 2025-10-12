@@ -28,8 +28,8 @@ public class User
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
-    public int RoleId { get; set; }
-    public virtual Role Role { get; set; } = default!;
+    public int? RoleId { get; set; }
+    public virtual Role? Role { get; set; } = default!;
 
     public virtual UserWallet UserWallet { get; set; } = default!;
 

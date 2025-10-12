@@ -19,6 +19,9 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.9" />
 		<PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
+		<PackageReference Include="Mapster" Version="7.4.0" />
+		<PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Version="9.0.8" />
+		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.9" />
 	</ItemGroup>
 
 </Project>
