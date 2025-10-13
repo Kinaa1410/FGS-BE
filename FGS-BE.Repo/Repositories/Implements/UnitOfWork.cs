@@ -3,10 +3,21 @@ using FGS_BE.Repo.Repositories.Interfaces;
 using System.Collections;
 
 namespace FGS_BE.Repo.Repositories.Implements;
-public class UnitOfWork(ApplicationDbContext _context) : IUnitOfWork
+public class UnitOfWork : IUnitOfWork
 {
+    private readonly ApplicationDbContext _context;
     private Hashtable? _repositories;
     private bool disposed = false;
+
+    //
+    public ISemesterRepository SemesterRepository { get; }
+
+    public UnitOfWork(ApplicationDbContext context, ISemesterRepository semesterRepository)
+    {
+        _context = context;
+        SemesterRepository = semesterRepository;
+    }
+    //
 
     public IGenericRepository<T> Repository<T>() where T : class
     {
