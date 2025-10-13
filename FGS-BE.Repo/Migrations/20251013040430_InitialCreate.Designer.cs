@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FGS_BE.Repo.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251012104218_Init")]
-    partial class Init
+    [Migration("20251013040430_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,9 +21,9 @@ namespace FGS_BE.Repo.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "9.0.9")
-                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Achievement", b =>
                 {
@@ -31,34 +31,34 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ConditionType")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConditionValue")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("IconUrl")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PointsReward")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -71,31 +71,41 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ChatRoomId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ChatRoomId1")
+                        .HasColumnType("int");
+
                     b.Property<string>("Content")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("bit");
 
                     b.Property<string>("MessageType")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("SenderId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ChatRoomId");
 
+                    b.HasIndex("ChatRoomId1");
+
                     b.HasIndex("SenderId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("ChatMessages");
                 });
@@ -106,16 +116,16 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ChatRoomId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsMuted")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("bit");
 
                     b.Property<DateTime>("JoinedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<int?>("LastReadMessageId")
                         .HasColumnType("int");
@@ -123,11 +133,16 @@ namespace FGS_BE.Repo.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("UserId1")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ChatRoomId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("ChatParticipants");
                 });
@@ -138,30 +153,29 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("bit");
 
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
                     b.Property<string>("RoomName")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RoomType")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProjectId")
-                        .IsUnique();
+                    b.HasIndex("ProjectId");
 
                     b.HasIndex("UserId");
 
@@ -174,28 +188,28 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Body")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                    b.Property<bool>("IsSent")
+                        .HasColumnType("bit");
 
                     b.Property<int>("NotificationId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("SentAt")
-                        .HasColumnType("datetime(6)");
+                    b.Property<string>("RecipientEmail")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Status")
-                        .HasColumnType("longtext");
+                    b.Property<DateTime>("ScheduledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("SentAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Subject")
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("ToEmail")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -211,31 +225,31 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DueDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Status")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Weight")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -250,40 +264,50 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsRead")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("bit");
 
                     b.Property<string>("Message")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("NotificationTemplateId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("NotificationTemplateId1")
                         .HasColumnType("int");
 
                     b.Property<int>("RelatedId")
                         .HasColumnType("int");
 
                     b.Property<string>("RelatedType")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("SentByEmail")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("bit");
 
                     b.Property<string>("Subject")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId1")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("NotificationTemplateId");
 
+                    b.HasIndex("NotificationTemplateId1");
+
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("Notifications");
                 });
@@ -294,19 +318,19 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("BodyTemplate")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Code")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("bit");
 
                     b.Property<string>("SubjectTemplate")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -319,38 +343,58 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Comment")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("MilestoneId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MilestoneId1")
                         .HasColumnType("int");
 
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ProjectId1")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Score")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("TaskId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("TaskId1")
+                        .HasColumnType("int");
+
                     b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId1")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("MilestoneId");
 
+                    b.HasIndex("MilestoneId1");
+
                     b.HasIndex("ProjectId");
+
+                    b.HasIndex("ProjectId1");
 
                     b.HasIndex("TaskId");
 
+                    b.HasIndex("TaskId1");
+
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("PerformanceScores");
                 });
@@ -361,16 +405,16 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Note")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SourceType")
                         .IsRequired()
@@ -396,29 +440,39 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProposerId")
+                        .HasColumnType("int");
 
                     b.Property<int>("SemesterId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("SemesterId1")
+                        .HasColumnType("int");
+
                     b.Property<string>("Status")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TotalPoints")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ProposerId");
+
                     b.HasIndex("SemesterId");
+
+                    b.HasIndex("SemesterId1");
 
                     b.ToTable("Projects");
                 });
@@ -429,7 +483,7 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
@@ -455,16 +509,16 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("JoinAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
                     b.Property<string>("Role")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -484,16 +538,16 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("ProcessedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("RequestedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("RewardItemId")
                         .HasColumnType("int");
@@ -503,9 +557,12 @@ namespace FGS_BE.Repo.Migrations
                         .HasColumnType("nvarchar(24)");
 
                     b.Property<decimal>("TotalPoints")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId1")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -513,6 +570,8 @@ namespace FGS_BE.Repo.Migrations
                     b.HasIndex("RewardItemId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
 
                     b.ToTable("RedeemRequests");
                 });
@@ -523,22 +582,25 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("PriceInPoints")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
@@ -549,6 +611,8 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedById");
+
                     b.ToTable("RewardItems");
                 });
 
@@ -558,13 +622,13 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -577,26 +641,26 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("KeywordTheme")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -609,32 +673,35 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Feedback")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FileUrl")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("Grade")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("IsFinal")
-                        .HasColumnType("tinyint(1)");
+                        .HasColumnType("bit");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(24)");
 
                     b.Property<DateTime>("SubmittedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("TaskId")
                         .HasColumnType("int");
 
                     b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId1")
                         .HasColumnType("int");
 
                     b.Property<int>("Version")
@@ -646,6 +713,8 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("UserId1");
+
                     b.ToTable("Submissions");
                 });
 
@@ -655,31 +724,31 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("AssigneeId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("Complexity")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DueDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<decimal>("EstimatedHours")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Label")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("MilestoneId")
                         .HasColumnType("int");
@@ -688,16 +757,16 @@ namespace FGS_BE.Repo.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Priority")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("StartDate")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Status")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Weight")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -716,13 +785,13 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BasePoints")
                         .HasColumnType("int");
 
                     b.Property<string>("Keyword")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("RuleBonus")
                         .HasColumnType("int");
@@ -730,9 +799,14 @@ namespace FGS_BE.Repo.Migrations
                     b.Property<int>("SemesterId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("SemesterId1")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SemesterId");
+
+                    b.HasIndex("SemesterId1");
 
                     b.ToTable("TermKeywords");
                 });
@@ -743,48 +817,53 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Phone")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<int?>("RoleId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("RoleId1")
+                        .HasColumnType("int");
+
                     b.Property<string>("Status")
-                        .HasColumnType("longtext");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StudentCode")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.HasIndex("RoleId");
+
+                    b.HasIndex("RoleId1");
 
                     b.ToTable("Users");
                 });
@@ -795,13 +874,16 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AchievementId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("AchievementId1")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("UnlockedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -809,6 +891,8 @@ namespace FGS_BE.Repo.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AchievementId");
+
+                    b.HasIndex("AchievementId1");
 
                     b.HasIndex("UserId");
 
@@ -821,13 +905,13 @@ namespace FGS_BE.Repo.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Balance")
-                        .HasColumnType("decimal(65,30)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("LastUpdatedAt")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -843,16 +927,24 @@ namespace FGS_BE.Repo.Migrations
             modelBuilder.Entity("FGS_BE.Repo.Entities.ChatMessage", b =>
                 {
                     b.HasOne("FGS_BE.Repo.Entities.ChatRoom", "ChatRoom")
-                        .WithMany("ChatMessages")
+                        .WithMany()
                         .HasForeignKey("ChatRoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FGS_BE.Repo.Entities.User", "Sender")
+                    b.HasOne("FGS_BE.Repo.Entities.ChatRoom", null)
                         .WithMany("ChatMessages")
+                        .HasForeignKey("ChatRoomId1");
+
+                    b.HasOne("FGS_BE.Repo.Entities.User", "Sender")
+                        .WithMany()
                         .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("FGS_BE.Repo.Entities.User", null)
+                        .WithMany("ChatMessages")
+                        .HasForeignKey("UserId");
 
                     b.Navigation("ChatRoom");
 
@@ -868,10 +960,14 @@ namespace FGS_BE.Repo.Migrations
                         .IsRequired();
 
                     b.HasOne("FGS_BE.Repo.Entities.User", "User")
-                        .WithMany("ChatParticipants")
+                        .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("FGS_BE.Repo.Entities.User", null)
+                        .WithMany("ChatParticipants")
+                        .HasForeignKey("UserId1");
 
                     b.Navigation("ChatRoom");
 
@@ -881,9 +977,9 @@ namespace FGS_BE.Repo.Migrations
             modelBuilder.Entity("FGS_BE.Repo.Entities.ChatRoom", b =>
                 {
                     b.HasOne("FGS_BE.Repo.Entities.Project", "Project")
-                        .WithOne("ChatRoom")
-                        .HasForeignKey("FGS_BE.Repo.Entities.ChatRoom", "ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .WithMany("ChatRooms")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("FGS_BE.Repo.Entities.User", "User")
@@ -902,7 +998,7 @@ namespace FGS_BE.Repo.Migrations
                     b.HasOne("FGS_BE.Repo.Entities.Notification", "Notification")
                         .WithOne("EmailQueue")
                         .HasForeignKey("FGS_BE.Repo.Entities.EmailQueue", "NotificationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Notification");
@@ -922,16 +1018,24 @@ namespace FGS_BE.Repo.Migrations
             modelBuilder.Entity("FGS_BE.Repo.Entities.Notification", b =>
                 {
                     b.HasOne("FGS_BE.Repo.Entities.NotificationTemplate", "NotificationTemplate")
-                        .WithMany("Notifications")
+                        .WithMany()
                         .HasForeignKey("NotificationTemplateId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("FGS_BE.Repo.Entities.User", "User")
+                    b.HasOne("FGS_BE.Repo.Entities.NotificationTemplate", null)
                         .WithMany("Notifications")
+                        .HasForeignKey("NotificationTemplateId1");
+
+                    b.HasOne("FGS_BE.Repo.Entities.User", "User")
+                        .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("FGS_BE.Repo.Entities.User", null)
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId1");
 
                     b.Navigation("NotificationTemplate");
 
@@ -941,28 +1045,44 @@ namespace FGS_BE.Repo.Migrations
             modelBuilder.Entity("FGS_BE.Repo.Entities.PerformanceScore", b =>
                 {
                     b.HasOne("FGS_BE.Repo.Entities.Milestone", "Milestone")
-                        .WithMany("PerformanceScores")
+                        .WithMany()
                         .HasForeignKey("MilestoneId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("FGS_BE.Repo.Entities.Milestone", null)
+                        .WithMany("PerformanceScores")
+                        .HasForeignKey("MilestoneId1");
 
                     b.HasOne("FGS_BE.Repo.Entities.Project", "Project")
-                        .WithMany("PerformanceScores")
+                        .WithMany()
                         .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("FGS_BE.Repo.Entities.Project", null)
+                        .WithMany("PerformanceScores")
+                        .HasForeignKey("ProjectId1");
 
                     b.HasOne("FGS_BE.Repo.Entities.Task", "Task")
-                        .WithMany("PerformanceScores")
+                        .WithMany()
                         .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("FGS_BE.Repo.Entities.User", "User")
+                    b.HasOne("FGS_BE.Repo.Entities.Task", null)
                         .WithMany("PerformanceScores")
+                        .HasForeignKey("TaskId1");
+
+                    b.HasOne("FGS_BE.Repo.Entities.User", "User")
+                        .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("FGS_BE.Repo.Entities.User", null)
+                        .WithMany("PerformanceScores")
+                        .HasForeignKey("UserId1");
 
                     b.Navigation("Milestone");
 
@@ -978,7 +1098,7 @@ namespace FGS_BE.Repo.Migrations
                     b.HasOne("FGS_BE.Repo.Entities.UserWallet", "UserWallet")
                         .WithMany("PointTransactions")
                         .HasForeignKey("UserWalletId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("UserWallet");
@@ -986,11 +1106,23 @@ namespace FGS_BE.Repo.Migrations
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Project", b =>
                 {
+                    b.HasOne("FGS_BE.Repo.Entities.User", "Proposer")
+                        .WithMany()
+                        .HasForeignKey("ProposerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("FGS_BE.Repo.Entities.Semester", "Semester")
-                        .WithMany("Projects")
+                        .WithMany()
                         .HasForeignKey("SemesterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("FGS_BE.Repo.Entities.Semester", null)
+                        .WithMany("Projects")
+                        .HasForeignKey("SemesterId1");
+
+                    b.Navigation("Proposer");
 
                     b.Navigation("Semester");
                 });
@@ -1006,7 +1138,7 @@ namespace FGS_BE.Repo.Migrations
                     b.HasOne("FGS_BE.Repo.Entities.TermKeyword", "TermKeyword")
                         .WithMany("ProjectKeywords")
                         .HasForeignKey("TermKeywordId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Project");
@@ -1019,13 +1151,13 @@ namespace FGS_BE.Repo.Migrations
                     b.HasOne("FGS_BE.Repo.Entities.Project", "Project")
                         .WithMany("ProjectMembers")
                         .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("FGS_BE.Repo.Entities.User", "User")
                         .WithMany("ProjectMembers")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Project");
@@ -1038,18 +1170,32 @@ namespace FGS_BE.Repo.Migrations
                     b.HasOne("FGS_BE.Repo.Entities.RewardItem", "RewardItem")
                         .WithMany("RedeemRequests")
                         .HasForeignKey("RewardItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("FGS_BE.Repo.Entities.User", "User")
-                        .WithMany("RedeemRequests")
+                        .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("FGS_BE.Repo.Entities.User", null)
+                        .WithMany("RedeemRequests")
+                        .HasForeignKey("UserId1");
 
                     b.Navigation("RewardItem");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FGS_BE.Repo.Entities.RewardItem", b =>
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("CreatedBy");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Submission", b =>
@@ -1057,14 +1203,18 @@ namespace FGS_BE.Repo.Migrations
                     b.HasOne("FGS_BE.Repo.Entities.Task", "Task")
                         .WithMany("Submissions")
                         .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("FGS_BE.Repo.Entities.User", "User")
-                        .WithMany("Submissions")
+                        .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("FGS_BE.Repo.Entities.User", null)
+                        .WithMany("Submissions")
+                        .HasForeignKey("UserId1");
 
                     b.Navigation("Task");
 
@@ -1085,7 +1235,8 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasOne("FGS_BE.Repo.Entities.Task", "ParentTask")
                         .WithMany("SubTasks")
-                        .HasForeignKey("ParentTaskId");
+                        .HasForeignKey("ParentTaskId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Assignee");
 
@@ -1097,10 +1248,14 @@ namespace FGS_BE.Repo.Migrations
             modelBuilder.Entity("FGS_BE.Repo.Entities.TermKeyword", b =>
                 {
                     b.HasOne("FGS_BE.Repo.Entities.Semester", "Semester")
-                        .WithMany("TermKeywords")
+                        .WithMany()
                         .HasForeignKey("SemesterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("FGS_BE.Repo.Entities.Semester", null)
+                        .WithMany("TermKeywords")
+                        .HasForeignKey("SemesterId1");
 
                     b.Navigation("Semester");
                 });
@@ -1108,8 +1263,13 @@ namespace FGS_BE.Repo.Migrations
             modelBuilder.Entity("FGS_BE.Repo.Entities.User", b =>
                 {
                     b.HasOne("FGS_BE.Repo.Entities.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("FGS_BE.Repo.Entities.Role", null)
                         .WithMany("Users")
-                        .HasForeignKey("RoleId");
+                        .HasForeignKey("RoleId1");
 
                     b.Navigation("Role");
                 });
@@ -1117,15 +1277,19 @@ namespace FGS_BE.Repo.Migrations
             modelBuilder.Entity("FGS_BE.Repo.Entities.UserAchievement", b =>
                 {
                     b.HasOne("FGS_BE.Repo.Entities.Achievement", "Achievement")
-                        .WithMany("UserAchievements")
+                        .WithMany()
                         .HasForeignKey("AchievementId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("FGS_BE.Repo.Entities.Achievement", null)
+                        .WithMany("UserAchievements")
+                        .HasForeignKey("AchievementId1");
 
                     b.HasOne("FGS_BE.Repo.Entities.User", "User")
                         .WithMany("UserAchievements")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Achievement");
@@ -1176,8 +1340,7 @@ namespace FGS_BE.Repo.Migrations
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Project", b =>
                 {
-                    b.Navigation("ChatRoom")
-                        .IsRequired();
+                    b.Navigation("ChatRooms");
 
                     b.Navigation("Milestones");
 

@@ -1,7 +1,9 @@
 ﻿using FGS_BE.Repo.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
+using FGS_BE.Repo.Entities; 
 
 namespace FGS_BE.Repo.Entities;
+
 public class PointTransaction
 {
     public int Id { get; set; }
@@ -17,5 +19,4 @@ public class PointTransaction
 
     public int UserWalletId { get; set; }
     public virtual UserWallet UserWallet { get; set; } = default!;
-
 }

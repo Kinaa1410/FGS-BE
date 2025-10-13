@@ -1,7 +1,9 @@
 ﻿using FGS_BE.Repo.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
+using FGS_BE.Repo.Entities;
 
 namespace FGS_BE.Repo.Entities;
+
 public class RewardItem
 {
     public int Id { get; set; }
@@ -19,4 +21,6 @@ public class RewardItem
 
     public virtual ICollection<RedeemRequest> RedeemRequests { get; set; } = new HashSet<RedeemRequest>();
 
+    public int? CreatedById { get; set; }
+    public virtual User? CreatedBy { get; set; }
 }
