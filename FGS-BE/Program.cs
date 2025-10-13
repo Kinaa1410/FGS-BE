@@ -21,10 +21,20 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services
     .AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>))
-    .AddScoped<IUnitOfWork, UnitOfWork>()
 
     .AddScoped<ISemesterRepository, SemesterRepository>()
-    .AddScoped<ISemesterService, SemesterService>();
+    .AddScoped<IRewardItemRepository, RewardItemRepository>()
+
+    .AddScoped<ISemesterService, SemesterService>()
+    .AddScoped<IRewardItemService, RewardItemService>()
+
+    .AddScoped<IUnitOfWork>(provider =>
+    {
+        var context = provider.GetRequiredService<ApplicationDbContext>();
+        var semesterRepo = provider.GetRequiredService<ISemesterRepository>();
+        var rewardItemRepo = provider.GetRequiredService<IRewardItemRepository>();
+        return new UnitOfWork(context, semesterRepo, rewardItemRepo);
+    });
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
