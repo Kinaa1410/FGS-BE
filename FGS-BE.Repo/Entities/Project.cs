@@ -1,8 +1,8 @@
-﻿namespace FGS_BE.Repo.Entities;
+﻿using FGS_BE.Repo.Entities; 
+namespace FGS_BE.Repo.Entities;
 
 public class Project
 {
-
     public int Id { get; set; }
 
     public string? Title { get; set; } = string.Empty;
@@ -16,11 +16,13 @@ public class Project
     public int SemesterId { get; set; }
     public virtual Semester Semester { get; set; } = default!;
 
-    public virtual ChatRoom ChatRoom { get; set; } = default!;
+    public virtual ICollection<ChatRoom> ChatRooms { get; set; } = new HashSet<ChatRoom>();
 
     public virtual ICollection<ProjectKeyword> ProjectKeywords { get; set; } = new HashSet<ProjectKeyword>();
     public virtual ICollection<Milestone> Milestones { get; set; } = new HashSet<Milestone>();
     public virtual ICollection<PerformanceScore> PerformanceScores { get; set; } = new HashSet<PerformanceScore>();
     public virtual ICollection<ProjectMember> ProjectMembers { get; set; } = new HashSet<ProjectMember>();
 
+    public int ProposerId { get; set; }
+    public virtual User Proposer { get; set; } = default!;
 }

@@ -8,11 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddDbContext<FGSDbContext>(options =>
 //    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-string defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")!;
+string defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("DefaultConnection not found in configuration.");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseMySql(defaultConnection, ServerVersion.AutoDetect(defaultConnection))
-                    .EnableSensitiveDataLogging()
-                    .EnableDetailedErrors());
+    options.UseSqlServer(defaultConnection) 
+           .EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
+           .EnableDetailedErrors(builder.Environment.IsDevelopment()));
 
 builder.Services
     .AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>))

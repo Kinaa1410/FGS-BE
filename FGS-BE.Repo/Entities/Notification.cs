@@ -13,9 +13,9 @@ public class Notification
 
     public int UserId { get; set; }
     public virtual User User { get; set; } = default!;
+
     public virtual EmailQueue EmailQueue { get; set; } = default!;
 
     public int NotificationTemplateId { get; set; }
     public virtual NotificationTemplate NotificationTemplate { get; set; } = default!;
-
 }
