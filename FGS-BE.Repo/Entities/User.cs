@@ -1,4 +1,4 @@
-﻿using EntityFrameworkCore.Projectables;
+using EntityFrameworkCore.Projectables;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -37,5 +37,4 @@ public class User : IdentityUser<int>
     public virtual ICollection<ChatRoom> ChatRooms { get; set; } = new HashSet<ChatRoom>();
 
     public virtual ICollection<Task> AssignedTasks { get; set; } = new HashSet<Task>();
-
 }

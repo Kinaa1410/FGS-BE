@@ -1,4 +1,5 @@
-﻿using FGS_BE.Repo.Entities; 
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
 namespace FGS_BE.Repo.Entities;
 
 public class Project
@@ -13,6 +14,7 @@ public class Project
 
     public DateTime CreatedAt { get; set; }
 
+    [ForeignKey(nameof(SemesterId))]
     public int SemesterId { get; set; }
     public virtual Semester Semester { get; set; } = default!;
 
@@ -23,6 +25,7 @@ public class Project
     public virtual ICollection<PerformanceScore> PerformanceScores { get; set; } = new HashSet<PerformanceScore>();
     public virtual ICollection<ProjectMember> ProjectMembers { get; set; } = new HashSet<ProjectMember>();
 
+    [ForeignKey(nameof(ProposerId))]
     public int ProposerId { get; set; }
     public virtual User Proposer { get; set; } = default!;
 }
