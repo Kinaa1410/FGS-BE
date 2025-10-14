@@ -70,35 +70,37 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Project>().HasIndex(p => p.ProposerId);
 
         // Projects <-> Semester - one-to-many, required
+        // FIXED: Added inverse collection reference to avoid convention duplicate
         modelBuilder.Entity<Project>()
             .HasOne(p => p.Semester)
-            .WithMany()
+            .WithMany(s => s.Projects)  // Changed from empty WithMany()
             .HasForeignKey(p => p.SemesterId)
             .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
         modelBuilder.Entity<Project>().HasIndex(p => p.SemesterId);
 
         // PerformanceScores <-> Projects, Users, Milestones, Tasks
+        // FIXED: Added inverse collection references for all to avoid duplicates
         modelBuilder.Entity<PerformanceScore>()
             .HasOne(ps => ps.Project)
-            .WithMany()
+            .WithMany(p => p.PerformanceScores)  // Changed from empty WithMany()
             .HasForeignKey(ps => ps.ProjectId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
         modelBuilder.Entity<PerformanceScore>()
             .HasOne(ps => ps.User)
-            .WithMany()
+            .WithMany(u => u.PerformanceScores)  // Changed from empty WithMany()
             .HasForeignKey(ps => ps.UserId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
         modelBuilder.Entity<PerformanceScore>()
             .HasOne(ps => ps.Milestone)
-            .WithMany()
+            .WithMany(m => m.PerformanceScores)  // Changed from empty WithMany()
             .HasForeignKey(ps => ps.MilestoneId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<PerformanceScore>()
             .HasOne(ps => ps.Task)
-            .WithMany()
+            .WithMany(t => t.PerformanceScores)  // Changed from empty WithMany()
             .HasForeignKey(ps => ps.TaskId)
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<PerformanceScore>().HasIndex(ps => ps.ProjectId);
@@ -131,6 +133,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Entities.Task>().HasIndex(t => t.ParentTaskId);
 
         // Submissions <-> Tasks & Users
+        // FIXED: Added inverse collection reference for User
         modelBuilder.Entity<Submission>()
             .HasOne(s => s.Task)
             .WithMany(t => t.Submissions)
@@ -139,7 +142,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .IsRequired();
         modelBuilder.Entity<Submission>()
             .HasOne(s => s.User)
-            .WithMany()
+            .WithMany(u => u.Submissions)  // Changed from empty WithMany()
             .HasForeignKey(s => s.UserId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
@@ -155,6 +158,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<ChatRoom>().HasIndex(cr => cr.ProjectId);
 
         // ChatParticipants <-> ChatRooms & Users
+        // FIXED: Added inverse collection reference for User
         modelBuilder.Entity<ChatParticipant>()
             .HasOne(cp => cp.ChatRoom)
             .WithMany(cr => cr.ChatParticipants)
@@ -163,7 +167,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .IsRequired();
         modelBuilder.Entity<ChatParticipant>()
             .HasOne(cp => cp.User)
-            .WithMany()
+            .WithMany(u => u.ChatParticipants)  // Changed from empty WithMany()
             .HasForeignKey(cp => cp.UserId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
@@ -171,15 +175,16 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<ChatParticipant>().HasIndex(cp => cp.UserId);
 
         // ChatMessages <-> ChatRooms & Sender (Users)
+        // FIXED: Added inverse collection references for both ChatRoom and User
         modelBuilder.Entity<ChatMessage>()
             .HasOne(cm => cm.ChatRoom)
-            .WithMany()
+            .WithMany(cr => cr.ChatMessages)  // Changed from empty WithMany()
             .HasForeignKey(cm => cm.ChatRoomId)
             .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
         modelBuilder.Entity<ChatMessage>()
             .HasOne(cm => cm.Sender)
-            .WithMany()
+            .WithMany(u => u.ChatMessages)  // Changed from empty WithMany()
             .HasForeignKey(cm => cm.SenderId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
@@ -204,9 +209,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<RewardItem>().HasIndex(ri => ri.CreatedById);
 
         // RedeemRequests <-> Users & RewardItems
+        // FIXED: Added inverse collection reference for User
         modelBuilder.Entity<RedeemRequest>()
             .HasOne(rr => rr.User)
-            .WithMany()
+            .WithMany(u => u.RedeemRequests)  // Changed from empty WithMany()
             .HasForeignKey(rr => rr.UserId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
@@ -220,15 +226,16 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<RedeemRequest>().HasIndex(rr => rr.RewardItemId);
 
         // Notifications <-> Users & NotificationTemplates
+        // FIXED: Added inverse collection references for both User and NotificationTemplate
         modelBuilder.Entity<Notification>()
             .HasOne(n => n.User)
-            .WithMany()
+            .WithMany(u => u.Notifications)  // Changed from empty WithMany()
             .HasForeignKey(n => n.UserId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
         modelBuilder.Entity<Notification>()
             .HasOne(n => n.NotificationTemplate)
-            .WithMany()
+            .WithMany(nt => nt.Notifications)  // Changed from empty WithMany()
             .HasForeignKey(n => n.NotificationTemplateId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
@@ -245,9 +252,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<EmailQueue>().HasIndex(eq => eq.NotificationId);
 
         // TermKeywords <-> Semesters (one-to-many, cascade)
+        // FIXED: Added inverse collection reference
         modelBuilder.Entity<TermKeyword>()
             .HasOne(tk => tk.Semester)
-            .WithMany()
+            .WithMany(s => s.TermKeywords)  // Changed from empty WithMany()
             .HasForeignKey(tk => tk.SemesterId)
             .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
@@ -261,5 +269,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
         modelBuilder.Entity<ProjectKeyword>().HasIndex(pk => pk.TermKeywordId);
+
+        // NEW: Explicit config for User <-> UserWallet (one-to-one, to avoid convention issues)
+        modelBuilder.Entity<UserWallet>()
+            .HasOne(uw => uw.User)
+            .WithOne(u => u.UserWallet)
+            .HasForeignKey<UserWallet>(uw => uw.UserId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired();
+        modelBuilder.Entity<UserWallet>().HasIndex(uw => uw.UserId);
     }
 }
