@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FGS_BE.Repo.Entities;
 
@@ -28,6 +29,7 @@ public class User
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
+    [ForeignKey(nameof(RoleId))]
     public int? RoleId { get; set; }
     public virtual Role? Role { get; set; } = default!;
 
@@ -47,5 +49,4 @@ public class User
     public virtual ICollection<ChatRoom> ChatRooms { get; set; } = new HashSet<ChatRoom>();
 
     public virtual ICollection<Task> AssignedTasks { get; set; } = new HashSet<Task>();
-
 }

@@ -4,6 +4,7 @@ using FGS_BE.Repo.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FGS_BE.Repo.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251014145415_FixDuplicateFKs")]
+    partial class FixDuplicateFKs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -59,7 +62,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Achievements", (string)null);
+                    b.ToTable("Achievements");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ChatMessage", b =>
@@ -71,6 +74,9 @@ namespace FGS_BE.Repo.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("ChatRoomId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ChatRoomId1")
                         .HasColumnType("int");
 
                     b.Property<string>("Content")
@@ -92,9 +98,11 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("ChatRoomId");
 
+                    b.HasIndex("ChatRoomId1");
+
                     b.HasIndex("SenderId");
 
-                    b.ToTable("ChatMessages", (string)null);
+                    b.ToTable("ChatMessages");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ChatParticipant", b =>
@@ -126,7 +134,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ChatParticipants", (string)null);
+                    b.ToTable("ChatParticipants");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ChatRoom", b =>
@@ -143,7 +151,7 @@ namespace FGS_BE.Repo.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("ProjectId")
+                    b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
                     b.Property<string>("RoomName")
@@ -161,7 +169,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ChatRooms", (string)null);
+                    b.ToTable("ChatRooms");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.EmailQueue", b =>
@@ -198,7 +206,7 @@ namespace FGS_BE.Repo.Migrations
                     b.HasIndex("NotificationId")
                         .IsUnique();
 
-                    b.ToTable("EmailQueues", (string)null);
+                    b.ToTable("EmailQueues");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Milestone", b =>
@@ -237,7 +245,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("Milestones", (string)null);
+                    b.ToTable("Milestones");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Notification", b =>
@@ -260,6 +268,9 @@ namespace FGS_BE.Repo.Migrations
                     b.Property<int>("NotificationTemplateId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("NotificationTemplateId1")
+                        .HasColumnType("int");
+
                     b.Property<int>("RelatedId")
                         .HasColumnType("int");
 
@@ -279,9 +290,11 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("NotificationTemplateId");
 
+                    b.HasIndex("NotificationTemplateId1");
+
                     b.HasIndex("UserId");
 
-                    b.ToTable("Notifications", (string)null);
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.NotificationTemplate", b =>
@@ -306,7 +319,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("NotificationTemplates", (string)null);
+                    b.ToTable("NotificationTemplates");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.PerformanceScore", b =>
@@ -348,7 +361,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PerformanceScores", (string)null);
+                    b.ToTable("PerformanceScores");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.PointTransaction", b =>
@@ -383,7 +396,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserWalletId");
 
-                    b.ToTable("PointTransactions", (string)null);
+                    b.ToTable("PointTransactions");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Project", b =>
@@ -421,7 +434,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("SemesterId");
 
-                    b.ToTable("Projects", (string)null);
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ProjectKeyword", b =>
@@ -447,7 +460,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("TermKeywordId");
 
-                    b.ToTable("ProjectKeywords", (string)null);
+                    b.ToTable("ProjectKeywords");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ProjectMember", b =>
@@ -476,7 +489,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ProjectMembers", (string)null);
+                    b.ToTable("ProjectMembers");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.RedeemRequest", b =>
@@ -487,7 +500,7 @@ namespace FGS_BE.Repo.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("ProcessedAt")
+                    b.Property<DateTime>("ProcessedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Quantity")
@@ -515,7 +528,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("RedeemRequests", (string)null);
+                    b.ToTable("RedeemRequests");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.RewardItem", b =>
@@ -555,7 +568,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("CreatedById");
 
-                    b.ToTable("RewardItems", (string)null);
+                    b.ToTable("RewardItems");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Role", b =>
@@ -574,7 +587,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Semester", b =>
@@ -606,7 +619,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Semesters", (string)null);
+                    b.ToTable("Semesters");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Submission", b =>
@@ -652,7 +665,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Submissions", (string)null);
+                    b.ToTable("Submissions");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Task", b =>
@@ -713,7 +726,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("ParentTaskId");
 
-                    b.ToTable("Tasks", (string)null);
+                    b.ToTable("Tasks");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.TermKeyword", b =>
@@ -740,7 +753,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("SemesterId");
 
-                    b.ToTable("TermKeywords", (string)null);
+                    b.ToTable("TermKeywords");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.User", b =>
@@ -792,7 +805,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.UserAchievement", b =>
@@ -818,7 +831,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserAchievements", (string)null);
+                    b.ToTable("UserAchievements");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.UserWallet", b =>
@@ -843,16 +856,20 @@ namespace FGS_BE.Repo.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("UserWallets", (string)null);
+                    b.ToTable("UserWallets");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ChatMessage", b =>
                 {
                     b.HasOne("FGS_BE.Repo.Entities.ChatRoom", "ChatRoom")
-                        .WithMany("ChatMessages")
+                        .WithMany()
                         .HasForeignKey("ChatRoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("FGS_BE.Repo.Entities.ChatRoom", null)
+                        .WithMany("ChatMessages")
+                        .HasForeignKey("ChatRoomId1");
 
                     b.HasOne("FGS_BE.Repo.Entities.User", "Sender")
                         .WithMany("ChatMessages")
@@ -889,7 +906,8 @@ namespace FGS_BE.Repo.Migrations
                     b.HasOne("FGS_BE.Repo.Entities.Project", "Project")
                         .WithMany("ChatRooms")
                         .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("FGS_BE.Repo.Entities.User", "User")
                         .WithMany("ChatRooms")
@@ -927,10 +945,14 @@ namespace FGS_BE.Repo.Migrations
             modelBuilder.Entity("FGS_BE.Repo.Entities.Notification", b =>
                 {
                     b.HasOne("FGS_BE.Repo.Entities.NotificationTemplate", "NotificationTemplate")
-                        .WithMany("Notifications")
+                        .WithMany()
                         .HasForeignKey("NotificationTemplateId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("FGS_BE.Repo.Entities.NotificationTemplate", null)
+                        .WithMany("Notifications")
+                        .HasForeignKey("NotificationTemplateId1");
 
                     b.HasOne("FGS_BE.Repo.Entities.User", "User")
                         .WithMany("Notifications")
@@ -1099,7 +1121,7 @@ namespace FGS_BE.Repo.Migrations
                     b.HasOne("FGS_BE.Repo.Entities.User", "Assignee")
                         .WithMany("AssignedTasks")
                         .HasForeignKey("AssigneeId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("FGS_BE.Repo.Entities.Milestone", "Milestone")
                         .WithMany("Tasks")

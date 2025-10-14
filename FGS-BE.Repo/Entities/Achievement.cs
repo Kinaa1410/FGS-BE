@@ -1,4 +1,8 @@
-﻿namespace FGS_BE.Repo.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace FGS_BE.Repo.Entities;
+
 public class Achievement
 {
     public int Id { get; set; }
@@ -13,5 +17,4 @@ public class Achievement
     public DateTime UpdatedAt { get; set; }
 
     public virtual ICollection<UserAchievement> UserAchievements { get; set; } = new HashSet<UserAchievement>();
-
 }
