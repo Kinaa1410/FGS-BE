@@ -1,35 +1,25 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using EntityFrameworkCore.Projectables;
+using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FGS_BE.Repo.Entities;
 
-public class User
+public class User : IdentityUser<int>
 {
-    public int Id { get; set; }
+    public string? FullName { get; set; }
 
-    [StringLength(100, MinimumLength = 2)]
-    public string FullName { get; set; } = string.Empty;
+    public string? StudentCode { get; set; }
 
-    [EmailAddress]
-    [StringLength(255)]
-    public string Email { get; set; } = string.Empty;
-
-    [StringLength(255)]
-    public string PasswordHash { get; set; } = string.Empty;
-
-    [StringLength(20)]
-    public string StudentCode { get; set; } = string.Empty;
-
-    [Phone]
-    [StringLength(20)]
-    public string Phone { get; set; } = string.Empty;
-
-    public string? Status { get; set; } = string.Empty;
+    public string? Status { get; set; }
 
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
-    public int? RoleId { get; set; }
-    public virtual Role? Role { get; set; } = default!;
+    public virtual ICollection<UserRole> UserRoles { get; set; } = new HashSet<UserRole>();
+
+    [Projectable]
+    [NotMapped]
+    public IEnumerable<Role> Roles => UserRoles.Select(ur => ur.Role);
 
     public virtual UserWallet UserWallet { get; set; } = default!;
 

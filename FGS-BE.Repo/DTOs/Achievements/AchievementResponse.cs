@@ -1,5 +1,5 @@
-﻿namespace FGS_BE.Repo.Entities;
-public class Achievement
+﻿namespace FGS_BE.Repo.DTOs.Achievements;
+public sealed record AchievementResponse
 {
     public int Id { get; set; }
     public string? Name { get; set; }
@@ -11,7 +11,4 @@ public class Achievement
     public string? ConditionValue { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-
-    public virtual ICollection<UserAchievement> UserAchievements { get; set; } = new HashSet<UserAchievement>();
-
 }

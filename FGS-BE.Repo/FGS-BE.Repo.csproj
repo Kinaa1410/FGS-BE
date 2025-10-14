@@ -23,10 +23,8 @@
 		<PackageReference Include="Mapster" Version="7.4.0" />
 		<PackageReference Include="LinqKit.Microsoft.EntityFrameworkCore" Version="9.0.8" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.9" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Migrations\" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.20" />
+		<PackageReference Include="EntityFrameworkCore.Projectables" Version="4.0.0" />
 	</ItemGroup>
 
 </Project>

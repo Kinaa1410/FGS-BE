@@ -1,84 +1,50 @@
-﻿using FGS_BE.Exceptions;
-using FGS_BE.Repo.DTOs;
-using FGS_BE.Repo.DTOs.Pages;
-using FGS_BE.Repo.Entities;
-using FGS_BE.Repo.Repositories.Interfaces;
-using Mapster;
+﻿using FGS_BE.Repo.DTOs.Pages;
+using FGS_BE.Repo.DTOs.Users;
+using FGS_BE.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FGS_BE.Controllers;
 [Route("api/[controller]")]
 [ApiController]
-public class UsersController(IUnitOfWork unitOfWork) : ControllerBase
+public class UsersController(IUserService service) : ControllerBase
 {
-    private readonly IGenericRepository<User> _userRepository = unitOfWork.Repository<User>();
 
-    [HttpGet]
-    public async Task<ActionResult<PaginatedResponse<UserResponse>>> GetUsers([FromQuery] GetUsersQuery request)
+    [HttpPost("login")]
+    public async Task<ActionResult<UserResponse>> Login(LoginRequest request)
     {
-        var users = await _userRepository
-            .FindAsync<UserResponse>(
-                request.PageIndex,
-                request.PageSize,
-                request.GetExpressions(),
-                request.GetOrder());
-
-        return await users.ToPaginatedResponseAsync();
+        return await service.LoginAsync(request);
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<UserResponse>> GetUserById(int id)
+    [HttpPost("register")]
+    public async Task<ActionResult<MessageResponse>> Register(RegisterRequest request)
     {
-        var user = await _userRepository
-            .FindByAsync<UserResponse>(x => x.Id == id);
-
-        if (user == null)
-        {
-            throw new NotFoundException(nameof(User), id);
-        }
-
-        return user;
-    }
-
-    [HttpPost]
-    public async Task<ActionResult<MessageResponse>> CreateUser(CreateUserCommand command)
-    {
-
-        var entity = command.Adapt<User>();
-
-        await _userRepository.CreateAsync(entity);
-        await unitOfWork.CommitAsync();
-
+        await service.RegisterAsync(request);
         return new MessageResponse("Created Success");
     }
 
-    [HttpPut("{id}")]
-    public async Task<ActionResult<MessageResponse>> UpdateUser(int id, UpdateUserCommand request)
+    [HttpGet]
+    public async Task<ActionResult<PaginatedResponse<UserResponse>>> Find([FromQuery] GetUsersQuery request)
     {
-        var user = await _userRepository.FindByAsync(x => x.Id == id);
+        return await service.FindAsync(request);
+    }
 
-        if (user is null)
-        {
-            throw new NotFoundException(nameof(User), id);
-        }
-        request.Adapt(user);
-        await unitOfWork.CommitAsync();
+    [HttpGet("{id}")]
+    public async Task<ActionResult<UserResponse>> FindById(int id)
+    {
+        return await service.FindByAsync(id);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<MessageResponse>> Update(int id, UpdateUserCommand request)
+    {
+        await service.UpdateAsync(id, request);
         return new MessageResponse("Updated Success");
     }
 
     [HttpDelete("{id}")]
-    public async Task<ActionResult<MessageResponse>> DeleteUser(int id)
+    public async Task<ActionResult<MessageResponse>> Delete(int id)
     {
-        var user = await _userRepository.FindByAsync(x => x.Id == id);
-
-        if (user is null)
-        {
-            throw new NotFoundException(nameof(User), id);
-        }
-
-        await _userRepository.DeleteAsync(user);
-        await unitOfWork.CommitAsync();
-
+        await service.DeleteAsync(id);
         return new MessageResponse("Deleted Success");
     }
 }

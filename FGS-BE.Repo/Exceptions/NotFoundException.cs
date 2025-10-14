@@ -1,4 +1,4 @@
-﻿namespace FGS_BE.Exceptions;
+﻿namespace FGS_BE.Repo.Exceptions;
 
 public class NotFoundException : Exception
 {
@@ -9,7 +9,6 @@ public class NotFoundException : Exception
 
     public NotFoundException(string message, Exception innerException) : base(message, innerException) { }
 
-    public NotFoundException(string name, object key)
-        : base($"Entity {name} ({key}) was not found.") { }
+    public NotFoundException(string name, object key) : base($"Entity {name} ({key}) was not found.") { }
 
 }

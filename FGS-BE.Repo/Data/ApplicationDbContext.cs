@@ -1,11 +1,14 @@
 ﻿using FGS_BE.Repo.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
 namespace FGS_BE.Repo.Data;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<User, Role, int, IdentityUserClaim<int>, UserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>(options)
 {
+    private const string Prefix = "AspNet";
     public DbSet<Achievement> Achievements { get; set; }
     public DbSet<ChatMessage> ChatMessages { get; set; }
     public DbSet<ChatParticipant> ChatParticipants { get; set; }
@@ -21,55 +24,25 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ProjectMember> ProjectMembers { get; set; }
     public DbSet<RedeemRequest> RedeemRequests { get; set; }
     public DbSet<RewardItem> RewardItems { get; set; }
-    public DbSet<Role> Roles { get; set; }
     public DbSet<Semester> Semesters { get; set; }
     public DbSet<Submission> Submissions { get; set; }
     public DbSet<Entities.Task> Tasks { get; set; }
     public DbSet<TermKeyword> TermKeywords { get; set; }
-    public DbSet<User> Users { get; set; }
     public DbSet<UserAchievement> UserAchievements { get; set; }
     public DbSet<UserWallet> UserWallets { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
-        // Apply any existing external configs
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
-        // Roles <-> Users (one-to-many, optional)
-        modelBuilder.Entity<User>()
-            .HasOne(u => u.Role)
-            .WithMany()
-            .HasForeignKey(u => u.RoleId)
-            .OnDelete(DeleteBehavior.Restrict)
-            .IsRequired(false);
-        modelBuilder.Entity<User>().HasIndex(u => u.RoleId);
-
-        // UserWallets <-> Users (one-to-one, cascade delete)
-        modelBuilder.Entity<UserWallet>()
-            .HasOne(w => w.User)
-            .WithOne(u => u.UserWallet)
-            .HasForeignKey<UserWallet>(w => w.UserId)
-            .OnDelete(DeleteBehavior.Cascade)
-            .IsRequired();
-        modelBuilder.Entity<UserWallet>().HasIndex(w => w.UserId);
-
-        // UserAchievements <-> Users & Achievements (many-to-one)
-        modelBuilder.Entity<UserAchievement>()
-            .HasOne(ua => ua.User)
-            .WithMany(u => u.UserAchievements)
-            .HasForeignKey(ua => ua.UserId)
-            .OnDelete(DeleteBehavior.Restrict)
-            .IsRequired();
-        modelBuilder.Entity<UserAchievement>()
-            .HasOne(ua => ua.Achievement)
-            .WithMany()
-            .HasForeignKey(ua => ua.AchievementId)
-            .OnDelete(DeleteBehavior.Restrict)
-            .IsRequired();
-        modelBuilder.Entity<UserAchievement>().HasIndex(ua => ua.UserId);
-        modelBuilder.Entity<UserAchievement>().HasIndex(ua => ua.AchievementId);
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            var tableName = entityType.GetTableName();
+            if (tableName != null && tableName.StartsWith(Prefix))
+            {
+                entityType.SetTableName(tableName.Substring(6));
+            }
+        }
 
         // ProjectMembers <-> Projects & Users (many-to-many junction)
         modelBuilder.Entity<ProjectMember>()
@@ -283,7 +256,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         // ProjectKeywords <-> Projects (one-to-many, cascade)
         modelBuilder.Entity<ProjectKeyword>()
             .HasOne(pk => pk.TermKeyword)
-            .WithMany(tk => tk.ProjectKeywords) 
+            .WithMany(tk => tk.ProjectKeywords)
             .HasForeignKey(pk => pk.TermKeywordId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
