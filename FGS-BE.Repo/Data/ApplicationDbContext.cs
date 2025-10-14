@@ -46,13 +46,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         }
 
         // Roles <-> Users (one-to-many, optional)
-        modelBuilder.Entity<User>()
-            .HasOne(u => u.Role)
-            .WithMany(r => r.Users)
-            .HasForeignKey(u => u.RoleId)
-            .OnDelete(DeleteBehavior.Restrict)
-            .IsRequired(false);
-        modelBuilder.Entity<User>().HasIndex(u => u.RoleId);
+        //modelBuilder.Entity<User>()
+        //    .HasOne(u => u.Role)
+        //    .WithMany(r => r.Users)
+        //    .HasForeignKey(u => u.RoleId)
+        //    .OnDelete(DeleteBehavior.Restrict)
+        //    .IsRequired(false);
+        //modelBuilder.Entity<User>().HasIndex(u => u.RoleId);
 
         // UserWallets <-> Users (one-to-one, cascade delete)
         modelBuilder.Entity<UserWallet>()

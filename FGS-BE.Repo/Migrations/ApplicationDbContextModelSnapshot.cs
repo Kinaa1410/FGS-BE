@@ -23,1459 +23,1566 @@ namespace FGS_BE.Repo.Migrations
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Achievement", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<string>("ConditionType")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("ConditionType")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<string>("ConditionValue")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("ConditionValue")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<DateTime>("CreatedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Description")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<string>("IconUrl")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("IconUrl")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<bool>("IsActive")
-                    .HasColumnType("bit");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
-                b.Property<string>("Name")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<int>("PointsReward")
-                    .HasColumnType("int");
+                    b.Property<int>("PointsReward")
+                        .HasColumnType("int");
 
-                b.Property<DateTime>("UpdatedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.ToTable("Achievements", (string)null);
-            });
+                    b.ToTable("Achievements", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ChatMessage", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<int>("ChatRoomId")
-                    .HasColumnType("int");
+                    b.Property<int>("ChatRoomId")
+                        .HasColumnType("int");
 
-                b.Property<string>("Content")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("ChatRoomId1")
+                        .HasColumnType("int");
 
-                b.Property<DateTime>("CreatedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<string>("Content")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<bool>("IsDeleted")
-                    .HasColumnType("bit");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("MessageType")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
-                b.Property<int>("SenderId")
-                    .HasColumnType("int");
+                    b.Property<string>("MessageType")
+                        .HasColumnType("nvarchar(max)");
 
-                b.HasKey("Id");
+                    b.Property<int>("SenderId")
+                        .HasColumnType("int");
 
-                b.HasIndex("ChatRoomId");
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
 
-                b.HasIndex("SenderId");
+                    b.HasKey("Id");
 
-                b.ToTable("ChatMessages", (string)null);
-            });
+                    b.HasIndex("ChatRoomId");
+
+                    b.HasIndex("ChatRoomId1");
+
+                    b.HasIndex("SenderId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ChatMessages", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ChatParticipant", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<int>("ChatRoomId")
-                    .HasColumnType("int");
+                    b.Property<int>("ChatRoomId")
+                        .HasColumnType("int");
 
-                b.Property<bool>("IsMuted")
-                    .HasColumnType("bit");
+                    b.Property<bool>("IsMuted")
+                        .HasColumnType("bit");
 
-                b.Property<DateTime>("JoinedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<int?>("LastReadMessageId")
-                    .HasColumnType("int");
+                    b.Property<int?>("LastReadMessageId")
+                        .HasColumnType("int");
 
-                b.Property<int>("UserId")
-                    .HasColumnType("int");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                b.HasKey("Id");
+                    b.Property<int?>("UserId1")
+                        .HasColumnType("int");
 
-                b.HasIndex("ChatRoomId");
+                    b.HasKey("Id");
 
-                b.HasIndex("UserId");
+                    b.HasIndex("ChatRoomId");
 
-                b.ToTable("ChatParticipants", (string)null);
-            });
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
+
+                    b.ToTable("ChatParticipants", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ChatRoom", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime>("CreatedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<bool>("IsActive")
-                    .HasColumnType("bit");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
-                b.Property<int?>("ProjectId")
-                    .HasColumnType("int");
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
 
-                b.Property<string>("RoomName")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("RoomName")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<string>("RoomType")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("RoomType")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<int>("UserId")
-                    .HasColumnType("int");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("ProjectId");
+                    b.HasIndex("ProjectId");
 
-                b.HasIndex("UserId");
+                    b.HasIndex("UserId");
 
-                b.ToTable("ChatRooms", (string)null);
-            });
+                    b.ToTable("ChatRooms", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.EmailQueue", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<string>("Body")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Body")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<bool>("IsSent")
-                    .HasColumnType("bit");
+                    b.Property<bool>("IsSent")
+                        .HasColumnType("bit");
 
-                b.Property<int>("NotificationId")
-                    .HasColumnType("int");
+                    b.Property<int>("NotificationId")
+                        .HasColumnType("int");
 
-                b.Property<string>("RecipientEmail")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("RecipientEmail")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<DateTime>("ScheduledAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("ScheduledAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<DateTime?>("SentAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("SentAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Subject")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Subject")
+                        .HasColumnType("nvarchar(max)");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("NotificationId")
-                    .IsUnique();
+                    b.HasIndex("NotificationId")
+                        .IsUnique();
 
-                b.ToTable("EmailQueues", (string)null);
-            });
+                    b.ToTable("EmailQueues", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Milestone", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime>("CreatedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Description")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<DateTime>("DueDate")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2");
 
-                b.Property<int>("ProjectId")
-                    .HasColumnType("int");
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
 
-                b.Property<DateTime>("StartDate")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Status")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<string>("Title")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<decimal>("Weight")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<decimal>("Weight")
+                        .HasColumnType("decimal(18,2)");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("ProjectId");
+                    b.HasIndex("ProjectId");
 
-                b.ToTable("Milestones", (string)null);
-            });
+                    b.ToTable("Milestones", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Notification", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime>("CreatedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<bool>("IsRead")
-                    .HasColumnType("bit");
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
 
-                b.Property<string>("Message")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<int>("NotificationTemplateId")
-                    .HasColumnType("int");
+                    b.Property<int>("NotificationTemplateId")
+                        .HasColumnType("int");
 
-                b.Property<int>("RelatedId")
-                    .HasColumnType("int");
+                    b.Property<int?>("NotificationTemplateId1")
+                        .HasColumnType("int");
 
-                b.Property<string>("RelatedType")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<int>("RelatedId")
+                        .HasColumnType("int");
 
-                b.Property<bool>("SentByEmail")
-                    .HasColumnType("bit");
+                    b.Property<string>("RelatedType")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<string>("Subject")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("SentByEmail")
+                        .HasColumnType("bit");
 
-                b.Property<int>("UserId")
-                    .HasColumnType("int");
+                    b.Property<string>("Subject")
+                        .HasColumnType("nvarchar(max)");
 
-                b.HasKey("Id");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                b.HasIndex("NotificationTemplateId");
+                    b.Property<int?>("UserId1")
+                        .HasColumnType("int");
 
-                b.HasIndex("UserId");
+                    b.HasKey("Id");
 
-                b.ToTable("Notifications", (string)null);
-            });
+                    b.HasIndex("NotificationTemplateId");
+
+                    b.HasIndex("NotificationTemplateId1");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
+
+                    b.ToTable("Notifications", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.NotificationTemplate", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<string>("BodyTemplate")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("BodyTemplate")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<string>("Code")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<bool>("IsActive")
-                    .HasColumnType("bit");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
-                b.Property<string>("SubjectTemplate")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("SubjectTemplate")
+                        .HasColumnType("nvarchar(max)");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.ToTable("NotificationTemplates", (string)null);
-            });
+                    b.ToTable("NotificationTemplates", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.PerformanceScore", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<string>("Comment")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Comment")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<DateTime>("CreatedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<int>("MilestoneId")
-                    .HasColumnType("int");
+                    b.Property<int>("MilestoneId")
+                        .HasColumnType("int");
 
-                b.Property<int>("ProjectId")
-                    .HasColumnType("int");
+                    b.Property<int?>("MilestoneId1")
+                        .HasColumnType("int");
 
-                b.Property<decimal>("Score")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
 
-                b.Property<int>("TaskId")
-                    .HasColumnType("int");
+                    b.Property<int?>("ProjectId1")
+                        .HasColumnType("int");
 
-                b.Property<int>("UserId")
-                    .HasColumnType("int");
+                    b.Property<decimal>("Score")
+                        .HasColumnType("decimal(18,2)");
 
-                b.HasKey("Id");
+                    b.Property<int>("TaskId")
+                        .HasColumnType("int");
 
-                b.HasIndex("MilestoneId");
+                    b.Property<int?>("TaskId1")
+                        .HasColumnType("int");
 
-                b.HasIndex("ProjectId");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                b.HasIndex("TaskId");
+                    b.Property<int?>("UserId1")
+                        .HasColumnType("int");
 
-                b.HasIndex("UserId");
+                    b.HasKey("Id");
 
-                b.ToTable("PerformanceScores", (string)null);
-            });
+                    b.HasIndex("MilestoneId");
+
+                    b.HasIndex("MilestoneId1");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("ProjectId1");
+
+                    b.HasIndex("TaskId");
+
+                    b.HasIndex("TaskId1");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
+
+                    b.ToTable("PerformanceScores", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.PointTransaction", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<decimal>("Amount")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
 
-                b.Property<DateTime>("CreatedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Note")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<string>("SourceType")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(24)");
+                    b.Property<string>("SourceType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(24)");
 
-                b.Property<string>("Type")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(24)");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(24)");
 
-                b.Property<int>("UserWalletId")
-                    .HasColumnType("int");
+                    b.Property<int>("UserWalletId")
+                        .HasColumnType("int");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("UserWalletId");
+                    b.HasIndex("UserWalletId");
 
-                b.ToTable("PointTransactions", (string)null);
-            });
+                    b.ToTable("PointTransactions", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Project", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime>("CreatedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Description")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<int>("ProposerId")
-                    .HasColumnType("int");
+                    b.Property<int>("ProposerId")
+                        .HasColumnType("int");
 
-                b.Property<int>("SemesterId")
-                    .HasColumnType("int");
+                    b.Property<int>("SemesterId")
+                        .HasColumnType("int");
 
-                b.Property<string>("Status")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("SemesterId1")
+                        .HasColumnType("int");
 
-                b.Property<string>("Title")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<decimal>("TotalPoints")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
 
-                b.HasKey("Id");
+                    b.Property<decimal>("TotalPoints")
+                        .HasColumnType("decimal(18,2)");
 
-                b.HasIndex("ProposerId");
+                    b.HasKey("Id");
 
-                b.HasIndex("SemesterId");
+                    b.HasIndex("ProposerId");
 
-                b.ToTable("Projects", (string)null);
-            });
+                    b.HasIndex("SemesterId");
+
+                    b.HasIndex("SemesterId1");
+
+                    b.ToTable("Projects", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ProjectKeyword", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<int>("ProjectId")
-                    .HasColumnType("int");
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
 
-                b.Property<int>("RulesMetPoints")
-                    .HasColumnType("int");
+                    b.Property<int>("RulesMetPoints")
+                        .HasColumnType("int");
 
-                b.Property<int>("TermKeywordId")
-                    .HasColumnType("int");
+                    b.Property<int>("TermKeywordId")
+                        .HasColumnType("int");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("ProjectId");
+                    b.HasIndex("ProjectId");
 
-                b.HasIndex("TermKeywordId");
+                    b.HasIndex("TermKeywordId");
 
-                b.ToTable("ProjectKeywords", (string)null);
-            });
+                    b.ToTable("ProjectKeywords", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ProjectMember", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime>("JoinAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("JoinAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<int>("ProjectId")
-                    .HasColumnType("int");
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
 
-                b.Property<string>("Role")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Role")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<int>("UserId")
-                    .HasColumnType("int");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("ProjectId");
+                    b.HasIndex("ProjectId");
 
-                b.HasIndex("UserId");
+                    b.HasIndex("UserId");
 
-                b.ToTable("ProjectMembers", (string)null);
-            });
+                    b.ToTable("ProjectMembers", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.RedeemRequest", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime?>("ProcessedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("ProcessedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<int>("Quantity")
-                    .HasColumnType("int");
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
 
-                b.Property<DateTime>("RequestedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<int>("RewardItemId")
-                    .HasColumnType("int");
+                    b.Property<int>("RewardItemId")
+                        .HasColumnType("int");
 
-                b.Property<string>("Status")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(24)");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(24)");
 
-                b.Property<decimal>("TotalPoints")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<decimal>("TotalPoints")
+                        .HasColumnType("decimal(18,2)");
 
-                b.Property<int>("UserId")
-                    .HasColumnType("int");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                b.HasKey("Id");
+                    b.Property<int?>("UserId1")
+                        .HasColumnType("int");
 
-                b.HasIndex("RewardItemId");
+                    b.HasKey("Id");
 
-                b.HasIndex("UserId");
+                    b.HasIndex("RewardItemId");
 
-                b.ToTable("RedeemRequests", (string)null);
-            });
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
+
+                    b.ToTable("RedeemRequests", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.RewardItem", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime>("CreatedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<int?>("CreatedById")
-                    .HasColumnType("int");
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
 
-                b.Property<string>("Description")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<bool>("IsActive")
-                    .HasColumnType("bit");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
-                b.Property<string>("Name")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<decimal>("PriceInPoints")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<decimal>("PriceInPoints")
+                        .HasColumnType("decimal(18,2)");
 
-                b.Property<int>("Quantity")
-                    .HasColumnType("int");
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
 
-                b.Property<string>("Type")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(24)");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(24)");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("CreatedById");
+                    b.HasIndex("CreatedById");
 
-                b.ToTable("RewardItems", (string)null);
-            });
+                    b.ToTable("RewardItems", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Role", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<string>("ConcurrencyStamp")
-                    .IsConcurrencyToken()
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<string>("Name")
-                    .HasMaxLength(256)
-                    .HasColumnType("nvarchar(256)");
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
-                b.Property<string>("NormalizedName")
-                    .HasMaxLength(256)
-                    .HasColumnType("nvarchar(256)");
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("NormalizedName")
-                    .IsUnique()
-                    .HasDatabaseName("RoleNameIndex")
-                    .HasFilter("[NormalizedName] IS NOT NULL");
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
 
-                b.ToTable("Roles", (string)null);
-            });
+                    b.ToTable("Roles", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Semester", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<DateTime>("CreatedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<DateTime>("EndDate")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("KeywordTheme")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("KeywordTheme")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<string>("Name")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<DateTime>("StartDate")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Status")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.ToTable("Semesters", (string)null);
-            });
+                    b.ToTable("Semesters", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Submission", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<string>("Feedback")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Feedback")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<string>("FileUrl")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<decimal?>("Grade")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<decimal?>("Grade")
+                        .HasColumnType("decimal(18,2)");
 
-                b.Property<bool>("IsFinal")
-                    .HasColumnType("bit");
+                    b.Property<bool>("IsFinal")
+                        .HasColumnType("bit");
 
-                b.Property<string>("Status")
-                    .IsRequired()
-                    .HasColumnType("nvarchar(24)");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(24)");
 
-                b.Property<DateTime>("SubmittedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<int>("TaskId")
-                    .HasColumnType("int");
+                    b.Property<int>("TaskId")
+                        .HasColumnType("int");
 
-                b.Property<int>("UserId")
-                    .HasColumnType("int");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                b.Property<int>("Version")
-                    .HasColumnType("int");
+                    b.Property<int?>("UserId1")
+                        .HasColumnType("int");
 
-                b.HasKey("Id");
+                    b.Property<int>("Version")
+                        .HasColumnType("int");
 
-                b.HasIndex("TaskId");
+                    b.HasKey("Id");
 
-                b.HasIndex("UserId");
+                    b.HasIndex("TaskId");
 
-                b.ToTable("Submissions", (string)null);
-            });
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserId1");
+
+                    b.ToTable("Submissions", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Task", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<int?>("AssigneeId")
-                    .HasColumnType("int");
+                    b.Property<int?>("AssigneeId")
+                        .HasColumnType("int");
 
-                b.Property<DateTime?>("CompletedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<int>("Complexity")
-                    .HasColumnType("int");
+                    b.Property<int>("Complexity")
+                        .HasColumnType("int");
 
-                b.Property<DateTime>("CreatedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Description")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<DateTime?>("DueDate")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("DueDate")
+                        .HasColumnType("datetime2");
 
-                b.Property<decimal>("EstimatedHours")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<decimal>("EstimatedHours")
+                        .HasColumnType("decimal(18,2)");
 
-                b.Property<string>("Label")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Label")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<int>("MilestoneId")
-                    .HasColumnType("int");
+                    b.Property<int>("MilestoneId")
+                        .HasColumnType("int");
 
-                b.Property<int?>("ParentTaskId")
-                    .HasColumnType("int");
+                    b.Property<int?>("ParentTaskId")
+                        .HasColumnType("int");
 
-                b.Property<string>("Priority")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Priority")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<DateTime?>("StartDate")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Status")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<decimal>("Weight")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<decimal>("Weight")
+                        .HasColumnType("decimal(18,2)");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("AssigneeId");
+                    b.HasIndex("AssigneeId");
 
-                b.HasIndex("MilestoneId");
+                    b.HasIndex("MilestoneId");
 
-                b.HasIndex("ParentTaskId");
+                    b.HasIndex("ParentTaskId");
 
-                b.ToTable("Tasks", (string)null);
-            });
+                    b.ToTable("Tasks", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.TermKeyword", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<int>("BasePoints")
-                    .HasColumnType("int");
+                    b.Property<int>("BasePoints")
+                        .HasColumnType("int");
 
-                b.Property<string>("Keyword")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Keyword")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<int>("RuleBonus")
-                    .HasColumnType("int");
+                    b.Property<int>("RuleBonus")
+                        .HasColumnType("int");
 
-                b.Property<int>("SemesterId")
-                    .HasColumnType("int");
+                    b.Property<int>("SemesterId")
+                        .HasColumnType("int");
 
-                b.HasKey("Id");
+                    b.Property<int?>("SemesterId1")
+                        .HasColumnType("int");
 
-                b.HasIndex("SemesterId");
+                    b.HasKey("Id");
 
-                b.ToTable("TermKeywords", (string)null);
-            });
+                    b.HasIndex("SemesterId");
+
+                    b.HasIndex("SemesterId1");
+
+                    b.ToTable("TermKeywords", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.User", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<int>("AccessFailedCount")
-                    .HasColumnType("int");
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
 
-                b.Property<string>("ConcurrencyStamp")
-                    .IsConcurrencyToken()
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<DateTime>("CreatedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("Email")
-                    .HasMaxLength(256)
-                    .HasColumnType("nvarchar(256)");
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
-                b.Property<bool>("EmailConfirmed")
-                    .HasColumnType("bit");
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
 
-                b.Property<string>("FullName")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("FullName")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<bool>("LockoutEnabled")
-                    .HasColumnType("bit");
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
 
-                b.Property<DateTimeOffset?>("LockoutEnd")
-                    .HasColumnType("datetimeoffset");
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
 
-                b.Property<string>("NormalizedEmail")
-                    .HasMaxLength(256)
-                    .HasColumnType("nvarchar(256)");
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
-                b.Property<string>("NormalizedUserName")
-                    .HasMaxLength(256)
-                    .HasColumnType("nvarchar(256)");
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
-                b.Property<string>("PasswordHash")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<string>("PhoneNumber")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<bool>("PhoneNumberConfirmed")
-                    .HasColumnType("bit");
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
 
-                b.Property<string>("SecurityStamp")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<string>("Status")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Status")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<string>("StudentCode")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("StudentCode")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<bool>("TwoFactorEnabled")
-                    .HasColumnType("bit");
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
 
-                b.Property<DateTime>("UpdatedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<string>("UserName")
-                    .HasMaxLength(256)
-                    .HasColumnType("nvarchar(256)");
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("NormalizedEmail")
-                    .HasDatabaseName("EmailIndex");
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
 
-                b.HasIndex("NormalizedUserName")
-                    .IsUnique()
-                    .HasDatabaseName("UserNameIndex")
-                    .HasFilter("[NormalizedUserName] IS NOT NULL");
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                b.ToTable("Users", (string)null);
-            });
+                    b.ToTable("Users", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.UserAchievement", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<int>("AchievementId")
-                    .HasColumnType("int");
+                    b.Property<int>("AchievementId")
+                        .HasColumnType("int");
 
-                b.Property<DateTime>("UnlockedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("UnlockedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<int>("UserId")
-                    .HasColumnType("int");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("AchievementId");
+                    b.HasIndex("AchievementId");
 
-                b.HasIndex("UserId");
+                    b.HasIndex("UserId");
 
-                b.ToTable("UserAchievements", (string)null);
-            });
+                    b.ToTable("UserAchievements", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.UserRole", b =>
-            {
-                b.Property<int>("UserId")
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                b.Property<int>("RoleId")
-                    .HasColumnType("int");
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
-                b.HasKey("UserId", "RoleId");
+                    b.HasKey("UserId", "RoleId");
 
-                b.HasIndex("RoleId");
+                    b.HasIndex("RoleId");
 
-                b.ToTable("UserRoles", (string)null);
-            });
+                    b.ToTable("UserRoles", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.UserWallet", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<decimal>("Balance")
-                    .HasColumnType("decimal(18,2)");
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("decimal(18,2)");
 
-                b.Property<DateTime>("LastUpdatedAt")
-                    .HasColumnType("datetime2");
+                    b.Property<DateTime>("LastUpdatedAt")
+                        .HasColumnType("datetime2");
 
-                b.Property<int>("UserId")
-                    .HasColumnType("int");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("UserId")
-                    .IsUnique();
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
-                b.ToTable("UserWallets", (string)null);
-            });
+                    b.ToTable("UserWallets", (string)null);
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<string>("ClaimType")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<string>("ClaimValue")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<int>("RoleId")
-                    .HasColumnType("int");
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("RoleId");
+                    b.HasIndex("RoleId");
 
-                b.ToTable("RoleClaims", (string)null);
-            });
+                    b.ToTable("RoleClaims", (string)null);
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
-            {
-                b.Property<int>("Id")
-                    .ValueGeneratedOnAdd()
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                b.Property<string>("ClaimType")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<string>("ClaimValue")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<int>("UserId")
-                    .HasColumnType("int");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                b.HasKey("Id");
+                    b.HasKey("Id");
 
-                b.HasIndex("UserId");
+                    b.HasIndex("UserId");
 
-                b.ToTable("UserClaims", (string)null);
-            });
+                    b.ToTable("UserClaims", (string)null);
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
-            {
-                b.Property<string>("LoginProvider")
-                    .HasColumnType("nvarchar(450)");
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
 
-                b.Property<string>("ProviderKey")
-                    .HasColumnType("nvarchar(450)");
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("nvarchar(450)");
 
-                b.Property<string>("ProviderDisplayName")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
 
-                b.Property<int>("UserId")
-                    .HasColumnType("int");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                b.HasKey("LoginProvider", "ProviderKey");
+                    b.HasKey("LoginProvider", "ProviderKey");
 
-                b.HasIndex("UserId");
+                    b.HasIndex("UserId");
 
-                b.ToTable("UserLogins", (string)null);
-            });
+                    b.ToTable("UserLogins", (string)null);
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
-            {
-                b.Property<int>("UserId")
-                    .HasColumnType("int");
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                b.Property<string>("LoginProvider")
-                    .HasColumnType("nvarchar(450)");
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("nvarchar(450)");
 
-                b.Property<string>("Name")
-                    .HasColumnType("nvarchar(450)");
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(450)");
 
-                b.Property<string>("Value")
-                    .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
 
-                b.HasKey("UserId", "LoginProvider", "Name");
+                    b.HasKey("UserId", "LoginProvider", "Name");
 
-                b.ToTable("UserTokens", (string)null);
-            });
+                    b.ToTable("UserTokens", (string)null);
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ChatMessage", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.ChatRoom", "ChatRoom")
-                    .WithMany("ChatMessages")
-                    .HasForeignKey("ChatRoomId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.ChatRoom", "ChatRoom")
+                        .WithMany()
+                        .HasForeignKey("ChatRoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.HasOne("FGS_BE.Repo.Entities.User", "Sender")
-                    .WithMany("ChatMessages")
-                    .HasForeignKey("SenderId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                    b.HasOne("FGS_BE.Repo.Entities.ChatRoom", null)
+                        .WithMany("ChatMessages")
+                        .HasForeignKey("ChatRoomId1");
 
-                b.Navigation("ChatRoom");
+                    b.HasOne("FGS_BE.Repo.Entities.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.Navigation("Sender");
-            });
+                    b.HasOne("FGS_BE.Repo.Entities.User", null)
+                        .WithMany("ChatMessages")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("ChatRoom");
+
+                    b.Navigation("Sender");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ChatParticipant", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.ChatRoom", "ChatRoom")
-                    .WithMany("ChatParticipants")
-                    .HasForeignKey("ChatRoomId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.ChatRoom", "ChatRoom")
+                        .WithMany("ChatParticipants")
+                        .HasForeignKey("ChatRoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.HasOne("FGS_BE.Repo.Entities.User", "User")
-                    .WithMany("ChatParticipants")
-                    .HasForeignKey("UserId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                    b.HasOne("FGS_BE.Repo.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.Navigation("ChatRoom");
+                    b.HasOne("FGS_BE.Repo.Entities.User", null)
+                        .WithMany("ChatParticipants")
+                        .HasForeignKey("UserId1");
 
-                b.Navigation("User");
-            });
+                    b.Navigation("ChatRoom");
+
+                    b.Navigation("User");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ChatRoom", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.Project", "Project")
-                    .WithMany("ChatRooms")
-                    .HasForeignKey("ProjectId")
-                    .OnDelete(DeleteBehavior.Restrict);
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.Project", "Project")
+                        .WithMany("ChatRooms")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.HasOne("FGS_BE.Repo.Entities.User", "User")
-                    .WithMany("ChatRooms")
-                    .HasForeignKey("UserId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                    b.HasOne("FGS_BE.Repo.Entities.User", "User")
+                        .WithMany("ChatRooms")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.Navigation("Project");
+                    b.Navigation("Project");
 
-                b.Navigation("User");
-            });
+                    b.Navigation("User");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.EmailQueue", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.Notification", "Notification")
-                    .WithOne("EmailQueue")
-                    .HasForeignKey("FGS_BE.Repo.Entities.EmailQueue", "NotificationId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.Notification", "Notification")
+                        .WithOne("EmailQueue")
+                        .HasForeignKey("FGS_BE.Repo.Entities.EmailQueue", "NotificationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.Navigation("Notification");
-            });
+                    b.Navigation("Notification");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Milestone", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.Project", "Project")
-                    .WithMany("Milestones")
-                    .HasForeignKey("ProjectId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.Project", "Project")
+                        .WithMany("Milestones")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.Navigation("Project");
-            });
+                    b.Navigation("Project");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Notification", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.NotificationTemplate", "NotificationTemplate")
-                    .WithMany("Notifications")
-                    .HasForeignKey("NotificationTemplateId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.NotificationTemplate", "NotificationTemplate")
+                        .WithMany()
+                        .HasForeignKey("NotificationTemplateId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.HasOne("FGS_BE.Repo.Entities.User", "User")
-                    .WithMany("Notifications")
-                    .HasForeignKey("UserId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                    b.HasOne("FGS_BE.Repo.Entities.NotificationTemplate", null)
+                        .WithMany("Notifications")
+                        .HasForeignKey("NotificationTemplateId1");
 
-                b.Navigation("NotificationTemplate");
+                    b.HasOne("FGS_BE.Repo.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.Navigation("User");
-            });
+                    b.HasOne("FGS_BE.Repo.Entities.User", null)
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId1");
+
+                    b.Navigation("NotificationTemplate");
+
+                    b.Navigation("User");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.PerformanceScore", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.Milestone", "Milestone")
-                    .WithMany("PerformanceScores")
-                    .HasForeignKey("MilestoneId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.Milestone", "Milestone")
+                        .WithMany()
+                        .HasForeignKey("MilestoneId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.HasOne("FGS_BE.Repo.Entities.Project", "Project")
-                    .WithMany("PerformanceScores")
-                    .HasForeignKey("ProjectId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                    b.HasOne("FGS_BE.Repo.Entities.Milestone", null)
+                        .WithMany("PerformanceScores")
+                        .HasForeignKey("MilestoneId1");
 
-                b.HasOne("FGS_BE.Repo.Entities.Task", "Task")
-                    .WithMany("PerformanceScores")
-                    .HasForeignKey("TaskId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                    b.HasOne("FGS_BE.Repo.Entities.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.HasOne("FGS_BE.Repo.Entities.User", "User")
-                    .WithMany("PerformanceScores")
-                    .HasForeignKey("UserId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                    b.HasOne("FGS_BE.Repo.Entities.Project", null)
+                        .WithMany("PerformanceScores")
+                        .HasForeignKey("ProjectId1");
 
-                b.Navigation("Milestone");
+                    b.HasOne("FGS_BE.Repo.Entities.Task", "Task")
+                        .WithMany()
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.Navigation("Project");
+                    b.HasOne("FGS_BE.Repo.Entities.Task", null)
+                        .WithMany("PerformanceScores")
+                        .HasForeignKey("TaskId1");
 
-                b.Navigation("Task");
+                    b.HasOne("FGS_BE.Repo.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.Navigation("User");
-            });
+                    b.HasOne("FGS_BE.Repo.Entities.User", null)
+                        .WithMany("PerformanceScores")
+                        .HasForeignKey("UserId1");
+
+                    b.Navigation("Milestone");
+
+                    b.Navigation("Project");
+
+                    b.Navigation("Task");
+
+                    b.Navigation("User");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.PointTransaction", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.UserWallet", "UserWallet")
-                    .WithMany("PointTransactions")
-                    .HasForeignKey("UserWalletId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.UserWallet", "UserWallet")
+                        .WithMany("PointTransactions")
+                        .HasForeignKey("UserWalletId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.Navigation("UserWallet");
-            });
+                    b.Navigation("UserWallet");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Project", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.User", "Proposer")
-                    .WithMany()
-                    .HasForeignKey("ProposerId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.User", "Proposer")
+                        .WithMany()
+                        .HasForeignKey("ProposerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.HasOne("FGS_BE.Repo.Entities.Semester", "Semester")
-                    .WithMany("Projects")
-                    .HasForeignKey("SemesterId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                    b.HasOne("FGS_BE.Repo.Entities.Semester", "Semester")
+                        .WithMany()
+                        .HasForeignKey("SemesterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.Navigation("Proposer");
+                    b.HasOne("FGS_BE.Repo.Entities.Semester", null)
+                        .WithMany("Projects")
+                        .HasForeignKey("SemesterId1");
 
-                b.Navigation("Semester");
-            });
+                    b.Navigation("Proposer");
+
+                    b.Navigation("Semester");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ProjectKeyword", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.Project", "Project")
-                    .WithMany("ProjectKeywords")
-                    .HasForeignKey("ProjectId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.Project", "Project")
+                        .WithMany("ProjectKeywords")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.HasOne("FGS_BE.Repo.Entities.TermKeyword", "TermKeyword")
-                    .WithMany("ProjectKeywords")
-                    .HasForeignKey("TermKeywordId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                    b.HasOne("FGS_BE.Repo.Entities.TermKeyword", "TermKeyword")
+                        .WithMany("ProjectKeywords")
+                        .HasForeignKey("TermKeywordId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.Navigation("Project");
+                    b.Navigation("Project");
 
-                b.Navigation("TermKeyword");
-            });
+                    b.Navigation("TermKeyword");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ProjectMember", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.Project", "Project")
-                    .WithMany("ProjectMembers")
-                    .HasForeignKey("ProjectId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.Project", "Project")
+                        .WithMany("ProjectMembers")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.HasOne("FGS_BE.Repo.Entities.User", "User")
-                    .WithMany("ProjectMembers")
-                    .HasForeignKey("UserId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                    b.HasOne("FGS_BE.Repo.Entities.User", "User")
+                        .WithMany("ProjectMembers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.Navigation("Project");
+                    b.Navigation("Project");
 
-                b.Navigation("User");
-            });
+                    b.Navigation("User");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.RedeemRequest", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.RewardItem", "RewardItem")
-                    .WithMany("RedeemRequests")
-                    .HasForeignKey("RewardItemId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.RewardItem", "RewardItem")
+                        .WithMany("RedeemRequests")
+                        .HasForeignKey("RewardItemId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.HasOne("FGS_BE.Repo.Entities.User", "User")
-                    .WithMany("RedeemRequests")
-                    .HasForeignKey("UserId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                    b.HasOne("FGS_BE.Repo.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.Navigation("RewardItem");
+                    b.HasOne("FGS_BE.Repo.Entities.User", null)
+                        .WithMany("RedeemRequests")
+                        .HasForeignKey("UserId1");
 
-                b.Navigation("User");
-            });
+                    b.Navigation("RewardItem");
+
+                    b.Navigation("User");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.RewardItem", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.User", "CreatedBy")
-                    .WithMany()
-                    .HasForeignKey("CreatedById")
-                    .OnDelete(DeleteBehavior.Restrict);
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                b.Navigation("CreatedBy");
-            });
+                    b.Navigation("CreatedBy");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Submission", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.Task", "Task")
-                    .WithMany("Submissions")
-                    .HasForeignKey("TaskId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.Task", "Task")
+                        .WithMany("Submissions")
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.HasOne("FGS_BE.Repo.Entities.User", "User")
-                    .WithMany("Submissions")
-                    .HasForeignKey("UserId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                    b.HasOne("FGS_BE.Repo.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                b.Navigation("Task");
+                    b.HasOne("FGS_BE.Repo.Entities.User", null)
+                        .WithMany("Submissions")
+                        .HasForeignKey("UserId1");
 
-                b.Navigation("User");
-            });
+                    b.Navigation("Task");
+
+                    b.Navigation("User");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Task", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.User", "Assignee")
-                    .WithMany("AssignedTasks")
-                    .HasForeignKey("AssigneeId")
-                    .OnDelete(DeleteBehavior.Restrict);
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.User", "Assignee")
+                        .WithMany("AssignedTasks")
+                        .HasForeignKey("AssigneeId");
 
-                b.HasOne("FGS_BE.Repo.Entities.Milestone", "Milestone")
-                    .WithMany("Tasks")
-                    .HasForeignKey("MilestoneId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                    b.HasOne("FGS_BE.Repo.Entities.Milestone", "Milestone")
+                        .WithMany("Tasks")
+                        .HasForeignKey("MilestoneId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.HasOne("FGS_BE.Repo.Entities.Task", "ParentTask")
-                    .WithMany("SubTasks")
-                    .HasForeignKey("ParentTaskId")
-                    .OnDelete(DeleteBehavior.Restrict);
+                    b.HasOne("FGS_BE.Repo.Entities.Task", "ParentTask")
+                        .WithMany("SubTasks")
+                        .HasForeignKey("ParentTaskId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                b.Navigation("Assignee");
+                    b.Navigation("Assignee");
 
-                b.Navigation("Milestone");
+                    b.Navigation("Milestone");
 
-                b.Navigation("ParentTask");
-            });
+                    b.Navigation("ParentTask");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.TermKeyword", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.Semester", "Semester")
-                    .WithMany("TermKeywords")
-                    .HasForeignKey("SemesterId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.Semester", "Semester")
+                        .WithMany()
+                        .HasForeignKey("SemesterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.Navigation("Semester");
-            });
+                    b.HasOne("FGS_BE.Repo.Entities.Semester", null)
+                        .WithMany("TermKeywords")
+                        .HasForeignKey("SemesterId1");
 
-            modelBuilder.Entity("FGS_BE.Repo.Entities.User", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.Role", "Role")
-                    .WithMany("Users")
-                    .HasForeignKey("RoleId")
-                    .OnDelete(DeleteBehavior.Restrict);
-
-                b.Navigation("Role");
-            });
+                    b.Navigation("Semester");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.UserAchievement", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.Achievement", "Achievement")
-                    .WithMany("UserAchievements")
-                    .HasForeignKey("AchievementId")
-                    .OnDelete(DeleteBehavior.Restrict)
-                    .IsRequired();
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.Achievement", "Achievement")
+                        .WithMany("UserAchievements")
+                        .HasForeignKey("AchievementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.HasOne("FGS_BE.Repo.Entities.User", "User")
-                    .WithMany("UserAchievements")
-                    .HasForeignKey("UserId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                    b.HasOne("FGS_BE.Repo.Entities.User", "User")
+                        .WithMany("UserAchievements")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.Navigation("Achievement");
+                    b.Navigation("Achievement");
 
-                b.Navigation("User");
-            });
+                    b.Navigation("User");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.UserRole", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.Role", "Role")
-                    .WithMany("UserRoles")
-                    .HasForeignKey("RoleId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.Role", "Role")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.HasOne("FGS_BE.Repo.Entities.User", "User")
-                    .WithMany("UserRoles")
-                    .HasForeignKey("UserId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                    b.HasOne("FGS_BE.Repo.Entities.User", "User")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.Navigation("Role");
+                    b.Navigation("Role");
 
-                b.Navigation("User");
-            });
+                    b.Navigation("User");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.UserWallet", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.User", "User")
-                    .WithOne("UserWallet")
-                    .HasForeignKey("FGS_BE.Repo.Entities.UserWallet", "UserId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.User", "User")
+                        .WithOne("UserWallet")
+                        .HasForeignKey("FGS_BE.Repo.Entities.UserWallet", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                b.Navigation("User");
-            });
+                    b.Navigation("User");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.Role", null)
-                    .WithMany()
-                    .HasForeignKey("RoleId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
-            });
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.User", null)
-                    .WithMany()
-                    .HasForeignKey("UserId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
-            });
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.User", null)
-                    .WithMany()
-                    .HasForeignKey("UserId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
-            });
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
-            {
-                b.HasOne("FGS_BE.Repo.Entities.User", null)
-                    .WithMany()
-                    .HasForeignKey("UserId")
-                    .OnDelete(DeleteBehavior.Cascade)
-                    .IsRequired();
-            });
+                {
+                    b.HasOne("FGS_BE.Repo.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Achievement", b =>
-            {
-                b.Navigation("UserAchievements");
-            });
+                {
+                    b.Navigation("UserAchievements");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ChatRoom", b =>
-            {
-                b.Navigation("ChatMessages");
+                {
+                    b.Navigation("ChatMessages");
 
-                b.Navigation("ChatParticipants");
-            });
+                    b.Navigation("ChatParticipants");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Milestone", b =>
-            {
-                b.Navigation("PerformanceScores");
+                {
+                    b.Navigation("PerformanceScores");
 
-                b.Navigation("Tasks");
-            });
+                    b.Navigation("Tasks");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Notification", b =>
-            {
-                b.Navigation("EmailQueue")
-                    .IsRequired();
-            });
+                {
+                    b.Navigation("EmailQueue")
+                        .IsRequired();
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.NotificationTemplate", b =>
-            {
-                b.Navigation("Notifications");
-            });
+                {
+                    b.Navigation("Notifications");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Project", b =>
-            {
-                b.Navigation("ChatRooms");
+                {
+                    b.Navigation("ChatRooms");
 
-                b.Navigation("Milestones");
+                    b.Navigation("Milestones");
 
-                b.Navigation("PerformanceScores");
+                    b.Navigation("PerformanceScores");
 
-                b.Navigation("ProjectKeywords");
+                    b.Navigation("ProjectKeywords");
 
-                b.Navigation("ProjectMembers");
-            });
+                    b.Navigation("ProjectMembers");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.RewardItem", b =>
-            {
-                b.Navigation("RedeemRequests");
-            });
+                {
+                    b.Navigation("RedeemRequests");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Role", b =>
-            {
-                b.Navigation("UserRoles");
-            });
+                {
+                    b.Navigation("UserRoles");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Semester", b =>
-            {
-                b.Navigation("Projects");
+                {
+                    b.Navigation("Projects");
 
-                b.Navigation("TermKeywords");
-            });
+                    b.Navigation("TermKeywords");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Task", b =>
-            {
-                b.Navigation("PerformanceScores");
+                {
+                    b.Navigation("PerformanceScores");
 
-                b.Navigation("SubTasks");
+                    b.Navigation("SubTasks");
 
-                b.Navigation("Submissions");
-            });
+                    b.Navigation("Submissions");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.TermKeyword", b =>
-            {
-                b.Navigation("ProjectKeywords");
-            });
+                {
+                    b.Navigation("ProjectKeywords");
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.User", b =>
-            {
-                b.Navigation("AssignedTasks");
+                {
+                    b.Navigation("AssignedTasks");
 
-                b.Navigation("ChatMessages");
+                    b.Navigation("ChatMessages");
 
-                b.Navigation("ChatParticipants");
+                    b.Navigation("ChatParticipants");
 
-                b.Navigation("ChatRooms");
+                    b.Navigation("ChatRooms");
 
-                b.Navigation("Notifications");
+                    b.Navigation("Notifications");
 
-                b.Navigation("PerformanceScores");
+                    b.Navigation("PerformanceScores");
 
-                b.Navigation("ProjectMembers");
+                    b.Navigation("ProjectMembers");
 
-                b.Navigation("RedeemRequests");
+                    b.Navigation("RedeemRequests");
 
-                b.Navigation("Submissions");
+                    b.Navigation("Submissions");
 
-                b.Navigation("UserAchievements");
+                    b.Navigation("UserAchievements");
 
-                b.Navigation("UserRoles");
+                    b.Navigation("UserRoles");
 
-                b.Navigation("UserWallet")
-                    .IsRequired();
-            });
+                    b.Navigation("UserWallet")
+                        .IsRequired();
+                });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.UserWallet", b =>
-            {
-                b.Navigation("PointTransactions");
-            });
+                {
+                    b.Navigation("PointTransactions");
+                });
 #pragma warning restore 612, 618
         }
     }
