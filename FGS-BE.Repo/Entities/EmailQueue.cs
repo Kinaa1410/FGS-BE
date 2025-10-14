@@ -1,4 +1,4 @@
-﻿using FGS_BE.Repo.Entities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FGS_BE.Repo.Entities;
 
@@ -13,6 +13,7 @@ public class EmailQueue
     public bool IsSent { get; set; }
     public DateTime? SentAt { get; set; }
 
+    [ForeignKey(nameof(NotificationId))]
     public int NotificationId { get; set; }
     public virtual Notification Notification { get; set; } = default!;
 }

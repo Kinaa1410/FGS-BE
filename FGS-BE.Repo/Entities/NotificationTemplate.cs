@@ -1,4 +1,5 @@
 ﻿namespace FGS_BE.Repo.Entities;
+
 public class NotificationTemplate
 {
     public int Id { get; set; }
@@ -9,5 +10,4 @@ public class NotificationTemplate
     public bool IsActive { get; set; } = true;
 
     public virtual ICollection<Notification> Notifications { get; set; } = new HashSet<Notification>();
-
 }

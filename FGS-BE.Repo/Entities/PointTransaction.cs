@@ -1,6 +1,5 @@
 ﻿using FGS_BE.Repo.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
-using FGS_BE.Repo.Entities; 
 
 namespace FGS_BE.Repo.Entities;
 
@@ -17,6 +16,7 @@ public class PointTransaction
     [Column(TypeName = "nvarchar(24)")]
     public PointTransactionSourceType SourceType { get; set; }
 
+    [ForeignKey(nameof(UserWalletId))]
     public int UserWalletId { get; set; }
     public virtual UserWallet UserWallet { get; set; } = default!;
 }
