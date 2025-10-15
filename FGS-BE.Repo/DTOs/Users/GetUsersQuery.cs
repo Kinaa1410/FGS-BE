@@ -8,6 +8,10 @@ using System.Linq.Expressions;
 namespace FGS_BE.Repo.DTOs.Users;
 public sealed record GetUsersQuery : PaginationRequest<User>
 {
+
+    /// <summary>
+    /// The user's email address which acts as a user name.
+    /// </summary>
     public string? Search { get; set; }
 
     public RoleEnums? Role { get; set; }

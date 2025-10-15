@@ -2,11 +2,14 @@
 using FGS_BE.Repo.DTOs.Pages;
 using FGS_BE.Repo.DTOs.Users;
 using FGS_BE.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FGS_BE.Controllers;
 [Route("api/[controller]")]
 [ApiController]
+
+[Authorize]
 public class AchievementsController(IAchievementService service) : ControllerBase
 {
     [HttpGet]

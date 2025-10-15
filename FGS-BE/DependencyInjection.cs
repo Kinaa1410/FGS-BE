@@ -1,14 +1,28 @@
 ﻿using FGS_BE.Repo.Data;
 using FGS_BE.Repo.Data.SeedData;
 using FGS_BE.Repo.Entities;
+using FGS_BE.Repo.Exceptions;
+using FGS_BE.Repo.Extensions;
 using FGS_BE.Repo.Repositories.Implements;
 using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Services.Interfaces;
 using FGS_BE.Services.Services;
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
-using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
+using System.Net.Mime;
+using System.Reflection;
+using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Task = System.Threading.Tasks.Task;
 
@@ -24,17 +38,12 @@ public static class DependencyInjection
         services.AddRepositories();
         services.AddInitialiseDatabase();
         services.AddDefaultIdentity();
-        services.AddConfigureSettingServices(configuration);
 
     }
 
     private static void AddServices(this IServiceCollection services)
     {
         services
-            //.AddScoped<ICurrentUserService, CurrentUserService>()
-            //.AddScoped<IMomoPaymentService, MomoPaymentService>()
-            //.AddScoped<IVnPayPaymentService, VnPayPaymentService>()
-            //.AddTransient<IEmailSender, EmailSender>()
             .AddScoped<IAchievementService, AchievementService>()
             .AddScoped<IUserService, UserService>();
     }
@@ -82,14 +91,6 @@ public static class DependencyInjection
           .AddDefaultTokenProviders();
     }
 
-    private static void AddConfigureSettingServices(this IServiceCollection services, IConfiguration configuration)
-    {
-
-        //services.Configure<VnPaySettings>(configuration.GetSection(VnPaySettings.Section));
-        //services.Configure<MomoSettings>(configuration.GetSection(MomoSettings.Section));
-        //services.Configure<MailSettings>(configuration.GetSection(MailSettings.Section));
-    }
-
     private static void AddInitialiseDatabase(this IServiceCollection services)
     {
         services
@@ -104,10 +105,10 @@ public static class DependencyInjection
 
     private static void AddValidators(this IServiceCollection services)
     {
-        //services.AddFluentValidationRulesToSwagger();
-        //services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
-        //ValidatorOptions.Global.PropertyNameResolver = CamelCasePropertyNameResolver.ResolvePropertyName;
-        //services.AddFluentValidationAutoValidation();
+        services.AddFluentValidationRulesToSwagger();
+        services.AddValidatorsFromAssembly(typeof(Repo.AssemblyReference).Assembly);
+        ValidatorOptions.Global.PropertyNameResolver = CamelCasePropertyNameResolver.ResolvePropertyName;
+        services.AddFluentValidationAutoValidation();
     }
 
     public static void AddWebServices(this IServiceCollection services, IConfiguration configuration)
@@ -116,18 +117,8 @@ public static class DependencyInjection
         services.AddEndpointsApiExplorer();
         services.AddControllerServices();
         services.AddSwaggerServices();
-        services.AddUrlHelperServices();
         services.AddDistributedMemoryCache();
-
-    }
-
-    private static void AddUrlHelperServices(this IServiceCollection services)
-    {
-
-        //services.AddSingleton<IActionContextAccessor, ActionContextAccessor>()
-        // .AddScoped((IServiceProvider it) =>
-        //     it.GetRequiredService<IUrlHelperFactory>()
-        //       .GetUrlHelper(it.GetRequiredService<IActionContextAccessor>().ActionContext!));
+        services.AddAuthenticationServices(configuration);
 
     }
 
@@ -144,16 +135,48 @@ public static class DependencyInjection
 
     private static void AddSwaggerServices(this IServiceCollection services)
     {
-        //services.AddSwaggerGen(c =>
-        //{
-        //    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-        //    c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+        services.AddSwaggerGen(c =>
+        {
+            var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 
-        //    xmlFilename = $"{typeof(AssemblyReference).Assembly.GetName().Name}.xml";
-        //    c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+            xmlFilename = $"{typeof(Repo.AssemblyReference).Assembly.GetName().Name}.xml";
+            c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 
-        //    c.EnableAnnotations();
-        //});
+            c.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new()
+            {
+                Description = "JWT Authorization header using the Bearer scheme.",
+                Type = SecuritySchemeType.Http,
+                Scheme = JwtBearerDefaults.AuthenticationScheme
+            });
+            c.OperationFilter<SecurityRequirementsOperationFilter>(JwtBearerDefaults.AuthenticationScheme);
+            c.OperationFilter<AppendAuthorizeToSummaryOperationFilter>();
+            c.EnableAnnotations();
+        });
+    }
+
+    private static void AddAuthenticationServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+        }).AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                     configuration.GetSection("Authentication:Schemes:Bearer:SerectKey").Value!)),
+                ValidateIssuerSigningKey = true,
+                ClockSkew = TimeSpan.Zero,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                NameClaimType = ClaimTypes.NameIdentifier
+            };
+            options.RequireHttpsMetadata = false;
+            options.HandleEvents();
+        });
     }
 
     public static async Task UseWebApplication(this WebApplication app)
@@ -180,8 +203,8 @@ public static class DependencyInjection
 
         //app.UseHttpsRedirection();
         //app.UseStaticFiles();
-        //app.UseAuthentication();
-        //app.UseAuthorization();
+        app.UseAuthentication();
+        app.UseAuthorization();
         //app.MapControllers();
 
     }
@@ -207,52 +230,36 @@ public static class DependencyInjection
 
     private static void UseExceptionApplication(this IApplicationBuilder app)
     {
-        //app.UseExceptionHandler(exceptionHandlerApp =>
-        //{
-        //    exceptionHandlerApp.Run(async context =>
-        //    {
-        //        var _factory = context.RequestServices.GetRequiredService<ProblemDetailsFactory>();
-        //        var exceptionHandlerFeature = context.Features.Get<IExceptionHandlerFeature>();
-        //        var exception = exceptionHandlerFeature?.Error;
+        app.UseExceptionHandler(exceptionHandlerApp =>
+        {
+            exceptionHandlerApp.Run(async context =>
+            {
+                var _factory = context.RequestServices.GetRequiredService<ProblemDetailsFactory>();
+                var exceptionHandlerFeature = context.Features.Get<IExceptionHandlerFeature>();
+                var exception = exceptionHandlerFeature?.Error;
 
-        //        context.Response.ContentType = MediaTypeNames.Application.Json;
-        //        context.Response.StatusCode = exception switch
-        //        {
-        //            BadRequestException e => StatusCodes.Status400BadRequest,
-        //            ValidationBadRequestException e => StatusCodes.Status400BadRequest,
-        //            ConflictException e => StatusCodes.Status409Conflict,
+                context.Response.ContentType = MediaTypeNames.Application.Json;
+                context.Response.StatusCode = exception switch
+                {
+                    BadRequestException e => StatusCodes.Status400BadRequest,
+                    ConflictException e => StatusCodes.Status409Conflict,
+                    ForbiddenAccessException e => StatusCodes.Status403Forbidden,
+                    NotFoundException e => StatusCodes.Status404NotFound,
+                    UnauthorizedAccessException e => StatusCodes.Status401Unauthorized,
+                    _ => StatusCodes.Status500InternalServerError,
+                };
 
-        //            NotFoundException e => StatusCodes.Status404NotFound,
-        //            UnauthorizedAccessException e => StatusCodes.Status401Unauthorized,
-        //            _ => StatusCodes.Status500InternalServerError,
-        //        };
+                var problemDetails = _factory.CreateProblemDetails(
+                             httpContext: context,
+                             statusCode: context.Response.StatusCode,
+                             detail: exception?.Message);
 
-        //        var problemDetails = _factory.CreateProblemDetails(
-        //                     httpContext: context,
-        //                     statusCode: context.Response.StatusCode,
-        //                     detail: exception?.Message);
+                var result = JsonSerializer.Serialize(problemDetails, new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, });
 
-        //        var options = JsonSerializerUtils.GetGlobalJsonSerializerOptions();
+                await context.Response.WriteAsync(result);
 
-        //        var result = JsonSerializer.Serialize(problemDetails, options);
-
-        //        if (exception is ValidationBadRequestException badRequestException)
-        //        {
-        //            if (badRequestException.ModelState != null)
-        //            {
-        //                problemDetails = _factory.CreateValidationProblemDetails(
-        //                      httpContext: context,
-        //                      modelStateDictionary: badRequestException.ModelState,
-        //                      statusCode: context.Response.StatusCode,
-        //                      detail: exception?.Message);
-        //                result = JsonSerializer.Serialize((ValidationProblemDetails)problemDetails, options);
-        //            }
-        //        }
-
-        //        await context.Response.WriteAsync(result);
-
-        //    });
-        //});
+            });
+        });
     }
 
 }
