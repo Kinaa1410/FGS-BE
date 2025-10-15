@@ -1,6 +1,7 @@
 ﻿using FGS_BE.Repo.DTOs.Achievements;
 using FGS_BE.Repo.DTOs.Pages;
 using FGS_BE.Repo.DTOs.Users;
+using FGS_BE.Repo.Resources;
 using FGS_BE.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,20 +29,20 @@ public class AchievementsController(IAchievementService service) : ControllerBas
     public async Task<ActionResult<MessageResponse>> Create(CreateAchievementCommand command)
     {
         await service.CreateAsync(command);
-        return new MessageResponse("Created Success");
+        return new MessageResponse(Resource.CreatedSuccess);
     }
 
     [HttpPut("{id}")]
     public async Task<ActionResult<MessageResponse>> Update(int id, UpdateAchievementCommand request)
     {
         await service.UpdateAsync(id, request);
-        return new MessageResponse("Updated Success");
+        return new MessageResponse(Resource.UpdatedSuccess);
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult<MessageResponse>> Delete(int id)
     {
         await service.DeleteAsync(id);
-        return new MessageResponse("Deleted Success");
+        return new MessageResponse(Resource.DeletedSuccess);
     }
 }

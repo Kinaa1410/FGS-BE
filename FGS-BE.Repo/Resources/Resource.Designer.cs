@@ -133,6 +133,15 @@ namespace FGS_BE.Repo.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid Email.
+        /// </summary>
+        public static string InvalidEmail {
+            get {
+                return ResourceManager.GetString("InvalidEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Refresh token is not valid..
         /// </summary>
         public static string InvalidRefreshToken {

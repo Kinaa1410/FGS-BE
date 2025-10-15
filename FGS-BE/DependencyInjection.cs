@@ -5,6 +5,7 @@ using FGS_BE.Repo.Exceptions;
 using FGS_BE.Repo.Extensions;
 using FGS_BE.Repo.Repositories.Implements;
 using FGS_BE.Repo.Repositories.Interfaces;
+using FGS_BE.Repo.Settings;
 using FGS_BE.Services.Interfaces;
 using FGS_BE.Services.Services;
 using FluentValidation;
@@ -38,12 +39,19 @@ public static class DependencyInjection
         services.AddRepositories();
         services.AddInitialiseDatabase();
         services.AddDefaultIdentity();
+        services.AddConfigureSettingServices(configuration);
 
+    }
+
+    private static void AddConfigureSettingServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.Section));
     }
 
     private static void AddServices(this IServiceCollection services)
     {
         services
+            .AddScoped<IJwtService, JwtService>()
             .AddScoped<IAchievementService, AchievementService>()
             .AddScoped<IUserService, UserService>();
     }

@@ -4,15 +4,18 @@ using FGS_BE.Repo.Entities;
 using FGS_BE.Repo.Enums;
 using FGS_BE.Repo.Exceptions;
 using FGS_BE.Repo.Repositories.Interfaces;
+using FGS_BE.Repo.Resources;
 using FGS_BE.Services.Interfaces;
 using Mapster;
+using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Identity;
 using Task = System.Threading.Tasks.Task;
 
 namespace FGS_BE.Services.Services;
 public class UserService(
     IUnitOfWork unitOfWork,
-    UserManager<User> userManager) : IUserService
+    UserManager<User> userManager,
+    IJwtService jwtService) : IUserService
 {
     private readonly IGenericRepository<User> _userRepository = unitOfWork.Repository<User>();
 
@@ -50,20 +53,20 @@ public class UserService(
         await unitOfWork.CommitAsync();
     }
 
-    public async Task<UserResponse> LoginAsync(LoginRequest request)
+    public async Task<AccessTokenResponse> LoginAsync(LoginRequest request)
     {
         var user = await userManager.FindByNameAsync(request.Username);
         if (user == null)
-            throw new UnauthorizedAccessException("Unauthorized");
+            throw new UnauthorizedAccessException(Resource.Unauthorized);
         if (!await userManager.CheckPasswordAsync(user, request.Password))
-            throw new UnauthorizedAccessException("Unauthorized");
-        return user.Adapt<UserResponse>();
+            throw new UnauthorizedAccessException(Resource.Unauthorized);
+        return await jwtService.GenerateTokenAsync(user);
     }
 
     public async Task RegisterAsync(RegisterRequest request)
     {
         var user = await userManager.FindByNameAsync(request.Username);
-        if (user is not null) throw new BadRequestException("Username đã tồn tại");
+        if (user is not null) throw new BadRequestException(Resource.UsernameExisted);
         user = new User
         {
             UserName = request.Username,
@@ -74,5 +77,13 @@ public class UserService(
         result = await userManager.AddToRoleAsync(user, RoleEnums.User.ToString());
         if (!result.Succeeded) throw new BadRequestException();
 
+    }
+
+    public async Task<AccessTokenResponse> RefreshTokenAsync(RefreshTokenRequest request)
+    {
+        var user = await jwtService.ValidateRefreshTokenAsync(request.RefreshToken);
+        if (user == null) throw new UnauthorizedAccessException(Resource.InvalidRefreshToken);
+        await userManager.UpdateSecurityStampAsync(user);
+        return await jwtService.GenerateTokenAsync(user);
     }
 }
