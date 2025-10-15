@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FGS_BE.API.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/term-keywords")]
     public class TermKeywordController : ControllerBase
     {
         private readonly ITermKeywordService _service;
