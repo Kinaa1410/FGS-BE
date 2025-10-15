@@ -2,6 +2,8 @@ using FGS_BE;
 using FGS_BE.Repo.Data;
 using FGS_BE.Repo.Repositories.Implements;
 using FGS_BE.Repo.Repositories.Interfaces;
+using FGS_BE.Service.Implements;
+using FGS_BE.Service.Interfaces;
 using FGS_BE.Services.Interfaces;
 using FGS_BE.Services.Services;
 using Microsoft.EntityFrameworkCore;
@@ -25,9 +27,11 @@ builder.Services
 
     .AddScoped<ISemesterRepository, SemesterRepository>()
     .AddScoped<IRewardItemRepository, RewardItemRepository>()
+    .AddScoped<ITermKeywordRepository, TermKeywordRepository>()
 
     .AddScoped<ISemesterService, SemesterService>()
     .AddScoped<IRewardItemService, RewardItemService>()
+    .AddScoped<ITermKeywordService, TermKeywordService>()
 
     .AddScoped<IUnitOfWork>(provider =>
     {
