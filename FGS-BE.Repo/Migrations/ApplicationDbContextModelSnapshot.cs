@@ -59,7 +59,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Achievements");
+                    b.ToTable("Achievements", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ChatMessage", b =>
@@ -104,7 +104,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ChatMessages");
+                    b.ToTable("ChatMessages", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ChatParticipant", b =>
@@ -141,7 +141,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserId1");
 
-                    b.ToTable("ChatParticipants");
+                    b.ToTable("ChatParticipants", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ChatRoom", b =>
@@ -176,7 +176,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ChatRooms");
+                    b.ToTable("ChatRooms", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.EmailQueue", b =>
@@ -213,7 +213,7 @@ namespace FGS_BE.Repo.Migrations
                     b.HasIndex("NotificationId")
                         .IsUnique();
 
-                    b.ToTable("EmailQueues");
+                    b.ToTable("EmailQueues", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Milestone", b =>
@@ -252,7 +252,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("Milestones");
+                    b.ToTable("Milestones", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Notification", b =>
@@ -306,7 +306,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserId1");
 
-                    b.ToTable("Notifications");
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.NotificationTemplate", b =>
@@ -331,7 +331,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("NotificationTemplates");
+                    b.ToTable("NotificationTemplates", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.PerformanceScore", b =>
@@ -393,7 +393,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserId1");
 
-                    b.ToTable("PerformanceScores");
+                    b.ToTable("PerformanceScores", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.PointTransaction", b =>
@@ -428,7 +428,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserWalletId");
 
-                    b.ToTable("PointTransactions");
+                    b.ToTable("PointTransactions", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Project", b =>
@@ -471,7 +471,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("SemesterId1");
 
-                    b.ToTable("Projects");
+                    b.ToTable("Projects", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ProjectKeyword", b =>
@@ -497,7 +497,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("TermKeywordId");
 
-                    b.ToTable("ProjectKeywords");
+                    b.ToTable("ProjectKeywords", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.ProjectMember", b =>
@@ -526,7 +526,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ProjectMembers");
+                    b.ToTable("ProjectMembers", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.RedeemRequest", b =>
@@ -570,7 +570,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserId1");
 
-                    b.ToTable("RedeemRequests");
+                    b.ToTable("RedeemRequests", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.RewardItem", b =>
@@ -610,7 +610,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("CreatedById");
 
-                    b.ToTable("RewardItems");
+                    b.ToTable("RewardItems", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Role", b =>
@@ -672,7 +672,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Semesters");
+                    b.ToTable("Semesters", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Submission", b =>
@@ -723,7 +723,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserId1");
 
-                    b.ToTable("Submissions");
+                    b.ToTable("Submissions", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.Task", b =>
@@ -784,7 +784,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("ParentTaskId");
 
-                    b.ToTable("Tasks");
+                    b.ToTable("Tasks", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.TermKeyword", b =>
@@ -816,7 +816,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("SemesterId1");
 
-                    b.ToTable("TermKeywords");
+                    b.ToTable("TermKeywords", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.User", b =>
@@ -925,7 +925,7 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserAchievements");
+                    b.ToTable("UserAchievements", (string)null);
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.UserRole", b =>
@@ -965,7 +965,7 @@ namespace FGS_BE.Repo.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("UserWallets");
+                    b.ToTable("UserWallets", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

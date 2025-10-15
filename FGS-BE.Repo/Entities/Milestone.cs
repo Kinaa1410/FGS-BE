@@ -1,4 +1,6 @@
-﻿namespace FGS_BE.Repo.Entities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace FGS_BE.Repo.Entities;
 
 public class Milestone
 {
@@ -12,9 +14,10 @@ public class Milestone
     public string? Status { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
 
+    [ForeignKey(nameof(ProjectId))]
     public int ProjectId { get; set; }
     public virtual Project Project { get; set; } = default!;
+
     public virtual ICollection<PerformanceScore> PerformanceScores { get; set; } = new HashSet<PerformanceScore>();
     public virtual ICollection<Task> Tasks { get; set; } = new HashSet<Task>();
-
 }
