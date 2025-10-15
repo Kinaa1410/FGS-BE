@@ -6,7 +6,7 @@ namespace FGS_BE.Controllers
 {
     [ApiController]
     [Route("api/semesters")]
-    public class SemesterController : Controller
+    public class SemesterController : ControllerBase
     {
         private readonly ISemesterService _service;
         public SemesterController(ISemesterService service)
