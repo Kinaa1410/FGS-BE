@@ -7,7 +7,6 @@ using FGS_BE.Service.Interfaces;
 using FGS_BE.Services.Interfaces;
 using FGS_BE.Services.Services;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplication();
@@ -43,16 +42,6 @@ builder.Services
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options =>
-{
-    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-
-    if (File.Exists(xmlPath))
-    {
-        options.IncludeXmlComments(xmlPath);
-    }
-});
 
 var app = builder.Build();
 await app.UseWebApplication();

@@ -107,7 +107,6 @@ public static class DependencyInjection
     {
         services.AddFluentValidationRulesToSwagger();
         services.AddValidatorsFromAssembly(typeof(Repo.AssemblyReference).Assembly);
-        ValidatorOptions.Global.PropertyNameResolver = CamelCasePropertyNameResolver.ResolvePropertyName;
         services.AddFluentValidationAutoValidation();
     }
 

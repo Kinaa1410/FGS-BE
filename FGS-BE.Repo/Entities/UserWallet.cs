@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace FGS_BE.Repo.Entities;
+﻿namespace FGS_BE.Repo.Entities;
 
 public class UserWallet
 {
@@ -9,7 +7,6 @@ public class UserWallet
 
     public DateTime LastUpdatedAt { get; set; }
 
-    [ForeignKey(nameof(UserId))]
     public int UserId { get; set; }
     public virtual User User { get; set; } = default!;
 

@@ -45,40 +45,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             }
         }
 
-        // Roles <-> Users (one-to-many, optional)
-        //modelBuilder.Entity<User>()
-        //    .HasOne(u => u.Role)
-        //    .WithMany(r => r.Users)
-        //    .HasForeignKey(u => u.RoleId)
-        //    .OnDelete(DeleteBehavior.Restrict)
-        //    .IsRequired(false);
-        //modelBuilder.Entity<User>().HasIndex(u => u.RoleId);
-
-        // UserWallets <-> Users (one-to-one, cascade delete)
-        modelBuilder.Entity<UserWallet>()
-            .HasOne(w => w.User)
-            .WithOne(u => u.UserWallet)
-            .HasForeignKey<UserWallet>(w => w.UserId)
-            .OnDelete(DeleteBehavior.Cascade)
-            .IsRequired();
-        modelBuilder.Entity<UserWallet>().HasIndex(w => w.UserId);
-
-        // UserAchievements <-> Users & Achievements (many-to-one)
-        modelBuilder.Entity<UserAchievement>()
-            .HasOne(ua => ua.User)
-            .WithMany(u => u.UserAchievements)
-            .HasForeignKey(ua => ua.UserId)
-            .OnDelete(DeleteBehavior.Restrict)
-            .IsRequired();
-        modelBuilder.Entity<UserAchievement>()
-            .HasOne(ua => ua.Achievement)
-            .WithMany(a => a.UserAchievements)
-            .HasForeignKey(ua => ua.AchievementId)
-            .OnDelete(DeleteBehavior.Restrict)
-            .IsRequired();
-        modelBuilder.Entity<UserAchievement>().HasIndex(ua => ua.UserId);
-        modelBuilder.Entity<UserAchievement>().HasIndex(ua => ua.AchievementId);
-
         // ProjectMembers <-> Projects & Users (many-to-many junction)
         modelBuilder.Entity<ProjectMember>()
             .HasOne(pm => pm.Project)
