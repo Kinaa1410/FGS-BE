@@ -37,7 +37,8 @@ builder.Services
         var context = provider.GetRequiredService<ApplicationDbContext>();
         var semesterRepo = provider.GetRequiredService<ISemesterRepository>();
         var rewardItemRepo = provider.GetRequiredService<IRewardItemRepository>();
-        return new UnitOfWork(context, semesterRepo, rewardItemRepo);
+        var termKeywordRepo = provider.GetRequiredService<ITermKeywordRepository>();
+        return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo);
     });
 
 builder.Services.AddControllers();
