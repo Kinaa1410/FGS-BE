@@ -27,10 +27,12 @@ builder.Services
     .AddScoped<ISemesterRepository, SemesterRepository>()
     .AddScoped<IRewardItemRepository, RewardItemRepository>()
     .AddScoped<ITermKeywordRepository, TermKeywordRepository>()
+    .AddScoped<IProjectRepository, ProjectRepository>()
 
     .AddScoped<ISemesterService, SemesterService>()
     .AddScoped<IRewardItemService, RewardItemService>()
     .AddScoped<ITermKeywordService, TermKeywordService>()
+    .AddScoped<IProjectService, ProjectService>()
 
     .AddScoped<IUnitOfWork>(provider =>
     {
@@ -38,7 +40,8 @@ builder.Services
         var semesterRepo = provider.GetRequiredService<ISemesterRepository>();
         var rewardItemRepo = provider.GetRequiredService<IRewardItemRepository>();
         var termKeywordRepo = provider.GetRequiredService<ITermKeywordRepository>();
-        return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo);
+        var projectRepo = provider.GetRequiredService<IProjectRepository>();
+        return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo, projectRepo);
     });
 
 builder.Services.AddControllers();
