@@ -13,11 +13,15 @@ public class UnitOfWork : IUnitOfWork
     public ISemesterRepository SemesterRepository { get; }
     public IRewardItemRepository RewardItemRepository { get; }
 
-    public UnitOfWork(ApplicationDbContext context, ISemesterRepository semesterRepository, IRewardItemRepository rewardItemRepository)
+    public ITermKeywordRepository TermKeywordRepository { get; }
+
+    public UnitOfWork(ApplicationDbContext context, ISemesterRepository semesterRepository, 
+        IRewardItemRepository rewardItemRepository, ITermKeywordRepository termKeywordRepository)
     {
         _context = context;
         SemesterRepository = semesterRepository;
         RewardItemRepository = rewardItemRepository;
+        TermKeywordRepository = termKeywordRepository;
     }
     //
 
