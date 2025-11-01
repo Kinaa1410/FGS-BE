@@ -6,6 +6,7 @@ public interface IUnitOfWork : IDisposable
     ITermKeywordRepository TermKeywordRepository { get; }
     IProjectRepository ProjectRepository { get; }
     IMilestoneRepository MilestoneRepository { get; }
+    ITaskRepository TaskRepository { get; }
 
     IGenericRepository<T> Repository<T>() where T : class;
     Task CommitAsync(CancellationToken cancellationToken = default);
