@@ -15,10 +15,12 @@ public class UnitOfWork : IUnitOfWork
     public ITermKeywordRepository TermKeywordRepository { get; }
     public IProjectRepository ProjectRepository { get; }
     public IMilestoneRepository MilestoneRepository { get; }
+    public ITaskRepository TaskRepository { get; }
 
     public UnitOfWork(ApplicationDbContext context, ISemesterRepository semesterRepository, 
         IRewardItemRepository rewardItemRepository, ITermKeywordRepository termKeywordRepository, 
-        IProjectRepository projectRepository, IMilestoneRepository milestoneRepository)
+        IProjectRepository projectRepository, IMilestoneRepository milestoneRepository,
+        ITaskRepository taskRepository)
     {
         _context = context;
         SemesterRepository = semesterRepository;
@@ -26,6 +28,7 @@ public class UnitOfWork : IUnitOfWork
         TermKeywordRepository = termKeywordRepository;
         ProjectRepository = projectRepository;
         MilestoneRepository = milestoneRepository;
+        TaskRepository = taskRepository;
     }
     //
 
