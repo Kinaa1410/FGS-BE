@@ -30,8 +30,8 @@ builder.Services
     .AddScoped<IProjectRepository, ProjectRepository>()
     .AddScoped<IMilestoneRepository, MilestoneRepository>()
     .AddScoped<ITaskRepository, TaskRepository>()
-
-
+    .AddScoped<IRedeemRequestRepository, RedeemRequestRepository>()
+    .AddScoped<IRedeemRequestService, RedeemRequestService>()
     .AddScoped<ISemesterService, SemesterService>()
     .AddScoped<IRewardItemService, RewardItemService>()
     .AddScoped<ITermKeywordService, TermKeywordService>()
@@ -48,7 +48,8 @@ builder.Services
         var projectRepo = provider.GetRequiredService<IProjectRepository>();
         var milestoneRepo = provider.GetRequiredService<IMilestoneRepository>();
         var taskRepo = provider.GetRequiredService<ITaskRepository>();
-        return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo, projectRepo, milestoneRepo, taskRepo);
+        var redeemRequestRepo = provider.GetRequiredService<IRedeemRequestRepository>();
+        return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo, projectRepo, milestoneRepo, taskRepo, redeemRequestRepo);
     });
 
 builder.Services.AddControllers();
