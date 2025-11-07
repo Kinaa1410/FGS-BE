@@ -1,19 +1,24 @@
-﻿using FGS_BE.Repo.DTOs.Pages;
+﻿using Azure.Core;
+using FGS_BE.Repo.DTOs.Pages;
 using FGS_BE.Repo.DTOs.Submissions;
 using FGS_BE.Repo.Entities;
 using FGS_BE.Repo.Enums;
 using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Service.Interfaces;
+using FGS_BE.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace FGS_BE.Service.Implements
 {
     public class SubmissionService : ISubmissionService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public SubmissionService(IUnitOfWork unitOfWork)
+        public SubmissionService(IUnitOfWork unitOfWork, ICloudinaryService cloudinaryService)
         {
             _unitOfWork = unitOfWork;
+            _cloudinaryService = cloudinaryService;
         }
 
         public async Task<PaginatedList<SubmissionDto>> GetPagedAsync(
@@ -40,7 +45,30 @@ namespace FGS_BE.Service.Implements
 
         public async Task<SubmissionDto> CreateAsync(CreateSubmissionDto dto)
         {
-            var entity = dto.ToEntity();
+            if (dto.File == null || dto.File.Length == 0)
+            {
+                throw new Exception("File is required.");
+            }
+
+            string fileExtension = Path.GetExtension(dto.File.FileName);
+            string newFileName = $"{Guid.NewGuid()}{fileExtension}";
+
+            var uploadResult = await _cloudinaryService.UploadImage(newFileName, dto.File);
+
+            if (uploadResult == null)
+            {
+                throw new Exception("Error uploading file. Please try again.");
+            }
+
+            var entity = new Submission
+            {
+                TaskId = dto.TaskId,
+                UserId = dto.UserId,
+                FileUrl = uploadResult.ImageUrl,
+                SubmittedAt = DateTime.UtcNow,
+                Status = SubmissionStatus.Pending
+            };
+
             await _unitOfWork.SubmissionRepository.CreateAsync(entity);
             await _unitOfWork.CommitAsync();
             return new SubmissionDto(entity);

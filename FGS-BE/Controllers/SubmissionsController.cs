@@ -60,11 +60,13 @@ namespace FGS_BE.API.Controllers
         /// <param name="dto"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> CreateAsync(CreateSubmissionDto dto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Create([FromForm] CreateSubmissionDto dto)
         {
-            var created = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            var result = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
+
 
         /// <summary>
         /// update submission by id

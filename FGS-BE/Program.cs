@@ -2,6 +2,7 @@ using FGS_BE;
 using FGS_BE.Repo.Data;
 using FGS_BE.Repo.Repositories.Implements;
 using FGS_BE.Repo.Repositories.Interfaces;
+using FGS_BE.Repo.Settings;
 using FGS_BE.Service.Implements;
 using FGS_BE.Service.Interfaces;
 using FGS_BE.Services.Interfaces;
@@ -21,6 +22,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
            .EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
            .EnableDetailedErrors(builder.Environment.IsDevelopment())
            .UseProjectables());
+
+// Cloudinary configuration
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 
 builder.Services
 
@@ -43,6 +47,7 @@ builder.Services
     .AddScoped<IMilestoneService, MilestoneService>()
     .AddScoped<ITaskService, TaskService>()
     .AddScoped<ISubmissionService, SubmissionService>()
+    .AddScoped<ICloudinaryService, CloudinaryService>()
 
     .AddScoped<IUnitOfWork>(provider =>
     {
