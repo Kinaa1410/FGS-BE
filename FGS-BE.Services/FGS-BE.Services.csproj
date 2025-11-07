@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<ItemGroup>
+	  <PackageReference Include="CloudinaryDotNet" Version="1.27.8" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\FGS-BE.Repo\FGS-BE.Repo.csproj" />
 	</ItemGroup>
 
