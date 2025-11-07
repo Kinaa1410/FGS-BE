@@ -16,6 +16,16 @@ namespace FGS_BE.API.Controllers
             _service = service;
         }
 
+        /// <summary>
+        /// get pages submissions with filter
+        /// </summary>
+        /// <param name="pageIndex"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="userId"></param>
+        /// <param name="taskId"></param>
+        /// <param name="sortColumn"></param>
+        /// <param name="sortDir"></param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetPagedAsync(
             [FromQuery] int pageIndex = 1,
@@ -29,6 +39,11 @@ namespace FGS_BE.API.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// get submission by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<SubmissionDto>> GetById(int id)
         {
@@ -39,7 +54,11 @@ namespace FGS_BE.API.Controllers
             return Ok(submission);
         }
 
-
+        /// <summary>
+        /// add new submission
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> CreateAsync(CreateSubmissionDto dto)
         {
@@ -47,6 +66,12 @@ namespace FGS_BE.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
+        /// <summary>
+        /// update submission by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="dto"></param>
+        /// <returns></returns>
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateAsync(int id, UpdateSubmissionDto dto)
         {
@@ -54,6 +79,11 @@ namespace FGS_BE.API.Controllers
             return updated == null ? NotFound() : Ok(updated);
         }
 
+        /// <summary>
+        /// delete submission by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
