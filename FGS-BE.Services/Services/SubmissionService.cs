@@ -1,6 +1,7 @@
 ﻿using FGS_BE.Repo.DTOs.Pages;
 using FGS_BE.Repo.DTOs.Submissions;
 using FGS_BE.Repo.Entities;
+using FGS_BE.Repo.Enums;
 using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Service.Interfaces;
 
@@ -69,5 +70,22 @@ namespace FGS_BE.Service.Implements
             await _unitOfWork.CommitAsync();
             return true;
         }
+
+        public async Task<SubmissionDto?> GradeSubmissionAsync(int submissionId, GradeSubmissionDto dto)
+        {
+            var submission = await _unitOfWork.SubmissionRepository.FindByIdAsync(submissionId);
+            if (submission == null)
+                return null;
+
+            submission.Grade = dto.Grade;
+            submission.Feedback = dto.Feedback;
+            submission.Status = SubmissionStatus.Graded;
+
+            await _unitOfWork.SubmissionRepository.UpdateAsync(submission);
+            await _unitOfWork.CommitAsync();
+
+            return new SubmissionDto(submission);
+        }
+
     }
 }

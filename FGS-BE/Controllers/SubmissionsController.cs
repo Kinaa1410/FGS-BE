@@ -90,5 +90,21 @@ namespace FGS_BE.API.Controllers
             var deleted = await _service.DeleteAsync(id);
             return deleted ? NoContent() : NotFound();
         }
+
+        /// <summary>
+        /// grade and feedback submission by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        [HttpPut("{id}/grade")]
+        public async Task<IActionResult> GradeSubmission(int id, [FromBody] GradeSubmissionDto dto)
+        {
+            var result = await _service.GradeSubmissionAsync(id, dto);
+            if (result == null)
+                return NotFound();
+
+            return Ok(result);
+        }
     }
 }
