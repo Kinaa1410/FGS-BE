@@ -24,6 +24,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services
 
+    //repositories
     .AddScoped<ISemesterRepository, SemesterRepository>()
     .AddScoped<IRewardItemRepository, RewardItemRepository>()
     .AddScoped<ITermKeywordRepository, TermKeywordRepository>()
@@ -31,6 +32,9 @@ builder.Services
     .AddScoped<IMilestoneRepository, MilestoneRepository>()
     .AddScoped<ITaskRepository, TaskRepository>()
     .AddScoped<IRedeemRequestRepository, RedeemRequestRepository>()
+    .AddScoped<ISubmissionRepository, SubmissionRepository>()
+
+    //services
     .AddScoped<IRedeemRequestService, RedeemRequestService>()
     .AddScoped<ISemesterService, SemesterService>()
     .AddScoped<IRewardItemService, RewardItemService>()
@@ -38,6 +42,7 @@ builder.Services
     .AddScoped<IProjectService, ProjectService>()
     .AddScoped<IMilestoneService, MilestoneService>()
     .AddScoped<ITaskService, TaskService>()
+    .AddScoped<ISubmissionService, SubmissionService>()
 
     .AddScoped<IUnitOfWork>(provider =>
     {
@@ -49,7 +54,9 @@ builder.Services
         var milestoneRepo = provider.GetRequiredService<IMilestoneRepository>();
         var taskRepo = provider.GetRequiredService<ITaskRepository>();
         var redeemRequestRepo = provider.GetRequiredService<IRedeemRequestRepository>();
-        return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo, projectRepo, milestoneRepo, taskRepo, redeemRequestRepo);
+        var submissionRepo = provider.GetRequiredService<ISubmissionRepository>();
+        return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo, 
+            projectRepo, milestoneRepo, taskRepo, redeemRequestRepo, submissionRepo);
     });
 
 builder.Services.AddControllers();

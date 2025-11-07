@@ -8,6 +8,7 @@ public interface IUnitOfWork : IDisposable
     IMilestoneRepository MilestoneRepository { get; }
     ITaskRepository TaskRepository { get; }
     IRedeemRequestRepository RedeemRequestRepository { get; }
+    ISubmissionRepository SubmissionRepository { get; }
 
     IGenericRepository<T> Repository<T>() where T : class;
     Task CommitAsync(CancellationToken cancellationToken = default);
