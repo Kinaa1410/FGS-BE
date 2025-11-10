@@ -5,6 +5,7 @@ using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Repo.Settings;
 using FGS_BE.Service.Implements;
 using FGS_BE.Service.Interfaces;
+using FGS_BE.Services.Implements;
 using FGS_BE.Services.Interfaces;
 using FGS_BE.Services.Services;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +38,7 @@ builder.Services
     .AddScoped<ITaskRepository, TaskRepository>()
     .AddScoped<IRedeemRequestRepository, RedeemRequestRepository>()
     .AddScoped<ISubmissionRepository, SubmissionRepository>()
+    .AddScoped<IProjectMemberRepository, ProjectMemberRepository>()
 
     //services
     .AddScoped<IRedeemRequestService, RedeemRequestService>()
@@ -48,6 +50,7 @@ builder.Services
     .AddScoped<ITaskService, TaskService>()
     .AddScoped<ISubmissionService, SubmissionService>()
     .AddScoped<ICloudinaryService, CloudinaryService>()
+    .AddScoped<IProjectMemberService, ProjectMemberService>()
 
     .AddScoped<IUnitOfWork>(provider =>
     {
@@ -60,8 +63,10 @@ builder.Services
         var taskRepo = provider.GetRequiredService<ITaskRepository>();
         var redeemRequestRepo = provider.GetRequiredService<IRedeemRequestRepository>();
         var submissionRepo = provider.GetRequiredService<ISubmissionRepository>();
+        var projectMemberRepo = provider.GetRequiredService<IProjectMemberRepository>();
         return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo, 
-            projectRepo, milestoneRepo, taskRepo, redeemRequestRepo, submissionRepo);
+            projectRepo, milestoneRepo, taskRepo, redeemRequestRepo, submissionRepo,
+            projectMemberRepo);
     });
 
 builder.Services.AddControllers();
