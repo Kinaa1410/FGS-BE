@@ -37,4 +37,5 @@ public class User : IdentityUser<int>
     public virtual ICollection<ChatRoom> ChatRooms { get; set; } = new HashSet<ChatRoom>();
 
     public virtual ICollection<Task> AssignedTasks { get; set; } = new HashSet<Task>();
+    public virtual ICollection<UserLevel> UserLevels { get; set; } = new List<UserLevel>();
 }

@@ -290,5 +290,20 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .IsRequired();
         modelBuilder.Entity<ProjectKeyword>().HasIndex(pk => pk.TermKeywordId);
         modelBuilder.Entity<ProjectKeyword>().HasIndex(pk => pk.ProjectId);
+
+        modelBuilder.Entity<UserLevel>()
+            .HasOne(ul => ul.User)
+            .WithMany(u => u.UserLevels)
+            .HasForeignKey(ul => ul.UserId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired();
+        modelBuilder.Entity<UserLevel>()
+            .HasOne(ul => ul.Level)
+            .WithMany(l => l.UserLevels)
+            .HasForeignKey(ul => ul.LevelId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired();
+        modelBuilder.Entity<UserLevel>().HasIndex(ul => ul.UserId);
+        modelBuilder.Entity<UserLevel>().HasIndex(ul => ul.LevelId);
     }
 }
