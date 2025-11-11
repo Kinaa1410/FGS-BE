@@ -53,7 +53,7 @@ namespace FGS_BE.Services.Services
         {
             if (dto.EndDate <= dto.StartDate)
             {
-                throw new Exception("Ngày kết thúc không thể nhỏ hơn hoặc bằng ngày bắt đầu.");
+                throw new Exception("The EndDate cannot be less than or equal to the StartDate.");
             }
 
             var overlappingSemester = await _unitOfWork.SemesterRepository.Entities
@@ -66,7 +66,7 @@ namespace FGS_BE.Services.Services
 
             if (overlappingSemester != null)
             {
-                throw new Exception("Thời gian của học kỳ bị trùng với một học kỳ đã tồn tại.");
+                throw new Exception("The duration of this semester coincides with the current semester.");
             }
 
             var entity = dto.ToEntity();
