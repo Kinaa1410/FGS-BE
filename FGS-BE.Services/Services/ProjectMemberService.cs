@@ -3,6 +3,7 @@ using FGS_BE.Repo.DTOs.ProjectMembers;
 using FGS_BE.Repo.Entities;
 using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace FGS_BE.Services.Implements
 {
@@ -42,27 +43,38 @@ namespace FGS_BE.Services.Implements
 
         public async Task<ProjectMemberDto> CreateAsync(CreateProjectMemberDto dto)
         {
-            var exists = await _unitOfWork.ProjectMemberRepository.ExistsByAsync(
-                x => x.UserId == dto.UserId);
+            // Lấy project để xác định semester
+            var project = await _unitOfWork.ProjectRepository
+                .FindByAsync(p => p.Id == dto.ProjectId, q => q.Include(x => x.Semester));
 
-            if (exists)
-            {
-                throw new InvalidOperationException("User has already joined a project and cannot be added again.");
-            }
+            if (project == null)
+                throw new Exception("Project not found!");
 
-            var entity = new ProjectMember
-            {
-                ProjectId = dto.ProjectId,
-                UserId = dto.UserId,
-                Role = dto.Role ?? "Member",
-                JoinAt = DateTime.UtcNow
-            };
+            // 1. Kiểm tra user đã có trong project này chưa
+            bool alreadyInThisProject = await _unitOfWork.ProjectMemberRepository.Entities
+                .AnyAsync(pm => pm.UserId == dto.UserId && pm.ProjectId == dto.ProjectId);
 
+            if (alreadyInThisProject)
+                throw new Exception("You have already joined this project.!");
+
+            // 2. Kiểm tra user đã tham gia project khác trong cùng semester chưa
+            bool alreadyJoinedOtherProject = await _unitOfWork.ProjectMemberRepository.Entities
+                .Include(pm => pm.Project)
+                .AnyAsync(pm =>
+                    pm.UserId == dto.UserId &&
+                    pm.Project.SemesterId == project.SemesterId &&
+                    pm.ProjectId != dto.ProjectId);
+
+            if (alreadyJoinedOtherProject)
+                throw new Exception("You have taken on another project in the same semester!");
+
+            var entity = dto.ToEntity();
             await _unitOfWork.ProjectMemberRepository.CreateAsync(entity);
             await _unitOfWork.CommitAsync();
 
             return new ProjectMemberDto(entity);
         }
+
 
 
         public async Task<ProjectMemberDto?> UpdateAsync(int id, UpdateProjectMemberDto dto)
