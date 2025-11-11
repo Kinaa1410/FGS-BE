@@ -1,8 +1,10 @@
 ﻿using FGS_BE.Repo.DTOs.Milestones;
 using FGS_BE.Repo.DTOs.Pages;
+using FGS_BE.Repo.DTOs.Semesters;
 using FGS_BE.Repo.Entities;
 using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Service.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace FGS_BE.Service.Implements
 {
@@ -43,9 +45,29 @@ namespace FGS_BE.Service.Implements
 
         public async Task<MilestoneDto> CreateAsync(CreateMilestoneDto dto)
         {
+            if (dto.DueDate <= dto.StartDate)
+            {
+                throw new Exception("The DueDate cannot be less than or equal to the StartDate.");
+            }
+
+            var overlappingMilestone = await _unitOfWork.MilestoneRepository.Entities
+                .AsNoTracking()
+                .Where(x =>
+                    (dto.StartDate >= x.StartDate && dto.StartDate <= x.DueDate) ||
+                    (dto.DueDate >= x.StartDate && dto.DueDate <= x.DueDate) ||
+                    (dto.StartDate <= x.StartDate && dto.DueDate >= x.DueDate))
+                .FirstOrDefaultAsync();
+
+            if (overlappingMilestone != null)
+            {
+                throw new Exception("The duration of this semester coincides with the current semester.");
+            }
+
             var entity = dto.ToEntity();
+
             await _unitOfWork.MilestoneRepository.CreateAsync(entity);
             await _unitOfWork.CommitAsync();
+
             return new MilestoneDto(entity);
         }
 
