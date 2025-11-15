@@ -39,6 +39,7 @@ builder.Services
     .AddScoped<IRedeemRequestRepository, RedeemRequestRepository>()
     .AddScoped<ISubmissionRepository, SubmissionRepository>()
     .AddScoped<IProjectMemberRepository, ProjectMemberRepository>()
+    .AddScoped<ILevelRepository, LevelRepository>()
 
     //services
     .AddScoped<IRedeemRequestService, RedeemRequestService>()
@@ -51,6 +52,7 @@ builder.Services
     .AddScoped<ISubmissionService, SubmissionService>()
     .AddScoped<ICloudinaryService, CloudinaryService>()
     .AddScoped<IProjectMemberService, ProjectMemberService>()
+    .AddScoped<ILevelService, LevelService>()
 
     .AddScoped<IUnitOfWork>(provider =>
     {

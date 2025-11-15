@@ -52,7 +52,6 @@ public static class DependencyInjection
     {
         services
             .AddScoped<IJwtService, JwtService>()
-            .AddScoped<IAchievementService, AchievementService>()
             .AddScoped<IUserService, UserService>();
     }
 

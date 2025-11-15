@@ -14,4 +14,5 @@ public class Semester
 
     public virtual ICollection<TermKeyword> TermKeywords { get; set; } = new HashSet<TermKeyword>();
     public virtual ICollection<Project> Projects { get; set; } = new HashSet<Project>();
+    public virtual ICollection<SemesterMember> SemesterMembers { get; set; } = new HashSet<SemesterMember>();
 }

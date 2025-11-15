@@ -9,7 +9,6 @@ namespace FGS_BE.Repo.Data;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<User, Role, int, IdentityUserClaim<int>, UserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>(options)
 {
     private const string Prefix = "AspNet";
-    public DbSet<Achievement> Achievements { get; set; }
     public DbSet<ChatMessage> ChatMessages { get; set; }
     public DbSet<ChatParticipant> ChatParticipants { get; set; }
     public DbSet<ChatRoom> ChatRooms { get; set; }
@@ -28,8 +27,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Submission> Submissions { get; set; }
     public DbSet<Entities.Task> Tasks { get; set; }
     public DbSet<TermKeyword> TermKeywords { get; set; }
-    public DbSet<UserAchievement> UserAchievements { get; set; }
     public DbSet<UserWallet> UserWallets { get; set; }
+    public DbSet<SemesterMember> SemesterMembers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -79,6 +78,26 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
         modelBuilder.Entity<Project>().HasIndex(p => p.SemesterId);
+
+        modelBuilder.Entity<SemesterMember>()
+            .HasKey(sm => new { sm.SemesterId, sm.UserId });
+
+        modelBuilder.Entity<SemesterMember>()
+            .HasOne(sm => sm.Semester)
+            .WithMany(s => s.SemesterMembers)
+            .HasForeignKey(sm => sm.SemesterId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired();
+
+        modelBuilder.Entity<SemesterMember>()
+            .HasOne(sm => sm.User)
+            .WithMany(u => u.SemesterMembers)
+            .HasForeignKey(sm => sm.UserId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired();
+
+        modelBuilder.Entity<SemesterMember>().HasIndex(sm => sm.SemesterId);
+        modelBuilder.Entity<SemesterMember>().HasIndex(sm => sm.UserId);
 
         // PerformanceScores <-> Projects, Users, Milestones, Tasks
         // FIXED: Added inverse collection references for all to avoid duplicates

@@ -9,9 +9,12 @@ using FGS_BE.Services.Interfaces;
 using Mapster;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using Task = System.Threading.Tasks.Task;
 
 namespace FGS_BE.Services.Services;
+
 public class UserService(
     IUnitOfWork unitOfWork,
     UserManager<User> userManager,
@@ -67,16 +70,80 @@ public class UserService(
     {
         var user = await userManager.FindByNameAsync(request.Username);
         if (user is not null) throw new BadRequestException(Resource.UsernameExisted);
+
         user = new User
         {
             UserName = request.Username,
             Email = request.Username,
+            FullName = request.FullName ?? string.Empty, 
+            StudentCode = request.StudentCode ?? string.Empty,
+            Status = "Active",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+
         };
+
         var result = await userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded) throw new BadRequestException();
+
         result = await userManager.AddToRoleAsync(user, RoleEnums.User.ToString());
         if (!result.Succeeded) throw new BadRequestException();
 
+        // New: Create UserWallet with balance=0
+        var walletRepo = unitOfWork.Repository<UserWallet>();
+        var wallet = new UserWallet
+        {
+            UserId = user.Id,
+            Balance = 0, // Starting balance (matches entity property)
+            LastUpdatedAt = DateTime.UtcNow // Matches entity property
+        };
+        await walletRepo.CreateAsync(wallet);
+
+        // New: Auto-assign lowest level (dynamic query for smallest threshold)
+        var levelRepo = unitOfWork.Repository<Level>();
+        var userLevelRepo = unitOfWork.Repository<UserLevel>();
+
+        // Fixed: Load active levels to memory first, then sort client-side to avoid EF translation error
+        var activeLevels = await levelRepo.Entities
+            .Where(l => l.IsActive)
+            .ToListAsync();
+
+        var lowestLevel = activeLevels
+            .OrderBy(l => GetThresholdFromCondition(l.ConditionJson)) // Now safe in memory
+            .FirstOrDefault();
+
+        if (lowestLevel != null)
+        {
+            var initialUserLevel = new UserLevel
+            {
+                UserId = user.Id,
+                LevelId = lowestLevel.Id,
+                UnlockedAt = DateTime.UtcNow
+            };
+            await userLevelRepo.CreateAsync(initialUserLevel);
+        }
+
+        // Commit all changes atomically
+        await unitOfWork.CommitAsync();
+    }
+
+    // Private helper method (add to UserService class)
+    private int GetThresholdFromCondition(string? conditionJson)
+    {
+        if (string.IsNullOrEmpty(conditionJson)) return int.MaxValue; // High value if no condition
+
+        try
+        {
+            using var condition = JsonDocument.Parse(conditionJson);
+            return condition.RootElement.TryGetProperty("threshold", out var thresholdProp) &&
+                   thresholdProp.ValueKind == JsonValueKind.Number
+                ? thresholdProp.GetInt32()
+                : int.MaxValue;
+        }
+        catch (JsonException)
+        {
+            return int.MaxValue;
+        }
     }
 
     public async Task<AccessTokenResponse> RefreshTokenAsync(RefreshTokenRequest request)

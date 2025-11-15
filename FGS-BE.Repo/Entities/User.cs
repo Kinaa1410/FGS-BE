@@ -23,7 +23,6 @@ public class User : IdentityUser<int>
 
     public virtual UserWallet UserWallet { get; set; } = default!;
 
-    public virtual ICollection<UserAchievement> UserAchievements { get; set; } = new HashSet<UserAchievement>();
     public virtual ICollection<RedeemRequest> RedeemRequests { get; set; } = new HashSet<RedeemRequest>();
     public virtual ICollection<PerformanceScore> PerformanceScores { get; set; } = new HashSet<PerformanceScore>();
     public virtual ICollection<Submission> Submissions { get; set; } = new HashSet<Submission>();
@@ -38,4 +37,5 @@ public class User : IdentityUser<int>
 
     public virtual ICollection<Task> AssignedTasks { get; set; } = new HashSet<Task>();
     public virtual ICollection<UserLevel> UserLevels { get; set; } = new List<UserLevel>();
+    public virtual ICollection<SemesterMember> SemesterMembers { get; set; } = new HashSet<SemesterMember>();
 }
