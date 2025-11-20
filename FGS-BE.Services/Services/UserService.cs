@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Task = System.Threading.Tasks.Task;
 
-namespace FGS_BE.Services.Services;
+namespace FGS_BE.Service.Services;
 
 public class UserService(
     IUnitOfWork unitOfWork,

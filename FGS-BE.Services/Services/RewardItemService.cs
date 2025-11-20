@@ -6,7 +6,7 @@ using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Services.Interfaces;
 using Mapster;
 
-namespace FGS_BE.Services.Services
+namespace FGS_BE.Service.Services
 {
     public class RewardItemService : IRewardItemService
     {

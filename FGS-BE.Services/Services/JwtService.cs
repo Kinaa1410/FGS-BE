@@ -13,7 +13,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace FGS_BE.Services.Services;
+namespace FGS_BE.Service.Services;
 public class JwtService : IJwtService
 {
 

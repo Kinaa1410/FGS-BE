@@ -6,7 +6,7 @@ using FGS_BE.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
-namespace FGS_BE.Services.Services
+namespace FGS_BE.Service.Services
 {
     public class CloudinaryService : ICloudinaryService
     {

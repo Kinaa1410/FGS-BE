@@ -5,7 +5,7 @@ using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace FGS_BE.Services.Implements
+namespace FGS_BE.Service.Implements
 {
     public class ProjectMemberService : IProjectMemberService
     {
