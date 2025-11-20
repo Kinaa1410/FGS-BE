@@ -7,7 +7,7 @@ using FGS_BE.Services.Interfaces;
 using Mapster;
 using Microsoft.EntityFrameworkCore;
 
-namespace FGS_BE.Services.Services
+namespace FGS_BE.Service.Services
 {
     public class SemesterService : ISemesterService
     {

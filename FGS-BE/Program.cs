@@ -5,9 +5,9 @@ using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Repo.Settings;
 using FGS_BE.Service.Implements;
 using FGS_BE.Service.Interfaces;
+using FGS_BE.Service.Services;
 using FGS_BE.Services.Implements;
 using FGS_BE.Services.Interfaces;
-using FGS_BE.Services.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -53,6 +53,7 @@ builder.Services
     .AddScoped<ICloudinaryService, CloudinaryService>()
     .AddScoped<IProjectMemberService, ProjectMemberService>()
     .AddScoped<ILevelService, LevelService>()
+    .AddScoped<INotificationService, NotificationService>()
 
     .AddScoped<IUnitOfWork>(provider =>
     {

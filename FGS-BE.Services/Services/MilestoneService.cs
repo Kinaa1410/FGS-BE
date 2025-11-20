@@ -6,7 +6,7 @@ using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Service.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace FGS_BE.Service.Implements
+namespace FGS_BE.Services.Implements
 {
     public class MilestoneService : IMilestoneService
     {

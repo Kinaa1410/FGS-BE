@@ -1,6 +1,6 @@
 ﻿using FGS_BE.Repo.DTOs.Submissions;
-using FGS_BE.Service.Implements;
 using FGS_BE.Service.Interfaces;
+using FGS_BE.Services.Implements;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FGS_BE.API.Controllers

@@ -3,8 +3,8 @@ using FGS_BE.Repo.DTOs.Pages;
 using FGS_BE.Repo.Entities;
 using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Service.Interfaces;
-using Mapster; // Or manual mapping
-using Microsoft.EntityFrameworkCore; // For Include/ToListAsync
+using Mapster;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
 namespace FGS_BE.Service.Implements;
@@ -92,7 +92,7 @@ public class LevelService : ILevelService
     {
         var levelRepo = _unitOfWork.Repository<Level>();
         var userLevelRepo = _unitOfWork.Repository<UserLevel>();
-        var userWalletRepo = _unitOfWork.Repository<UserWallet>(); // Assume UserWallet exists
+        var userWalletRepo = _unitOfWork.Repository<UserWallet>();
 
         // Fetch existing user levels
         var existingLevels = await userLevelRepo.Entities
