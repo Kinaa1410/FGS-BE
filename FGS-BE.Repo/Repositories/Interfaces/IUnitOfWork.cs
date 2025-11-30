@@ -10,6 +10,7 @@ public interface IUnitOfWork : IDisposable
     IRedeemRequestRepository RedeemRequestRepository { get; }
     ISubmissionRepository SubmissionRepository { get; }
     IProjectMemberRepository ProjectMemberRepository { get; }
+    IPerformanceScoreRepository PerformanceScoreRepository { get; }
 
 
     IGenericRepository<T> Repository<T>() where T : class;

@@ -7,6 +7,7 @@ using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Service.Interfaces;
 using FGS_BE.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace FGS_BE.Service.Implements
 {
@@ -99,9 +100,32 @@ namespace FGS_BE.Service.Implements
             return true;
         }
 
+        //public async Task<SubmissionDto?> GradeSubmissionAsync(int submissionId, GradeSubmissionDto dto)
+        //{
+        //    var submission = await _unitOfWork.SubmissionRepository.FindByIdAsync(submissionId);
+        //    if (submission == null)
+        //        return null;
+
+        //    submission.Grade = dto.Grade;
+        //    submission.Feedback = dto.Feedback;
+        //    submission.Status = SubmissionStatus.Graded;
+
+        //    await _unitOfWork.SubmissionRepository.UpdateAsync(submission);
+        //    await _unitOfWork.CommitAsync();
+
+        //    return new SubmissionDto(submission);
+        //}
+
         public async Task<SubmissionDto?> GradeSubmissionAsync(int submissionId, GradeSubmissionDto dto)
         {
-            var submission = await _unitOfWork.SubmissionRepository.FindByIdAsync(submissionId);
+            var submission = await _unitOfWork.SubmissionRepository.FindByAsync(
+                x => x.Id == submissionId,
+                q => q
+                    .Include(s => s.Task)
+                        .ThenInclude(t => t.Milestone)
+                            .ThenInclude(m => m.Project)
+            );
+
             if (submission == null)
                 return null;
 
@@ -110,6 +134,23 @@ namespace FGS_BE.Service.Implements
             submission.Status = SubmissionStatus.Graded;
 
             await _unitOfWork.SubmissionRepository.UpdateAsync(submission);
+
+            var milestone = submission.Task.Milestone;
+            var project = milestone.Project;
+
+            var scoreEntity = new PerformanceScore
+            {
+                UserId = submission.UserId,
+                TaskId = submission.TaskId,
+                MilestoneId = milestone.Id,
+                ProjectId = project.Id,
+                Score = dto.Grade,
+                Comment = dto.Feedback,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _unitOfWork.PerformanceScoreRepository.CreateAsync(scoreEntity);
+
             await _unitOfWork.CommitAsync();
 
             return new SubmissionDto(submission);
