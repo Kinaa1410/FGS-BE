@@ -19,6 +19,7 @@ namespace FGS_BE.Repo.Repositories.Implements
         public IRedeemRequestRepository RedeemRequestRepository { get; }
         public ISubmissionRepository SubmissionRepository { get; }
         public IProjectMemberRepository ProjectMemberRepository { get; }
+        public IPerformanceScoreRepository PerformanceScoreRepository { get; }
 
 
         public UnitOfWork(
@@ -31,7 +32,8 @@ namespace FGS_BE.Repo.Repositories.Implements
             ITaskRepository taskRepository,
             IRedeemRequestRepository redeemRequestRepository,
             ISubmissionRepository submissionRepository,
-            IProjectMemberRepository projectMemberRepository) 
+            IProjectMemberRepository projectMemberRepository,
+            IPerformanceScoreRepository performanceScoreRepository) 
         {
             _context = context;
             SemesterRepository = semesterRepository;
@@ -43,6 +45,7 @@ namespace FGS_BE.Repo.Repositories.Implements
             RedeemRequestRepository = redeemRequestRepository; 
             SubmissionRepository = submissionRepository;
             ProjectMemberRepository = projectMemberRepository;
+            PerformanceScoreRepository = performanceScoreRepository;
         }
 
         public IGenericRepository<T> Repository<T>() where T : class

@@ -40,6 +40,7 @@ builder.Services
     .AddScoped<ISubmissionRepository, SubmissionRepository>()
     .AddScoped<IProjectMemberRepository, ProjectMemberRepository>()
     .AddScoped<ILevelRepository, LevelRepository>()
+    .AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>()
 
     //services
     .AddScoped<IRedeemRequestService, RedeemRequestService>()
@@ -54,6 +55,7 @@ builder.Services
     .AddScoped<IProjectMemberService, ProjectMemberService>()
     .AddScoped<ILevelService, LevelService>()
     .AddScoped<INotificationService, NotificationService>()
+    .AddScoped<IPerformanceScoreService, PerformanceScoreService>()
 
     .AddScoped<IUnitOfWork>(provider =>
     {
@@ -67,9 +69,10 @@ builder.Services
         var redeemRequestRepo = provider.GetRequiredService<IRedeemRequestRepository>();
         var submissionRepo = provider.GetRequiredService<ISubmissionRepository>();
         var projectMemberRepo = provider.GetRequiredService<IProjectMemberRepository>();
+        var performanceScoreRepo = provider.GetRequiredService<IPerformanceScoreRepository>();
         return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo, 
             projectRepo, milestoneRepo, taskRepo, redeemRequestRepo, submissionRepo,
-            projectMemberRepo);
+            projectMemberRepo, performanceScoreRepo);
     });
 
 builder.Services.AddControllers();
