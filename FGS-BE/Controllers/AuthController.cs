@@ -11,8 +11,8 @@ public class AuthController(IUserService service) : ControllerBase
 {
     /// <remarks>
     /// ```
-    /// Admin account: admin@gmail.com - admin@gmail.com
-    /// Staff account: user@gmail.com - user@gmail.com
+    /// Admin account: admin@gmail.com - @1
+    /// Staff account: staff@gmail.com - @1
     /// ```
     /// </remarks>
     [HttpPost("login")]
