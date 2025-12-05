@@ -153,4 +153,22 @@ public class UserService(
         await userManager.UpdateSecurityStampAsync(user);
         return await jwtService.GenerateTokenAsync(user);
     }
+
+    public async Task ChangePasswordAsync(int userId, ChangePasswordRequest request)
+    {
+        var user = await userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+            throw new NotFoundException(nameof(User), userId);
+
+        var result = await userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new BadRequestException(errors);
+        }
+
+        await userManager.UpdateSecurityStampAsync(user);
+    }
+
 }
