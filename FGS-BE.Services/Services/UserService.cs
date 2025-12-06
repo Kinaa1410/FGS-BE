@@ -56,15 +56,18 @@ public class UserService(
         await unitOfWork.CommitAsync();
     }
 
-    public async Task<AccessTokenResponse> LoginAsync(LoginRequest request)
+    public async Task<AccessTokenResponse?> LoginAsync(LoginRequest request)
     {
         var user = await userManager.FindByNameAsync(request.Username);
         if (user == null)
-            throw new UnauthorizedAccessException(Resource.Unauthorized);
+            return null;
+
         if (!await userManager.CheckPasswordAsync(user, request.Password))
-            throw new UnauthorizedAccessException(Resource.Unauthorized);
+            return null;
+
         return await jwtService.GenerateTokenAsync(user);
     }
+
 
     public async Task RegisterAsync(RegisterRequest request)
     {

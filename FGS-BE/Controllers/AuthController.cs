@@ -18,10 +18,16 @@ public class AuthController(IUserService service) : ControllerBase
     /// ```
     /// </remarks>
     [HttpPost("login")]
-    public async Task<ActionResult<AccessTokenResponse>> Login(LoginRequest request)
+    public async Task<IActionResult> Login(LoginRequest request)
     {
-        return await service.LoginAsync(request);
+        var token = await service.LoginAsync(request);
+
+        if (token == null)
+            return Unauthorized(new { message = "Invalid username or password" });
+
+        return Ok(token);
     }
+
 
     [HttpPost("refresh")]
     public async Task<ActionResult<AccessTokenResponse>> RefreshToken(RefreshTokenRequest request)
