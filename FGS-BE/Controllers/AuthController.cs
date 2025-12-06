@@ -1,7 +1,9 @@
 ﻿using FGS_BE.Repo.DTOs.Users;
 using FGS_BE.Repo.Resources;
+using FGS_BE.Service.Services;
 using FGS_BE.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.BearerToken;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FGS_BE.Controllers;
@@ -16,10 +18,16 @@ public class AuthController(IUserService service) : ControllerBase
     /// ```
     /// </remarks>
     [HttpPost("login")]
-    public async Task<ActionResult<AccessTokenResponse>> Login(LoginRequest request)
+    public async Task<IActionResult> Login(LoginRequest request)
     {
-        return await service.LoginAsync(request);
+        var token = await service.LoginAsync(request);
+
+        if (token == null)
+            return Unauthorized(new { message = "Invalid username or password" });
+
+        return Ok(token);
     }
+
 
     [HttpPost("refresh")]
     public async Task<ActionResult<AccessTokenResponse>> RefreshToken(RefreshTokenRequest request)
@@ -33,4 +41,14 @@ public class AuthController(IUserService service) : ControllerBase
         await service.RegisterAsync(request);
         return new MessageResponse(Resource.CreatedSuccess);
     }
+
+    [Authorize]
+    [HttpPut("change-password")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordRequest request)
+    {
+        var userId = int.Parse(User.FindFirst("id")!.Value);
+        await service.ChangePasswordAsync(userId, request);
+        return Ok(new { message = "Password updated successfully" });
+    }
+
 }

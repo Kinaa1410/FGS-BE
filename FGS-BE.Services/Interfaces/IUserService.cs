@@ -12,4 +12,5 @@ public interface IUserService
     Task<UserResponse> FindByAsync(int id);
     Task UpdateAsync(int id, UpdateUserCommand request);
     Task DeleteAsync(int id);
+    Task ChangePasswordAsync(int userId, ChangePasswordRequest request);
 }
