@@ -1,35 +1,31 @@
 ﻿using FGS_BE.Repo.Data;
 using FGS_BE.Repo.DTOs.Pages;
 using FGS_BE.Repo.Entities;
-using FGS_BE.Repo.Enums; // Add for ProjectStatus
 using FGS_BE.Repo.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
 
 namespace FGS_BE.Repo.Repositories.Implements
 {
-    public class ProjectRepository : GenericRepository<Project>, IProjectRepository
+    public class ProjectInvitationRepository : GenericRepository<ProjectInvitation>, IProjectInvitationRepository
     {
-        public ProjectRepository(ApplicationDbContext context) : base(context) { }
+        public ProjectInvitationRepository(ApplicationDbContext context) : base(context) { }
 
-        public async Task<PaginatedList<Project>> GetPagedAsync(
+        public async Task<PaginatedList<ProjectInvitation>> GetPagedAsync(
+            int projectId,
             int pageIndex,
             int pageSize,
-            string? keyword = null,
             string? status = null,
             string? sortColumn = "Id",
             string? sortDir = "Asc",
             CancellationToken cancellationToken = default)
         {
-            var query = Entities.AsNoTracking();
-            if (!string.IsNullOrWhiteSpace(keyword))
-            {
-                query = query.Where(x => x.Title!.Contains(keyword) || x.Description!.Contains(keyword));
-            }
+            var query = Entities
+                .Where(pi => pi.ProjectId == projectId)
+                .AsNoTracking();
             if (!string.IsNullOrWhiteSpace(status))
             {
-                // Convert enum to string for comparison
-                query = query.Where(x => x.Status.ToString() == status);
+                query = query.Where(pi => pi.Status == status);
             }
             var order = $"{sortColumn} {sortDir}";
             query = query.OrderBy(order);

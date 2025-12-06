@@ -4,6 +4,7 @@ using FGS_BE.Repo.Entities;
 using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace FGS_BE.Service.Implements
 {
@@ -43,38 +44,61 @@ namespace FGS_BE.Service.Implements
 
         public async Task<ProjectMemberDto> CreateAsync(CreateProjectMemberDto dto)
         {
-            // Lấy project để xác định semester
-            var project = await _unitOfWork.ProjectRepository
-                .FindByAsync(p => p.Id == dto.ProjectId, q => q.Include(x => x.Semester));
+            var project = await _unitOfWork.ProjectRepository.FindByAsync(p => p.Id == dto.ProjectId, q => q.Include(x => x.Semester));
+            if (project == null) throw new Exception("Project not found!");
 
-            if (project == null)
-                throw new Exception("Project not found!");
+            // UPDATED: Check total occupied (current + reserved)
+            if (project.CurrentMembers + project.ReservedMembers >= project.MaxMembers)
+                throw new Exception($"Project is full or locked (Max: {project.MaxMembers}). Cannot join.");
 
-            // 1. Kiểm tra user đã có trong project này chưa
+            // Existing checks
             bool alreadyInThisProject = await _unitOfWork.ProjectMemberRepository.Entities
                 .AnyAsync(pm => pm.UserId == dto.UserId && pm.ProjectId == dto.ProjectId);
+            if (alreadyInThisProject) throw new Exception("You have already joined this project!");
 
-            if (alreadyInThisProject)
-                throw new Exception("You have already joined this project.!");
-
-            // 2. Kiểm tra user đã tham gia project khác trong cùng semester chưa
             bool alreadyJoinedOtherProject = await _unitOfWork.ProjectMemberRepository.Entities
                 .Include(pm => pm.Project)
-                .AnyAsync(pm =>
-                    pm.UserId == dto.UserId &&
-                    pm.Project.SemesterId == project.SemesterId &&
-                    pm.ProjectId != dto.ProjectId);
-
-            if (alreadyJoinedOtherProject)
-                throw new Exception("You have taken on another project in the same semester!");
+                .AnyAsync(pm => pm.UserId == dto.UserId && pm.Project.SemesterId == project.SemesterId && pm.ProjectId != dto.ProjectId);
+            if (alreadyJoinedOtherProject) throw new Exception("You have taken on another project in the same semester!");
 
             var entity = dto.ToEntity();
-            await _unitOfWork.ProjectMemberRepository.CreateAsync(entity);
-            await _unitOfWork.CommitAsync();
+            entity.JoinAt = DateTime.UtcNow;
+
+            using var transaction = await _unitOfWork.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+            try
+            {
+                await _unitOfWork.ProjectMemberRepository.CreateAsync(entity);
+                project.CurrentMembers += 1;
+                await _unitOfWork.ProjectRepository.UpdateAsync(project);
+                await _unitOfWork.CommitAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+            await transaction.DisposeAsync();
 
             return new ProjectMemberDto(entity);
         }
 
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var entity = await _unitOfWork.ProjectMemberRepository.FindByIdAsync(id);
+            if (entity == null) return false;
+
+            var project = await _unitOfWork.ProjectRepository.FindByIdAsync(entity.ProjectId);
+            if (project != null)
+            {
+                project.CurrentMembers = Math.Max(0, project.CurrentMembers - 1);
+                await _unitOfWork.ProjectRepository.UpdateAsync(project);
+            }
+
+            await _unitOfWork.ProjectMemberRepository.DeleteAsync(entity);
+            await _unitOfWork.CommitAsync();
+            return true;
+        }
 
 
         public async Task<ProjectMemberDto?> UpdateAsync(int id, UpdateProjectMemberDto dto)
@@ -89,14 +113,6 @@ namespace FGS_BE.Service.Implements
             return new ProjectMemberDto(entity);
         }
 
-        public async Task<bool> DeleteAsync(int id)
-        {
-            var entity = await _unitOfWork.ProjectMemberRepository.FindByIdAsync(id);
-            if (entity == null) return false;
-
-            await _unitOfWork.ProjectMemberRepository.DeleteAsync(entity);
-            await _unitOfWork.CommitAsync();
-            return true;
-        }
+        
     }
 }

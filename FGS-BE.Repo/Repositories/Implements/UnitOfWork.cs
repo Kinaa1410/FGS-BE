@@ -1,6 +1,9 @@
 ﻿using FGS_BE.Repo.Data;
 using FGS_BE.Repo.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System.Collections;
+using System.Data; // For IsolationLevel
 
 namespace FGS_BE.Repo.Repositories.Implements
 {
@@ -20,7 +23,7 @@ namespace FGS_BE.Repo.Repositories.Implements
         public ISubmissionRepository SubmissionRepository { get; }
         public IProjectMemberRepository ProjectMemberRepository { get; }
         public IPerformanceScoreRepository PerformanceScoreRepository { get; }
-
+        public IProjectInvitationRepository ProjectInvitationRepository { get; }
 
         public UnitOfWork(
             ApplicationDbContext context,
@@ -33,7 +36,8 @@ namespace FGS_BE.Repo.Repositories.Implements
             IRedeemRequestRepository redeemRequestRepository,
             ISubmissionRepository submissionRepository,
             IProjectMemberRepository projectMemberRepository,
-            IPerformanceScoreRepository performanceScoreRepository) 
+            IPerformanceScoreRepository performanceScoreRepository,
+            IProjectInvitationRepository projectInvitationRepository)
         {
             _context = context;
             SemesterRepository = semesterRepository;
@@ -42,10 +46,11 @@ namespace FGS_BE.Repo.Repositories.Implements
             ProjectRepository = projectRepository;
             MilestoneRepository = milestoneRepository;
             TaskRepository = taskRepository;
-            RedeemRequestRepository = redeemRequestRepository; 
+            RedeemRequestRepository = redeemRequestRepository;
             SubmissionRepository = submissionRepository;
             ProjectMemberRepository = projectMemberRepository;
             PerformanceScoreRepository = performanceScoreRepository;
+            ProjectInvitationRepository = projectInvitationRepository;
         }
 
         public IGenericRepository<T> Repository<T>() where T : class
@@ -59,7 +64,7 @@ namespace FGS_BE.Repo.Repositories.Implements
                 var repositoryInstance = Activator.CreateInstance(repositoryType.MakeGenericType(typeof(T)), _context);
                 _repositories.Add(type, repositoryInstance);
             }
-            return (IGenericRepository<T>)_repositories[type];
+            return (IGenericRepository<T>)_repositories[type]!;
         }
 
         public async Task CommitAsync(CancellationToken cancellationToken = default)
@@ -67,10 +72,15 @@ namespace FGS_BE.Repo.Repositories.Implements
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public Task RollbackAsync()
+        public async Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, CancellationToken cancellationToken = default)
+        {
+            return await _context.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
+        }
+
+        public async Task RollbackAsync()
         {
             _context.ChangeTracker.Entries().ToList().ForEach(x => x.Reload());
-            return Task.CompletedTask;
+            await Task.CompletedTask;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -81,8 +91,8 @@ namespace FGS_BE.Repo.Repositories.Implements
                 {
                     _context.Dispose();
                 }
+                disposed = true;
             }
-            disposed = true;
         }
 
         public void Dispose()

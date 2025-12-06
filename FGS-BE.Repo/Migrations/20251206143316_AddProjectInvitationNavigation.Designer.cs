@@ -4,6 +4,7 @@ using FGS_BE.Repo.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FGS_BE.Repo.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251206143316_AddProjectInvitationNavigation")]
+    partial class AddProjectInvitationNavigation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -416,11 +419,6 @@ namespace FGS_BE.Repo.Migrations
                     b.Property<int>("ProposerId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ReservedMembers")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
-
                     b.Property<int>("SemesterId")
                         .HasColumnType("int");
 
@@ -444,8 +442,6 @@ namespace FGS_BE.Repo.Migrations
 
                     b.HasIndex("ProposerId");
 
-                    b.HasIndex("ReservedMembers");
-
                     b.HasIndex("SemesterId");
 
                     b.ToTable("Projects");
@@ -462,7 +458,7 @@ namespace FGS_BE.Repo.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("ExpiryAt")
+                    b.Property<DateTime?>("ExpiryAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("InviteCode")
@@ -481,9 +477,8 @@ namespace FGS_BE.Repo.Migrations
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

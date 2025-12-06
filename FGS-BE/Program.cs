@@ -57,6 +57,8 @@ builder.Services
     .AddScoped<IProjectMemberRepository, ProjectMemberRepository>()
     .AddScoped<ILevelRepository, LevelRepository>()
     .AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>()
+    .AddScoped<IProjectInvitationRepository, ProjectInvitationRepository>()
+
 
     //services
     .AddScoped<IRedeemRequestService, RedeemRequestService>()
@@ -72,6 +74,8 @@ builder.Services
     .AddScoped<ILevelService, LevelService>()
     .AddScoped<INotificationService, NotificationService>()
     .AddScoped<IPerformanceScoreService, PerformanceScoreService>()
+    .AddScoped<IProjectInvitationService, ProjectInvitationService>()
+
 
     .AddScoped<IUnitOfWork>(provider =>
     {
@@ -86,11 +90,12 @@ builder.Services
         var submissionRepo = provider.GetRequiredService<ISubmissionRepository>();
         var projectMemberRepo = provider.GetRequiredService<IProjectMemberRepository>();
         var performanceScoreRepo = provider.GetRequiredService<IPerformanceScoreRepository>();
+        var projectInvitationRepo = provider.GetRequiredService<IProjectInvitationRepository>();
         return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo, 
             projectRepo, milestoneRepo, taskRepo, redeemRequestRepo, submissionRepo,
-            projectMemberRepo, performanceScoreRepo);
+            projectMemberRepo, performanceScoreRepo,projectInvitationRepo);
     });
-
+builder.Services.AddHostedService<InvitationExpiryService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 

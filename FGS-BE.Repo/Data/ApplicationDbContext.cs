@@ -1,4 +1,5 @@
 ﻿using FGS_BE.Repo.Entities;
+using FGS_BE.Repo.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ namespace FGS_BE.Repo.Data;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<User, Role, int, IdentityUserClaim<int>, UserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>(options)
 {
     private const string Prefix = "AspNet";
+
     public DbSet<ChatMessage> ChatMessages { get; set; }
     public DbSet<ChatParticipant> ChatParticipants { get; set; }
     public DbSet<ChatRoom> ChatRooms { get; set; }
@@ -79,23 +81,39 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .IsRequired();
         modelBuilder.Entity<Project>().HasIndex(p => p.SemesterId);
 
+        // Project member limits and status enum configs
+        modelBuilder.Entity<Project>(entity =>
+        {
+            entity.Property(e => e.MinMembers).HasDefaultValue(2);
+            entity.Property(e => e.MaxMembers).HasDefaultValue(10);
+            entity.Property(e => e.CurrentMembers).HasDefaultValue(0);
+            entity.HasIndex(e => e.CurrentMembers); // For fast limit checks
+
+            // ReservedMembers config
+            entity.Property(e => e.ReservedMembers).HasDefaultValue(0);
+            entity.HasIndex(e => e.ReservedMembers); // For fast queries
+
+            // Enum to string conversion for Status
+            entity.Property(p => p.Status)
+                .HasConversion<string>() // Stores as string in DB (e.g., "Open")
+                .HasDefaultValue(ProjectStatus.Open)
+                .HasMaxLength(20);
+        });
+
         modelBuilder.Entity<SemesterMember>()
             .HasKey(sm => new { sm.SemesterId, sm.UserId });
-
         modelBuilder.Entity<SemesterMember>()
             .HasOne(sm => sm.Semester)
             .WithMany(s => s.SemesterMembers)
             .HasForeignKey(sm => sm.SemesterId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
-
         modelBuilder.Entity<SemesterMember>()
             .HasOne(sm => sm.User)
             .WithMany(u => u.SemesterMembers)
             .HasForeignKey(sm => sm.UserId)
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
-
         modelBuilder.Entity<SemesterMember>().HasIndex(sm => sm.SemesterId);
         modelBuilder.Entity<SemesterMember>().HasIndex(sm => sm.UserId);
 
