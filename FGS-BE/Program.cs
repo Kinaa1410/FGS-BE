@@ -30,16 +30,16 @@ builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection(
 
 builder.Services.AddCors(options =>
 {
+    string[] allowedOrigins = builder.Environment.IsDevelopment()
+        ? new[] { "http://localhost:5173", "https://localhost:5173", "http://127.0.0.1:5173" }
+        : new[] { "https://fe-fusion-lab-credits.vercel.app" };  
+
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins(
-            "http://localhost:5173",   
-            "https://localhost:5173",  
-            "http://127.0.0.1:5173"   
-        )
-        .AllowAnyMethod()
-        .AllowAnyHeader()
-        .AllowCredentials();
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
