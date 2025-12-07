@@ -51,10 +51,9 @@ namespace FGS_BE.Service.Implements
 
         public async Task<ProjectDto> CreateAsync(CreateProjectDto dto)
         {
-            var entity = dto.ToEntity(); // Now uses enum default
+            var entity = dto.ToEntity(); // Now includes MentorId
             await _unitOfWork.ProjectRepository.CreateAsync(entity);
             await _unitOfWork.CommitAsync();
-
             // Auto-join proposer
             var memberDto = new CreateProjectMemberDto
             {
@@ -63,8 +62,7 @@ namespace FGS_BE.Service.Implements
                 Role = "proposer"
             };
             await _projectMemberService.CreateAsync(memberDto); // Now exists
-
-            // Refresh entity to get updated CurrentMembers
+                                                                // Refresh entity to get updated CurrentMembers
             entity = await _unitOfWork.ProjectRepository.FindByIdAsync(entity.Id);
             return new ProjectDto(entity);
         }
@@ -73,25 +71,26 @@ namespace FGS_BE.Service.Implements
         {
             var entity = await _unitOfWork.ProjectRepository.FindByIdAsync(id);
             if (entity == null) return null;
-
             if (dto.Title != null) entity.Title = dto.Title;
             if (dto.Description != null) entity.Description = dto.Description;
             if (dto.TotalPoints.HasValue) entity.TotalPoints = dto.TotalPoints.Value;
+            // NEW: Handle mentor update
+            if (dto.MentorId.HasValue)
+            {
+                // Optional: Add validation, e.g., ensure MentorId is a valid user
+                entity.MentorId = dto.MentorId.Value;
+            }
             if (dto.MinMembers.HasValue) entity.MinMembers = dto.MinMembers.Value;
             if (dto.MaxMembers.HasValue) entity.MaxMembers = dto.MaxMembers.Value;
-
             if (dto.Status != null)
             {
                 if (!Enum.TryParse<ProjectStatus>(dto.Status, true, out var parsedStatus))
                     throw new ArgumentException($"Invalid Status: {dto.Status}. Valid: Open, InProcess, Close, Complete.");
-
                 // Check min members for InProcess
                 if (parsedStatus == ProjectStatus.InProcess && entity.CurrentMembers < entity.MinMembers)
                     throw new InvalidOperationException($"Need at least {entity.MinMembers} members to set InProcess. Current: {entity.CurrentMembers}");
-
                 entity.Status = parsedStatus; // Enum assignment
             }
-
             await _unitOfWork.ProjectRepository.UpdateAsync(entity);
             await _unitOfWork.CommitAsync();
             return new ProjectDto(entity);

@@ -1,6 +1,5 @@
 ﻿using FGS_BE.Repo.Entities;
 using FGS_BE.Repo.Enums;
-
 namespace FGS_BE.Repo.DTOs.Projects
 {
     public class CreateProjectDto
@@ -10,16 +9,15 @@ namespace FGS_BE.Repo.DTOs.Projects
         public decimal TotalPoints { get; set; } = 0;
         public int SemesterId { get; set; }
         public int ProposerId { get; set; }
-
+        // NEW: Optional mentor
+        public int? MentorId { get; set; }
         // Limits with defaults
         public int MinMembers { get; set; } = 2;
         public int MaxMembers { get; set; } = 10;
-
         public Project ToEntity()
         {
             if (MinMembers > MaxMembers)
                 throw new ArgumentException("MinMembers cannot exceed MaxMembers.");
-
             return new Project
             {
                 Title = Title ?? string.Empty,
@@ -28,6 +26,8 @@ namespace FGS_BE.Repo.DTOs.Projects
                 TotalPoints = TotalPoints,
                 SemesterId = SemesterId,
                 ProposerId = ProposerId,
+                // NEW: Set mentor if provided
+                MentorId = MentorId,
                 MinMembers = MinMembers,
                 MaxMembers = MaxMembers,
                 CurrentMembers = 0, // Auto-incremented after join

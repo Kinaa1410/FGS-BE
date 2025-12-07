@@ -7,10 +7,12 @@ using System.Reflection;
 
 namespace FGS_BE.Repo.Data;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<User, Role, int, IdentityUserClaim<int>, UserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>(options)
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    : IdentityDbContext<User, Role, int, IdentityUserClaim<int>, UserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>(options)
 {
     private const string Prefix = "AspNet";
 
+    // DbSets
     public DbSet<ChatMessage> ChatMessages { get; set; }
     public DbSet<ChatParticipant> ChatParticipants { get; set; }
     public DbSet<ChatRoom> ChatRooms { get; set; }
@@ -23,6 +25,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Project> Projects { get; set; }
     public DbSet<ProjectKeyword> ProjectKeywords { get; set; }
     public DbSet<ProjectMember> ProjectMembers { get; set; }
+    public DbSet<ProjectInvitation> ProjectInvitations { get; set; }
     public DbSet<RedeemRequest> RedeemRequests { get; set; }
     public DbSet<RewardItem> RewardItems { get; set; }
     public DbSet<Semester> Semesters { get; set; }
@@ -31,12 +34,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TermKeyword> TermKeywords { get; set; }
     public DbSet<UserWallet> UserWallets { get; set; }
     public DbSet<SemesterMember> SemesterMembers { get; set; }
+    public DbSet<UserLevel> UserLevels { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
 
+        // Rename AspNet tables
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             var tableName = entityType.GetTableName();
@@ -62,6 +67,47 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<ProjectMember>().HasIndex(pm => pm.ProjectId);
         modelBuilder.Entity<ProjectMember>().HasIndex(pm => pm.UserId);
 
+        // ProjectInvitations config
+        modelBuilder.Entity<ProjectInvitation>()
+            .HasOne(pi => pi.Project)
+            .WithMany(p => p.ProjectInvitations)
+            .HasForeignKey(pi => pi.ProjectId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired();
+
+        modelBuilder.Entity<ProjectInvitation>()
+            .HasOne(pi => pi.Inviter)
+            .WithMany()
+            .HasForeignKey(pi => pi.InviterId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired();
+
+        modelBuilder.Entity<ProjectInvitation>()
+            .HasOne(pi => pi.InvitedUser)
+            .WithMany()
+            .HasForeignKey(pi => pi.InvitedUserId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(false);
+
+        // Indexes for performance/queries
+        modelBuilder.Entity<ProjectInvitation>().HasIndex(pi => pi.ProjectId);
+        modelBuilder.Entity<ProjectInvitation>().HasIndex(pi => pi.InviterId);
+        modelBuilder.Entity<ProjectInvitation>().HasIndex(pi => pi.InvitedUserId);
+        modelBuilder.Entity<ProjectInvitation>().HasIndex(pi => pi.InviteCode).IsUnique(); // For fast lookup/validation
+        modelBuilder.Entity<ProjectInvitation>().HasIndex(pi => pi.Status); // For filtering pending/accepted
+        modelBuilder.Entity<ProjectInvitation>().HasIndex(pi => pi.ExpiryAt); // For expiry sweeps
+
+        // Optional: Property configs (defaults, lengths)
+        modelBuilder.Entity<ProjectInvitation>(entity =>
+        {
+            entity.Property(pi => pi.Status).HasMaxLength(20).HasDefaultValue("pending");
+            entity.Property(pi => pi.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+            entity.Property(pi => pi.ExpiryAt).HasDefaultValueSql("DATEADD(MINUTE, 15, GETUTCDATE())"); // 15-min expiry
+            entity.Property(pi => pi.InviteCode).HasMaxLength(50);
+            entity.Property(pi => pi.Message).HasMaxLength(500);
+        });
+
+        // Project relationships (grouped for clarity)
         // Projects <-> Proposer (Users) - one-to-many, required
         modelBuilder.Entity<Project>()
             .HasOne(p => p.Proposer)
@@ -71,8 +117,16 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .IsRequired();
         modelBuilder.Entity<Project>().HasIndex(p => p.ProposerId);
 
+        // Projects <-> Mentor (Users) - one-to-many, optional
+        modelBuilder.Entity<Project>()
+            .HasOne(p => p.Mentor)
+            .WithMany()
+            .HasForeignKey(p => p.MentorId)
+            .OnDelete(DeleteBehavior.SetNull)
+            .IsRequired(false);
+        modelBuilder.Entity<Project>().HasIndex(p => p.MentorId);
+
         // Projects <-> Semester - one-to-many, required
-        // FIXED: Added inverse collection reference to avoid convention duplicate
         modelBuilder.Entity<Project>()
             .HasOne(p => p.Semester)
             .WithMany(s => s.Projects)
@@ -81,25 +135,22 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .IsRequired();
         modelBuilder.Entity<Project>().HasIndex(p => p.SemesterId);
 
-        // Project member limits and status enum configs
+        // Project property configs (limits, status, etc.)
         modelBuilder.Entity<Project>(entity =>
         {
             entity.Property(e => e.MinMembers).HasDefaultValue(2);
             entity.Property(e => e.MaxMembers).HasDefaultValue(10);
             entity.Property(e => e.CurrentMembers).HasDefaultValue(0);
             entity.HasIndex(e => e.CurrentMembers); // For fast limit checks
-
-            // ReservedMembers config
             entity.Property(e => e.ReservedMembers).HasDefaultValue(0);
             entity.HasIndex(e => e.ReservedMembers); // For fast queries
-
-            // Enum to string conversion for Status
             entity.Property(p => p.Status)
-                .HasConversion<string>() // Stores as string in DB (e.g., "Open")
+                .HasConversion<string>()
                 .HasDefaultValue(ProjectStatus.Open)
                 .HasMaxLength(20);
         });
 
+        // SemesterMembers config
         modelBuilder.Entity<SemesterMember>()
             .HasKey(sm => new { sm.SemesterId, sm.UserId });
         modelBuilder.Entity<SemesterMember>()
@@ -117,8 +168,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<SemesterMember>().HasIndex(sm => sm.SemesterId);
         modelBuilder.Entity<SemesterMember>().HasIndex(sm => sm.UserId);
 
-        // PerformanceScores <-> Projects, Users, Milestones, Tasks
-        // FIXED: Added inverse collection references for all to avoid duplicates
+        // PerformanceScores relationships
         modelBuilder.Entity<PerformanceScore>()
             .HasOne(ps => ps.Project)
             .WithMany(p => p.PerformanceScores)
@@ -146,7 +196,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<PerformanceScore>().HasIndex(ps => ps.MilestoneId);
         modelBuilder.Entity<PerformanceScore>().HasIndex(ps => ps.TaskId);
 
-        // Milestones <-> Projects (one-to-many, cascade)
+        // Milestones <-> Projects
         modelBuilder.Entity<Milestone>()
             .HasOne(m => m.Project)
             .WithMany(p => p.Milestones)
@@ -155,7 +205,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .IsRequired();
         modelBuilder.Entity<Milestone>().HasIndex(m => m.ProjectId);
 
-        // Tasks <-> Milestones & Self (ParentTask)
+        // Tasks relationships
         modelBuilder.Entity<Entities.Task>()
             .HasOne(t => t.Milestone)
             .WithMany(m => m.Tasks)
@@ -176,8 +226,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Entities.Task>().HasIndex(t => t.ParentTaskId);
         modelBuilder.Entity<Entities.Task>().HasIndex(t => t.AssigneeId);
 
-        // Submissions <-> Tasks & Users
-        // FIXED: Added inverse collection reference for User
+        // Submissions relationships
         modelBuilder.Entity<Submission>()
             .HasOne(s => s.Task)
             .WithMany(t => t.Submissions)
@@ -193,7 +242,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Submission>().HasIndex(s => s.TaskId);
         modelBuilder.Entity<Submission>().HasIndex(s => s.UserId);
 
-        // ChatRooms <-> Projects (one-to-many, optional)
+        // ChatRooms relationships
         modelBuilder.Entity<ChatRoom>()
             .HasOne(cr => cr.Project)
             .WithMany(p => p.ChatRooms)
@@ -208,8 +257,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<ChatRoom>().HasIndex(cr => cr.ProjectId);
         modelBuilder.Entity<ChatRoom>().HasIndex(cr => cr.UserId);
 
-        // ChatParticipants <-> ChatRooms & Users
-        // FIXED: Added inverse collection reference for User
+        // ChatParticipants relationships
         modelBuilder.Entity<ChatParticipant>()
             .HasOne(cp => cp.ChatRoom)
             .WithMany(cr => cr.ChatParticipants)
@@ -225,8 +273,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<ChatParticipant>().HasIndex(cp => cp.ChatRoomId);
         modelBuilder.Entity<ChatParticipant>().HasIndex(cp => cp.UserId);
 
-        // ChatMessages <-> ChatRooms & Sender (Users)
-        // FIXED: Added inverse collection references for both ChatRoom and User
+        // ChatMessages relationships
         modelBuilder.Entity<ChatMessage>()
             .HasOne(cm => cm.ChatRoom)
             .WithMany(cr => cr.ChatMessages)
@@ -242,7 +289,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<ChatMessage>().HasIndex(cm => cm.ChatRoomId);
         modelBuilder.Entity<ChatMessage>().HasIndex(cm => cm.SenderId);
 
-        // PointTransactions <-> UserWallets (one-to-many, required)
+        // PointTransactions <-> UserWallets
         modelBuilder.Entity<PointTransaction>()
             .HasOne(pt => pt.UserWallet)
             .WithMany(w => w.PointTransactions)
@@ -251,7 +298,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .IsRequired();
         modelBuilder.Entity<PointTransaction>().HasIndex(pt => pt.UserWalletId);
 
-        // RewardItems <-> CreatedBy (Users) (one-to-many, optional)
+        // RewardItems <-> CreatedBy (Users)
         modelBuilder.Entity<RewardItem>()
             .HasOne(ri => ri.CreatedBy)
             .WithMany()
@@ -259,8 +306,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .OnDelete(DeleteBehavior.Restrict);
         modelBuilder.Entity<RewardItem>().HasIndex(ri => ri.CreatedById);
 
-        // RedeemRequests <-> Users & RewardItems
-        // FIXED: Added inverse collection reference for User
+        // RedeemRequests relationships
         modelBuilder.Entity<RedeemRequest>()
             .HasOne(rr => rr.User)
             .WithMany(u => u.RedeemRequests)
@@ -276,8 +322,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<RedeemRequest>().HasIndex(rr => rr.UserId);
         modelBuilder.Entity<RedeemRequest>().HasIndex(rr => rr.RewardItemId);
 
-        // Notifications <-> Users & NotificationTemplates
-        // FIXED: Added inverse collection references for both User and NotificationTemplate
+        // Notifications relationships
         modelBuilder.Entity<Notification>()
             .HasOne(n => n.User)
             .WithMany(u => u.Notifications)
@@ -293,7 +338,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<Notification>().HasIndex(n => n.UserId);
         modelBuilder.Entity<Notification>().HasIndex(n => n.NotificationTemplateId);
 
-        // EmailQueue <-> Notifications (one-to-one, required) - Fixed lambdas
+        // EmailQueue <-> Notifications (one-to-one)
         modelBuilder.Entity<EmailQueue>()
             .HasOne(eq => eq.Notification)
             .WithOne(n => n.EmailQueue)
@@ -302,8 +347,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .IsRequired();
         modelBuilder.Entity<EmailQueue>().HasIndex(eq => eq.NotificationId);
 
-        // TermKeywords <-> Semesters (one-to-many, cascade)
-        // FIXED: Added inverse collection reference
+        // TermKeywords <-> Semesters
         modelBuilder.Entity<TermKeyword>()
             .HasOne(tk => tk.Semester)
             .WithMany(s => s.TermKeywords)
@@ -312,7 +356,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .IsRequired();
         modelBuilder.Entity<TermKeyword>().HasIndex(tk => tk.SemesterId);
 
-        // ProjectKeywords <-> TermKeywords & Projects (many-to-one)
+        // ProjectKeywords relationships
         modelBuilder.Entity<ProjectKeyword>()
             .HasOne(pk => pk.TermKeyword)
             .WithMany(tk => tk.ProjectKeywords)
@@ -328,6 +372,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<ProjectKeyword>().HasIndex(pk => pk.TermKeywordId);
         modelBuilder.Entity<ProjectKeyword>().HasIndex(pk => pk.ProjectId);
 
+        // UserLevel relationships
         modelBuilder.Entity<UserLevel>()
             .HasOne(ul => ul.User)
             .WithMany(u => u.UserLevels)
