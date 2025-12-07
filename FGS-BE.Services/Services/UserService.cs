@@ -174,7 +174,7 @@ public class UserService(
         await userManager.UpdateSecurityStampAsync(user);
     }
 
-    public async Task RegisterMentorAsync(RegisterRequest request)
+    public async Task RegisterMentorAsync(RegisterStaffRequest request)
     {
         var user = await userManager.FindByNameAsync(request.Username);
         if (user is not null) throw new BadRequestException(Resource.UsernameExisted);
@@ -184,7 +184,6 @@ public class UserService(
             UserName = request.Username,
             Email = request.Username,
             FullName = request.FullName ?? string.Empty,
-            StudentCode = request.StudentCode ?? string.Empty,
             Status = "Active",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -231,7 +230,7 @@ public class UserService(
         await unitOfWork.CommitAsync();
     }
 
-    public async Task RegisterFinanceAsync(RegisterRequest request)
+    public async Task RegisterFinanceAsync(RegisterStaffRequest request)
     {
         var user = await userManager.FindByNameAsync(request.Username);
         if (user is not null) throw new BadRequestException(Resource.UsernameExisted);
@@ -241,7 +240,6 @@ public class UserService(
             UserName = request.Username,
             Email = request.Username,
             FullName = request.FullName ?? string.Empty,
-            StudentCode = request.StudentCode ?? string.Empty,
             Status = "Active",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

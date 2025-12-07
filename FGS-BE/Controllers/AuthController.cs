@@ -52,16 +52,16 @@ public class AuthController(IUserService service) : ControllerBase
     }
 
     [HttpPost("register-mentor")]
-    public async Task<ActionResult<MessageResponse>> RegisterMentor(RegisterRequest request)
+    public async Task<ActionResult<MessageResponse>> RegisterMentor(RegisterStaffRequest request)
     {
-        await service.RegisterAsync(request);
+        await service.RegisterMentorAsync(request);
         return new MessageResponse(Resource.CreatedSuccess);
     }
 
     [HttpPost("register-finance")]
-    public async Task<ActionResult<MessageResponse>> RegisterFinance(RegisterRequest request)
+    public async Task<ActionResult<MessageResponse>> RegisterFinance(RegisterStaffRequest request)
     {
-        await service.RegisterAsync(request);
+        await service.RegisterFinanceAsync(request);
         return new MessageResponse(Resource.CreatedSuccess);
     }
 }
