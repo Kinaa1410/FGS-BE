@@ -24,6 +24,7 @@ namespace FGS_BE.Repo.Repositories.Implements
         public IProjectMemberRepository ProjectMemberRepository { get; }
         public IPerformanceScoreRepository PerformanceScoreRepository { get; }
         public IProjectInvitationRepository ProjectInvitationRepository { get; }
+        public IUserRepository UserRepository { get; }
 
         public UnitOfWork(
             ApplicationDbContext context,
@@ -37,6 +38,7 @@ namespace FGS_BE.Repo.Repositories.Implements
             ISubmissionRepository submissionRepository,
             IProjectMemberRepository projectMemberRepository,
             IPerformanceScoreRepository performanceScoreRepository,
+            IUserRepository userRepository,
             IProjectInvitationRepository projectInvitationRepository)
         {
             _context = context;
@@ -50,6 +52,7 @@ namespace FGS_BE.Repo.Repositories.Implements
             SubmissionRepository = submissionRepository;
             ProjectMemberRepository = projectMemberRepository;
             PerformanceScoreRepository = performanceScoreRepository;
+            UserRepository = userRepository;
             ProjectInvitationRepository = projectInvitationRepository;
         }
 

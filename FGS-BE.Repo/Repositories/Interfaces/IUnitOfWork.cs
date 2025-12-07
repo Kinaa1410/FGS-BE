@@ -15,6 +15,7 @@ public interface IUnitOfWork : IDisposable
     IProjectMemberRepository ProjectMemberRepository { get; }
     IPerformanceScoreRepository PerformanceScoreRepository { get; }
     IProjectInvitationRepository ProjectInvitationRepository { get; }
+    IUserRepository UserRepository { get; }
     IGenericRepository<T> Repository<T>() where T : class;
     Task CommitAsync(CancellationToken cancellationToken = default);
     Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, CancellationToken cancellationToken = default); // Now uses System.Data.IsolationLevel

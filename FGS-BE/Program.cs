@@ -47,7 +47,8 @@ builder.Services
     .AddScoped<IProjectMemberRepository, ProjectMemberRepository>()
     .AddScoped<ILevelRepository, LevelRepository>()
     .AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>()
-    .AddScoped<IProjectInvitationRepository, ProjectInvitationRepository>();
+    .AddScoped<IProjectInvitationRepository, ProjectInvitationRepository>()
+    .AddScoped<IUserRepository, UserRepository>(); // NEW: Add this line for IUserRepository registration
 
 // Services (all Scoped to match repositories/DbContext)
 builder.Services
@@ -80,10 +81,11 @@ builder.Services.AddScoped<IUnitOfWork>(provider =>
     var submissionRepo = provider.GetRequiredService<ISubmissionRepository>();
     var projectMemberRepo = provider.GetRequiredService<IProjectMemberRepository>();
     var performanceScoreRepo = provider.GetRequiredService<IPerformanceScoreRepository>();
+    var userRepo = provider.GetRequiredService<IUserRepository>(); // NEW: This now resolves correctly
     var projectInvitationRepo = provider.GetRequiredService<IProjectInvitationRepository>();
     return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo,
         projectRepo, milestoneRepo, taskRepo, redeemRequestRepo, submissionRepo,
-        projectMemberRepo, performanceScoreRepo, projectInvitationRepo);
+        projectMemberRepo, performanceScoreRepo, userRepo, projectInvitationRepo);
 });
 
 // Background Services (e.g., for expiring invitations)
