@@ -1,6 +1,5 @@
 ﻿using FGS_BE.Repo.Entities;
 using FGS_BE.Repo.Enums;
-
 namespace FGS_BE.Repo.DTOs.Projects
 {
     public class ProjectDto
@@ -13,14 +12,13 @@ namespace FGS_BE.Repo.DTOs.Projects
         public DateTime CreatedAt { get; set; }
         public int SemesterId { get; set; }
         public int ProposerId { get; set; }
-
+        // NEW: Optional mentor
+        public int? MentorId { get; set; }
         // New fields
         public int MinMembers { get; set; }
         public int MaxMembers { get; set; }
         public int CurrentMembers { get; set; }
-
         public ProjectDto() { }
-
         public ProjectDto(Project entity)
         {
             Id = entity.Id;
@@ -31,6 +29,8 @@ namespace FGS_BE.Repo.DTOs.Projects
             CreatedAt = entity.CreatedAt;
             SemesterId = entity.SemesterId;
             ProposerId = entity.ProposerId;
+            // NEW: Map mentor
+            MentorId = entity.MentorId;
             MinMembers = entity.MinMembers;
             MaxMembers = entity.MaxMembers;
             CurrentMembers = entity.CurrentMembers;
