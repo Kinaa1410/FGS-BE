@@ -1,13 +1,14 @@
-﻿namespace FGS_BE.Repo.Settings;
-public class JwtSettings
+﻿namespace FGS_BE.Repo.Settings
 {
-    public static readonly string Section = "Authentication:Schemes:Bearer";
+    public class JwtSettings
+    {
+        public const string Section = "Authentication:Schemes:Bearer"; // Fixed: Added static Section constant for config binding
 
-    public string SerectKey { get; set; } = default!;
-    public string SerectRefreshKey { get; set; } = default!;
-    public int TokenExpire { get; set; }
-    public int RefreshTokenExpire { get; set; }
-    public string ValidIssuer { get; set; } = default!;
-    public string[] ValidAudiences { get; set; } = default!;
-
+        public string[] ValidAudiences { get; set; } = Array.Empty<string>(); // Array for multiple audiences
+        public string ValidIssuer { get; set; } = string.Empty;
+        public string SecretKey { get; set; } = string.Empty;
+        public string SecretRefreshKey { get; set; } = string.Empty;
+        public int TokenExpire { get; set; }
+        public int RefreshTokenExpire { get; set; }
+    }
 }

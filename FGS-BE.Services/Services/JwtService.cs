@@ -16,7 +16,6 @@ using System.Text;
 namespace FGS_BE.Service.Services;
 public class JwtService : IJwtService
 {
-
     private readonly JwtSettings _jwtSettings;
     private readonly SignInManager<User> _signInManager;
     private readonly IDataProtectionProvider _dataProtectionProvider;
@@ -28,11 +27,17 @@ public class JwtService : IJwtService
         IDataProtectionProvider dataProtectionProvider,
         IOptions<JwtSettings> jwtSettings)
     {
-        _jwtSettings = jwtSettings.Value;
         _signInManager = signInManager;
         _dataProtectionProvider = dataProtectionProvider;
+        _jwtSettings = jwtSettings.Value ?? throw new ArgumentNullException(nameof(jwtSettings));
 
-        protector = _dataProtectionProvider.CreateProtector(_jwtSettings.SerectRefreshKey);
+        // Validate required settings
+        if (string.IsNullOrWhiteSpace(_jwtSettings.SecretKey))
+            throw new InvalidOperationException("JwtSettings.SecretKey is required and must not be empty.");
+        if (string.IsNullOrWhiteSpace(_jwtSettings.SecretRefreshKey))
+            throw new InvalidOperationException("JwtSettings.SecretRefreshKey is required and must not be empty.");
+
+        protector = _dataProtectionProvider.CreateProtector(_jwtSettings.SecretRefreshKey);  // Fixed: SecretRefreshKey
         ticketDataFormat = new TicketDataFormat(protector);
     }
 
@@ -45,10 +50,13 @@ public class JwtService : IJwtService
         claims.Add(new Claim(ClaimUsers.UserName, user.UserName ?? ""));
         claims.Add(new Claim(ClaimUsers.Id, user.Id.ToString() ?? ""));
         claims.Add(new Claim(ClaimUsers.Email, user.Email ?? ""));
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SerectKey));
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));  // Fixed: SecretKey
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
         var expires = expiresTime ?? _jwtSettings.TokenExpire;
         var token = new JwtSecurityToken(
+            issuer: _jwtSettings.ValidIssuer,  // Bonus: Add issuer
+            audience: _jwtSettings.ValidAudiences.FirstOrDefault(),  // Bonus: Add audience (pick first or customize)
             claims: claims,
             expires: DateTime.UtcNow.AddSeconds(expires),
             signingCredentials: creds);

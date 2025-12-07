@@ -1,5 +1,6 @@
 using FGS_BE;
 using FGS_BE.Repo.Data;
+using FGS_BE.Repo.Entities;
 using FGS_BE.Repo.Repositories.Implements;
 using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Repo.Settings;
@@ -8,44 +9,33 @@ using FGS_BE.Service.Interfaces;
 using FGS_BE.Service.Services;
 using FGS_BE.Services.Implements;
 using FGS_BE.Services.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Custom extensions (these handle additional registrations like auto-scanning)
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddWebServices(builder.Configuration);
 
+// Database Context (overriding the commented MySQL in extensions for SQL Server)
 string defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("DefaultConnection not found in configuration.");
-
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(defaultConnection)
            .EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
            .EnableDetailedErrors(builder.Environment.IsDevelopment())
            .UseProjectables());
 
-// Cloudinary configuration
-builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
-
-
-var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
-                     ?? new[] { "http://localhost:5173", "https://localhost:5173" };
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll",
-        policy =>
-        {
-            policy.WithOrigins(allowedOrigins)
-                  .AllowAnyMethod()
-                  .AllowAnyHeader()
-                  .AllowCredentials();
-        });
-});
-
+// Repositories (all Scoped for per-request lifetime with DbContext)
 builder.Services
-
-    //repositories
     .AddScoped<ISemesterRepository, SemesterRepository>()
     .AddScoped<IRewardItemRepository, RewardItemRepository>()
     .AddScoped<ITermKeywordRepository, TermKeywordRepository>()
@@ -57,10 +47,10 @@ builder.Services
     .AddScoped<IProjectMemberRepository, ProjectMemberRepository>()
     .AddScoped<ILevelRepository, LevelRepository>()
     .AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>()
-    .AddScoped<IProjectInvitationRepository, ProjectInvitationRepository>()
+    .AddScoped<IProjectInvitationRepository, ProjectInvitationRepository>();
 
-
-    //services
+// Services (all Scoped to match repositories/DbContext)
+builder.Services
     .AddScoped<IRedeemRequestService, RedeemRequestService>()
     .AddScoped<ISemesterService, SemesterService>()
     .AddScoped<IRewardItemService, RewardItemService>()
@@ -74,48 +64,55 @@ builder.Services
     .AddScoped<ILevelService, LevelService>()
     .AddScoped<INotificationService, NotificationService>()
     .AddScoped<IPerformanceScoreService, PerformanceScoreService>()
-    .AddScoped<IProjectInvitationService, ProjectInvitationService>()
+    .AddScoped<IProjectInvitationService, ProjectInvitationService>();
 
+// UnitOfWork (Scoped factory to inject all repositories)
+builder.Services.AddScoped<IUnitOfWork>(provider =>
+{
+    var context = provider.GetRequiredService<ApplicationDbContext>();
+    var semesterRepo = provider.GetRequiredService<ISemesterRepository>();
+    var rewardItemRepo = provider.GetRequiredService<IRewardItemRepository>();
+    var termKeywordRepo = provider.GetRequiredService<ITermKeywordRepository>();
+    var projectRepo = provider.GetRequiredService<IProjectRepository>();
+    var milestoneRepo = provider.GetRequiredService<IMilestoneRepository>();
+    var taskRepo = provider.GetRequiredService<ITaskRepository>();
+    var redeemRequestRepo = provider.GetRequiredService<IRedeemRequestRepository>();
+    var submissionRepo = provider.GetRequiredService<ISubmissionRepository>();
+    var projectMemberRepo = provider.GetRequiredService<IProjectMemberRepository>();
+    var performanceScoreRepo = provider.GetRequiredService<IPerformanceScoreRepository>();
+    var projectInvitationRepo = provider.GetRequiredService<IProjectInvitationRepository>();
+    return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo,
+        projectRepo, milestoneRepo, taskRepo, redeemRequestRepo, submissionRepo,
+        projectMemberRepo, performanceScoreRepo, projectInvitationRepo);
+});
 
-    .AddScoped<IUnitOfWork>(provider =>
-    {
-        var context = provider.GetRequiredService<ApplicationDbContext>();
-        var semesterRepo = provider.GetRequiredService<ISemesterRepository>();
-        var rewardItemRepo = provider.GetRequiredService<IRewardItemRepository>();
-        var termKeywordRepo = provider.GetRequiredService<ITermKeywordRepository>();
-        var projectRepo = provider.GetRequiredService<IProjectRepository>();
-        var milestoneRepo = provider.GetRequiredService<IMilestoneRepository>();
-        var taskRepo = provider.GetRequiredService<ITaskRepository>();
-        var redeemRequestRepo = provider.GetRequiredService<IRedeemRequestRepository>();
-        var submissionRepo = provider.GetRequiredService<ISubmissionRepository>();
-        var projectMemberRepo = provider.GetRequiredService<IProjectMemberRepository>();
-        var performanceScoreRepo = provider.GetRequiredService<IPerformanceScoreRepository>();
-        var projectInvitationRepo = provider.GetRequiredService<IProjectInvitationRepository>();
-        return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo, 
-            projectRepo, milestoneRepo, taskRepo, redeemRequestRepo, submissionRepo,
-            projectMemberRepo, performanceScoreRepo,projectInvitationRepo);
-    });
+// Background Services (e.g., for expiring invitations)
 builder.Services.AddHostedService<InvitationExpiryService>();
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
 
-
-
+// Authorization (enables [Authorize] attributes on controllers)
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "FGS API v1");
+        options.RoutePrefix = string.Empty; // Optional: Serve Swagger at app root
+    });
 }
 
-
-app.UseSwagger();
-app.UseSwaggerUI();
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
-app.UseCors("AllowAll");
+
+// Essential Middleware Pipeline (using extension for consistency)
+await app.UseWebApplication();
+
 app.MapControllers();
+
 app.Run();
