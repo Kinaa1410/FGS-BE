@@ -14,7 +14,7 @@ public class AuthController(IUserService service) : ControllerBase
     /// <remarks>
     /// ```
     /// Admin account: admin@gmail.com - @1
-    /// Staff account: staff@gmail.com - @1
+    /// Mentor account: mentor01@gmail.com - @1
     /// ```
     /// </remarks>
     [HttpPost("login")]
@@ -51,4 +51,17 @@ public class AuthController(IUserService service) : ControllerBase
         return Ok(new { message = "Password updated successfully" });
     }
 
+    [HttpPost("register-mentor")]
+    public async Task<ActionResult<MessageResponse>> RegisterMentor(RegisterRequest request)
+    {
+        await service.RegisterAsync(request);
+        return new MessageResponse(Resource.CreatedSuccess);
+    }
+
+    [HttpPost("register-finance")]
+    public async Task<ActionResult<MessageResponse>> RegisterFinance(RegisterRequest request)
+    {
+        await service.RegisterAsync(request);
+        return new MessageResponse(Resource.CreatedSuccess);
+    }
 }

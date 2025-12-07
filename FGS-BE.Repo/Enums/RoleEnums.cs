@@ -4,4 +4,6 @@ public enum RoleEnums
     Admin,
     User,
     Staff,
+    Mentor,
+    Finance
 }
