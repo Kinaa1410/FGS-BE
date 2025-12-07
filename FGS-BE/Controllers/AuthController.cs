@@ -64,4 +64,6 @@ public class AuthController(IUserService service) : ControllerBase
         await service.RegisterFinanceAsync(request);
         return new MessageResponse(Resource.CreatedSuccess);
     }
+
+
 }
