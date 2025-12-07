@@ -28,19 +28,19 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 
 
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
+                     ?? new[] { "http://localhost:5173", "https://localhost:5173" };
+
 builder.Services.AddCors(options =>
 {
-    string[] allowedOrigins = builder.Environment.IsDevelopment()
-        ? new[] { "http://localhost:5173", "https://localhost:5173", "http://127.0.0.1:5173" }
-        : new[] { "https://fe-fusion-lab-credits.vercel.app" };  
-
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.WithOrigins(allowedOrigins)
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials();
-    });
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        });
 });
 
 builder.Services
