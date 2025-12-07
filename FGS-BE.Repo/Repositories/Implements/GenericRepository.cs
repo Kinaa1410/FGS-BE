@@ -109,6 +109,12 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         if (orderBy != null) query = orderBy(query);
         return await query.ProjectToType<TDTO>().PaginatedListAsync(pageIndex, pageSize, cancellationToken);
     }
+    public async Task<T?> FirstOrDefaultAsync(
+    Expression<Func<T, bool>> expression,
+    CancellationToken cancellationToken = default)
+    {
+        return await dbSet.FirstOrDefaultAsync(expression, cancellationToken);
+    }
 
     public async Task<int> CountAsync(
         Expression<Func<T, bool>>? expression = null,

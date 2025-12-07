@@ -47,5 +47,8 @@ public interface IGenericRepository<T> where T : class
     Task CreateAsync(T entity, CancellationToken cancellationToken = default);
     Task DeleteAsync(T entity);
 
+    Task<T?> FirstOrDefaultAsync(
+    Expression<Func<T, bool>> expression,
+    CancellationToken cancellationToken = default);
 
 }

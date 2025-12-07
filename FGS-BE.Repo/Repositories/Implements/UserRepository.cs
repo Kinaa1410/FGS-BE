@@ -4,6 +4,7 @@ using FGS_BE.Repo.Entities;
 using FGS_BE.Repo.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
+using System.Linq.Expressions;
 
 namespace FGS_BE.Repo.Repositories.Implements
 {
@@ -28,13 +29,20 @@ namespace FGS_BE.Repo.Repositories.Implements
                 query = query.Where(x => x.FullName!.Contains(keyword) || x.Email!.Contains(keyword) || x.StudentCode!.Contains(keyword));
             }
 
-            // Apply any additional filters from GetUsersQuery if needed (e.g., via expressions)
-            // Example: if (request.Status != null) query = query.Where(x => x.Status == request.Status);
-
             var order = $"{sortColumn} {sortDir}";
             query = query.OrderBy(order);
 
             return await query.PaginatedListAsync(pageIndex, pageSize, cancellationToken);
         }
+
+        // For role checks (e.g., in project creation)
+        public async Task<User?> FindByIdAsync(int id)
+        {
+            return await Entities
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.Id == id);
+        }
+
     }
 }

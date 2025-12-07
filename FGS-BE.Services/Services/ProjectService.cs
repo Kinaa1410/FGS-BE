@@ -1,102 +1,134 @@
-﻿using FGS_BE.Repo.DTOs.Pages;
-using FGS_BE.Repo.DTOs.ProjectMembers;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks; // Explicit use of async Task
+using FGS_BE.Repo.DTOs.Pages;
 using FGS_BE.Repo.DTOs.Projects;
-using FGS_BE.Repo.Entities;
 using FGS_BE.Repo.Enums;
 using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Service.Interfaces;
-using FGS_BE.Services.Interfaces;
-using Mapster;
+
+// Alias your Task entity to avoid name conflict
+using ProjectTask = FGS_BE.Repo.Entities.Task;
 
 namespace FGS_BE.Service.Implements
 {
     public class ProjectService : IProjectService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IProjectMemberService _projectMemberService;
-        public ProjectService(IUnitOfWork unitOfWork, IProjectMemberService projectMemberService)
+
+        public ProjectService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _projectMemberService = projectMemberService;
         }
 
-        public async Task<PaginatedList<ProjectDto>> GetPagedAsync(
-            int pageIndex, 
-            int pageSize, 
-            string? keyword = null, 
-            string? status = null, 
-            string? sortColumn = "Id", 
+        // ============================================================
+        // GET PAGED
+        // ============================================================
+        public async System.Threading.Tasks.Task<PaginatedList<ProjectDto>> GetPagedAsync(
+            int pageIndex,
+            int pageSize,
+            string? keyword = null,
+            string? status = null,
+            string? sortColumn = "Id",
             string? sortDir = "Asc")
         {
             var paged = await _unitOfWork.ProjectRepository.GetPagedAsync(
-                pageIndex, 
-                pageSize, 
-                keyword,
-                status,
-                sortColumn, 
-                sortDir);
-            var pagedDtos = new PaginatedList<ProjectDto>(
-                paged.Select(x => new ProjectDto(x)).ToList(), 
-                paged.TotalItems, 
-                paged.PageIndex, 
-                paged.PageSize);
-            return pagedDtos;
+                pageIndex, pageSize, keyword, status, sortColumn, sortDir);
+
+            var list = paged.Select(x => new ProjectDto(x)).ToList();
+
+            return new PaginatedList<ProjectDto>(
+                list,
+                paged.TotalItems,
+                paged.PageIndex,
+                paged.PageSize
+            );
         }
 
-        public async Task<ProjectDto?> GetByIdAsync(int id)
+        // ============================================================
+        // GET BY ID
+        // ============================================================
+        public async System.Threading.Tasks.Task<ProjectDto?> GetByIdAsync(int id)
         {
-            var project = await _unitOfWork.ProjectRepository.FindByIdAsync(id);
-            return project == null ? null : new ProjectDto(project);
+            var entity = await _unitOfWork.ProjectRepository.FindByIdAsync(id);
+            return entity == null ? null : new ProjectDto(entity);
         }
 
-        public async Task<ProjectDto> CreateAsync(CreateProjectDto dto)
+        // ============================================================
+        // CREATE
+        // ============================================================
+        public async System.Threading.Tasks.Task<ProjectDto> CreateAsync(CreateProjectDto dto)
         {
-            var entity = dto.ToEntity(); // Now includes MentorId
+            await ValidateProposerAsync(dto.ProposerId);
+            await ValidateSemesterAsync(dto.SemesterId);
+
+            if (dto.MentorId.HasValue)
+                await ValidateMentorAsync(dto.MentorId.Value);
+
+            // Duplicate title check
+            //var existing = await _unitOfWork.ProjectRepository.FindAsync(p => p.Title == dto.Title);
+            //var existingProject = await _unitOfWork.ProjectRepository
+            //.FindAsync(p => p.Title == dto.Title);
+
+            //if (existingProject != null)
+            //{
+            //    throw new InvalidOperationException($"A project with title '{dto.Title}' already exists.");
+            //}
+
+            var entity = dto.ToEntity();
             await _unitOfWork.ProjectRepository.CreateAsync(entity);
             await _unitOfWork.CommitAsync();
-            // Auto-join proposer
-            var memberDto = new CreateProjectMemberDto
-            {
-                ProjectId = entity.Id,
-                UserId = entity.ProposerId,
-                Role = "proposer"
-            };
-            await _projectMemberService.CreateAsync(memberDto); // Now exists
-                                                                // Refresh entity to get updated CurrentMembers
-            entity = await _unitOfWork.ProjectRepository.FindByIdAsync(entity.Id);
-            return new ProjectDto(entity);
+
+            var result = await _unitOfWork.ProjectRepository.FindByIdAsync(entity.Id);
+            return new ProjectDto(result);
         }
 
-        public async Task<ProjectDto?> UpdateAsync(int id, UpdateProjectDto dto)
+        // ============================================================
+        // UPDATE
+        // ============================================================
+        public async System.Threading.Tasks.Task<ProjectDto?> UpdateAsync(int id, UpdateProjectDto dto)
         {
             var entity = await _unitOfWork.ProjectRepository.FindByIdAsync(id);
             if (entity == null) return null;
+
             if (dto.Title != null) entity.Title = dto.Title;
             if (dto.Description != null) entity.Description = dto.Description;
             if (dto.TotalPoints.HasValue) entity.TotalPoints = dto.TotalPoints.Value;
-            // NEW: Handle mentor update
-            if (dto.MentorId.HasValue)
-            {
-                // Optional: Add validation, e.g., ensure MentorId is a valid user
-                entity.MentorId = dto.MentorId.Value;
-            }
             if (dto.MinMembers.HasValue) entity.MinMembers = dto.MinMembers.Value;
             if (dto.MaxMembers.HasValue) entity.MaxMembers = dto.MaxMembers.Value;
+
+            if (dto.MentorId.HasValue)
+            {
+                await ValidateMentorAsync(dto.MentorId.Value);
+                entity.MentorId = dto.MentorId.Value;
+            }
+
             if (dto.Status != null)
             {
-                if (!Enum.TryParse<ProjectStatus>(dto.Status, true, out var parsedStatus))
-                    throw new ArgumentException($"Invalid Status: {dto.Status}. Valid: Open, InProcess, Close, Complete.");
-                // Check min members for InProcess
-                if (parsedStatus == ProjectStatus.InProcess && entity.CurrentMembers < entity.MinMembers)
-                    throw new InvalidOperationException($"Need at least {entity.MinMembers} members to set InProcess. Current: {entity.CurrentMembers}");
-                entity.Status = parsedStatus; // Enum assignment
+                if (!Enum.TryParse(dto.Status, true, out ProjectStatus newStatus))
+                    throw new ArgumentException($"Invalid status: {dto.Status}.");
+
+                // Check member requirement for InProcess
+                if (newStatus == ProjectStatus.InProcess &&
+                    entity.CurrentMembers < entity.MinMembers)
+                {
+                    throw new InvalidOperationException(
+                        $"Need at least {entity.MinMembers} members to set InProcess.");
+                }
+
+                entity.Status = newStatus;
             }
+
             await _unitOfWork.ProjectRepository.UpdateAsync(entity);
             await _unitOfWork.CommitAsync();
+
             return new ProjectDto(entity);
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        // ============================================================
+        // DELETE
+        // ============================================================
+        public async System.Threading.Tasks.Task<bool> DeleteAsync(int id)
         {
             var entity = await _unitOfWork.ProjectRepository.FindByIdAsync(id);
             if (entity == null) return false;
@@ -104,6 +136,30 @@ namespace FGS_BE.Service.Implements
             await _unitOfWork.ProjectRepository.DeleteAsync(entity);
             await _unitOfWork.CommitAsync();
             return true;
+        }
+
+        // ============================================================
+        // VALIDATION METHODS (NO RETURNS → FIXED)
+        // ============================================================
+        private async System.Threading.Tasks.Task ValidateProposerAsync(int proposerId)
+        {
+            var p = await _unitOfWork.UserRepository.FindByIdAsync(proposerId);
+            if (p == null)
+                throw new ArgumentException("Proposer not found.", nameof(proposerId));
+        }
+
+        private async System.Threading.Tasks.Task ValidateSemesterAsync(int semesterId)
+        {
+            var semester = await _unitOfWork.SemesterRepository.FindByIdAsync(semesterId);
+            if (semester == null)
+                throw new ArgumentException("Semester not found.", nameof(semesterId));
+        }
+
+        private async System.Threading.Tasks.Task ValidateMentorAsync(int mentorId)
+        {
+            var mentor = await _unitOfWork.UserRepository.FindByIdAsync(mentorId);
+            if (mentor == null)
+                throw new ArgumentException("Mentor not found.", nameof(mentorId));
         }
     }
 }

@@ -1,14 +1,18 @@
 ﻿using FGS_BE.Repo.DTOs.Projects;
 using FGS_BE.Service.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
+using System.Security.Claims; // For validation if needed
 
 namespace FGS_BE.API.Controllers
 {
     [ApiController]
     [Route("api/projects")]
-    public class ProjectsController: ControllerBase
+    public class ProjectsController : ControllerBase
     {
         private readonly IProjectService _projectService;
+
         public ProjectsController(IProjectService projectService)
         {
             _projectService = projectService;
@@ -26,21 +30,33 @@ namespace FGS_BE.API.Controllers
         /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetAll(
-            [FromQuery] int pageIndex = 1, 
-            [FromQuery] int pageSize = 10, 
-            [FromQuery] string? keyword = null, 
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? keyword = null,
             [FromQuery] string? status = null,
-            [FromQuery] string? sortColumn = "Id", 
+            [FromQuery] string? sortColumn = "Id",
             [FromQuery] string? sortDir = "Asc")
         {
-            var result = await _projectService.GetPagedAsync(
-                pageIndex, 
-                pageSize, 
-                keyword, 
-                status, 
-                sortColumn, 
-                sortDir);
-            return Ok(result);
+            try
+            {
+                var result = await _projectService.GetPagedAsync(
+                    pageIndex,
+                    pageSize,
+                    keyword,
+                    status,
+                    sortColumn,
+                    sortDir);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                // Log the full exception if you have logging (e.g., ILogger)
+                return BadRequest(new { message = "An unexpected error occurred while retrieving projects." });
+            }
         }
 
         /// <summary>
@@ -51,8 +67,16 @@ namespace FGS_BE.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await _projectService.GetByIdAsync(id);
-            return result == null ? NotFound() : Ok(result);
+            try
+            {
+                var result = await _projectService.GetByIdAsync(id);
+                return result == null ? NotFound(new { message = "Project not found." }) : Ok(result);
+            }
+            catch (Exception ex)
+            {
+                // Log the full exception if you have logging
+                return BadRequest(new { message = "An unexpected error occurred while retrieving the project." });
+            }
         }
 
         /// <summary>
@@ -63,8 +87,29 @@ namespace FGS_BE.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CreateProjectDto dto)
         {
-            var result = await _projectService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var result = await _projectService.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                // Log if possible
+                return BadRequest(new { message = "An unexpected error occurred while creating the project." });
+            }
         }
 
         /// <summary>
@@ -76,8 +121,29 @@ namespace FGS_BE.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, UpdateProjectDto dto)
         {
-            var result = await _projectService.UpdateAsync(id, dto);
-            return result == null ? NotFound() : Ok(result);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            try
+            {
+                var result = await _projectService.UpdateAsync(id, dto);
+                return result == null ? NotFound(new { message = "Project not found." }) : Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                // Log the full exception if you have logging
+                return BadRequest(new { message = "An unexpected error occurred while updating the project." });
+            }
         }
 
         /// <summary>
@@ -88,8 +154,16 @@ namespace FGS_BE.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var success = await _projectService.DeleteAsync(id);
-            return success ? NoContent() : NotFound();
+            try
+            {
+                var success = await _projectService.DeleteAsync(id);
+                return success ? NoContent() : NotFound(new { message = "Project not found." });
+            }
+            catch (Exception ex)
+            {
+                // Log the full exception if you have logging
+                return BadRequest(new { message = "An unexpected error occurred while deleting the project." });
+            }
         }
     }
 }
