@@ -163,26 +163,89 @@ public static class DependencyInjection
 
     private static void AddAuthenticationServices(this IServiceCollection services, IConfiguration configuration)
     {
+        // Fetch and validate the Bearer configuration section
+        var bearerSection = configuration.GetSection("Authentication:Schemes:Bearer");
+        if (!bearerSection.Exists())
+        {
+            throw new InvalidOperationException("Bearer authentication configuration section 'Authentication:Schemes:Bearer' not found in appsettings.json.");
+        }
+
+        var secretKey = bearerSection.GetValue<string>("SecretKey");
+        if (string.IsNullOrWhiteSpace(secretKey))
+        {
+            throw new InvalidOperationException("JWT SecretKey is null, empty, or whitespace. Check 'Authentication:Schemes:Bearer:SecretKey' in configuration.");
+        }
+
+        var validIssuer = bearerSection.GetValue<string>("ValidIssuer");
+        var validAudiencesSection = bearerSection.GetSection("ValidAudiences");
+        var validAudiences = validAudiencesSection.Get<string[]>() ?? Array.Empty<string>();
+        var tokenExpireMinutes = bearerSection.GetValue<int>("TokenExpire", 1440); // Default: 24 hours (1440 minutes)
+
+        // Log for debugging (remove in production)
+        Console.WriteLine($"Loaded JWT Config - SecretKey Length: {secretKey.Length}, Issuer: '{validIssuer}', Audiences Count: {validAudiences.Length}");
+
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
-        }).AddJwtBearer(options =>
+        }).AddJwtBearer(jwtOptions =>
         {
-            options.TokenValidationParameters = new TokenValidationParameters
+            jwtOptions.TokenValidationParameters = new TokenValidationParameters
             {
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                     configuration.GetSection("Authentication:Schemes:Bearer:SerectKey").Value!)),
+                // Securely create signing key from config
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
                 ValidateIssuerSigningKey = true,
-                ClockSkew = TimeSpan.Zero,
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                NameClaimType = ClaimTypes.NameIdentifier
+
+                // Strict lifetime validation (enforces 'exp' claim)
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero, // No leeway for clock differences
+
+                // Conditional issuer validation
+                ValidateIssuer = !string.IsNullOrWhiteSpace(validIssuer),
+                ValidIssuer = validIssuer,
+
+                // Conditional audience validation
+                ValidateAudience = validAudiences.Length > 0,
+                ValidAudiences = validAudiences,
+
+                // Standard claims
+                NameClaimType = ClaimTypes.NameIdentifier,
+                RoleClaimType = ClaimTypes.Role // If using roles
             };
-            options.RequireHttpsMetadata = false;
-            options.HandleEvents();
+
+            // Disable HTTPS requirement for local dev (enable in prod)
+            jwtOptions.RequireHttpsMetadata = false;
+
+            // Event handlers for debugging/logging (customize as needed)
+            jwtOptions.Events = new JwtBearerEvents
+            {
+                OnAuthenticationFailed = context =>
+                {
+                    // Log failure reason
+                    Console.WriteLine($"JWT Auth Failed: {context.Exception?.Message}");
+                    return Task.CompletedTask;
+                },
+                OnTokenValidated = context =>
+                {
+                    // Optional: Inspect/add claims post-validation
+                    var userId = context.Principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                    Console.WriteLine($"JWT Validated for User: {userId}");
+                    return Task.CompletedTask;
+                },
+                OnForbidden = context =>
+                {
+                    Console.WriteLine("JWT Access Forbidden (e.g., invalid role/scope)");
+                    return Task.CompletedTask;
+                }
+            };
         });
+
+    }
+
+    public class RefreshTokenSettings
+    {
+        public string SecretRefreshKey { get; set; } = string.Empty;
+        public int RefreshTokenExpire { get; set; } // Seconds, as in your config
     }
 
     public static async Task UseWebApplication(this WebApplication app)
