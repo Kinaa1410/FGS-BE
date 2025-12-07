@@ -174,4 +174,118 @@ public class UserService(
         await userManager.UpdateSecurityStampAsync(user);
     }
 
+    public async Task RegisterMentorAsync(RegisterRequest request)
+    {
+        var user = await userManager.FindByNameAsync(request.Username);
+        if (user is not null) throw new BadRequestException(Resource.UsernameExisted);
+
+        user = new User
+        {
+            UserName = request.Username,
+            Email = request.Username,
+            FullName = request.FullName ?? string.Empty,
+            StudentCode = request.StudentCode ?? string.Empty,
+            Status = "Active",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+
+        };
+
+        var result = await userManager.CreateAsync(user, request.Password);
+        if (!result.Succeeded) throw new BadRequestException();
+
+        result = await userManager.AddToRoleAsync(user, RoleEnums.Mentor.ToString());
+        if (!result.Succeeded) throw new BadRequestException();
+
+        var walletRepo = unitOfWork.Repository<UserWallet>();
+        var wallet = new UserWallet
+        {
+            UserId = user.Id,
+            Balance = 0, 
+            LastUpdatedAt = DateTime.UtcNow 
+        };
+        await walletRepo.CreateAsync(wallet);
+
+        var levelRepo = unitOfWork.Repository<Level>();
+        var userLevelRepo = unitOfWork.Repository<UserLevel>();
+
+        var activeLevels = await levelRepo.Entities
+            .Where(l => l.IsActive)
+            .ToListAsync();
+
+        var lowestLevel = activeLevels
+            .OrderBy(l => GetThresholdFromCondition(l.ConditionJson)) 
+            .FirstOrDefault();
+
+        if (lowestLevel != null)
+        {
+            var initialUserLevel = new UserLevel
+            {
+                UserId = user.Id,
+                LevelId = lowestLevel.Id,
+                UnlockedAt = DateTime.UtcNow
+            };
+            await userLevelRepo.CreateAsync(initialUserLevel);
+        }
+
+        await unitOfWork.CommitAsync();
+    }
+
+    public async Task RegisterFinanceAsync(RegisterRequest request)
+    {
+        var user = await userManager.FindByNameAsync(request.Username);
+        if (user is not null) throw new BadRequestException(Resource.UsernameExisted);
+
+        user = new User
+        {
+            UserName = request.Username,
+            Email = request.Username,
+            FullName = request.FullName ?? string.Empty,
+            StudentCode = request.StudentCode ?? string.Empty,
+            Status = "Active",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+
+        };
+
+        var result = await userManager.CreateAsync(user, request.Password);
+        if (!result.Succeeded) throw new BadRequestException();
+
+        result = await userManager.AddToRoleAsync(user, RoleEnums.Finance.ToString());
+        if (!result.Succeeded) throw new BadRequestException();
+
+        var walletRepo = unitOfWork.Repository<UserWallet>();
+        var wallet = new UserWallet
+        {
+            UserId = user.Id,
+            Balance = 0,
+            LastUpdatedAt = DateTime.UtcNow
+        };
+        await walletRepo.CreateAsync(wallet);
+
+        var levelRepo = unitOfWork.Repository<Level>();
+        var userLevelRepo = unitOfWork.Repository<UserLevel>();
+
+        var activeLevels = await levelRepo.Entities
+            .Where(l => l.IsActive)
+            .ToListAsync();
+
+        var lowestLevel = activeLevels
+            .OrderBy(l => GetThresholdFromCondition(l.ConditionJson))
+            .FirstOrDefault();
+
+        if (lowestLevel != null)
+        {
+            var initialUserLevel = new UserLevel
+            {
+                UserId = user.Id,
+                LevelId = lowestLevel.Id,
+                UnlockedAt = DateTime.UtcNow
+            };
+            await userLevelRepo.CreateAsync(initialUserLevel);
+        }
+
+        await unitOfWork.CommitAsync();
+    }
+
 }

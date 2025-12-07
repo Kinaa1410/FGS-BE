@@ -13,4 +13,6 @@ public interface IUserService
     Task UpdateAsync(int id, UpdateUserCommand request);
     Task DeleteAsync(int id);
     Task ChangePasswordAsync(int userId, ChangePasswordRequest request);
+    Task RegisterMentorAsync(RegisterRequest request);
+    Task RegisterFinanceAsync(RegisterRequest request);
 }
