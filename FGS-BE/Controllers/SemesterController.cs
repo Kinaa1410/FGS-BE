@@ -59,9 +59,29 @@ namespace FGS_BE.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateSemesterDto dto)
         {
-            var created = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            try
+            {
+                var created = await _service.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Không thể tạo semester.", detail = ex.Message });
+            }
         }
+
 
         /// <summary>
         /// update semester

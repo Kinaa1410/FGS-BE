@@ -34,8 +34,16 @@ namespace FGS_BE.API.Controllers
             [FromQuery] string? sortDir = "Asc",
             [FromQuery] int? semesterId = null)
         {
-            var result = await _service.GetPagedAsync(pageIndex, pageSize, keyword, sortColumn, sortDir, semesterId);
-            return Ok(result);
+            try
+            {
+                var result = await _service.GetPagedAsync(pageIndex, pageSize, keyword, sortColumn, sortDir, semesterId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Không thể lấy danh sách term keyword.", detail = ex.Message });
+            }
+
         }
 
         /// <summary>
@@ -46,8 +54,16 @@ namespace FGS_BE.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await _service.GetByIdAsync(id);
-            return result == null ? NotFound() : Ok(result);
+            try
+            {
+                var result = await _service.GetByIdAsync(id);
+                return result == null ? NotFound() : Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Không thể lấy thông tin.", detail = ex.Message });
+            }
+
         }
 
         /// <summary>
@@ -58,8 +74,23 @@ namespace FGS_BE.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateTermKeywordDto dto)
         {
-            var result = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            try
+            {
+                var result = await _service.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Không thể tạo mới.", detail = ex.Message });
+            }
         }
 
         /// <summary>
