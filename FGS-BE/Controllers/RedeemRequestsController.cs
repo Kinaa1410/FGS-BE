@@ -15,18 +15,9 @@ namespace FGS_BE.API.Controllers
             _service = service;
         }
 
-        /// <summary>
-        /// Get all redeem requests with pagination and filters
-        /// </summary>
-        /// <param name="pageIndex">Current page number</param>
-        /// <param name="pageSize">Number of records per page</param>
-        /// <param name="keyword">Search by RewardItem name or description</param>
-        /// <param name="status">Filter by Status</param>
-        /// <param name="userId">Filter by UserId</param>
-        /// <param name="rewardItemId">Filter by RewardItemId</param>
-        /// <param name="sortColumn">Column to sort by</param>
-        /// <param name="sortDir">Sort direction: Asc or Desc</param>
-        /// <returns></returns>
+        // ===========================
+        // GET ALL
+        // ===========================
         [HttpGet]
         public async Task<IActionResult> GetAll(
             [FromQuery] int pageIndex = 1,
@@ -38,20 +29,15 @@ namespace FGS_BE.API.Controllers
             [FromQuery] string? sortColumn = "Id",
             [FromQuery] string? sortDir = "Asc")
         {
-            var result = await _service.GetPagedAsync(pageIndex, pageSize, keyword, status, userId, rewardItemId, sortColumn, sortDir);
+            var result = await _service.GetPagedAsync(
+                pageIndex, pageSize, keyword, status, userId, rewardItemId, sortColumn, sortDir);
+
             return Ok(result);
         }
 
-        /// <summary>
-        /// Get redeem requests by user ID with pagination
-        /// </summary>
-        /// <param name="userId">User ID to filter requests</param>
-        /// <param name="pageIndex">Current page number</param>
-        /// <param name="pageSize">Number of records per page</param>
-        /// <param name="status">Filter by Status</param>
-        /// <param name="sortColumn">Column to sort by</param>
-        /// <param name="sortDir">Sort direction: Asc or Desc</param>
-        /// <returns></returns>
+        // ===========================
+        // GET BY USER
+        // ===========================
         [HttpGet("by-user/{userId}")]
         public async Task<IActionResult> GetByUser(
             int userId,
@@ -61,65 +47,89 @@ namespace FGS_BE.API.Controllers
             [FromQuery] string? sortColumn = "Id",
             [FromQuery] string? sortDir = "Asc")
         {
-            var result = await _service.GetPagedByUserAsync(userId, pageIndex, pageSize, status, sortColumn, sortDir);
+            var result = await _service.GetPagedByUserAsync(
+                userId, pageIndex, pageSize, status, sortColumn, sortDir);
+
             return Ok(result);
         }
 
-        /// <summary>
-        /// Get redeem request by ID
-        /// </summary>
-        /// <param name="id">Redeem request ID</param>
-        /// <returns></returns>
+        // ===========================
+        // GET BY ID
+        // ===========================
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _service.GetByIdAsync(id);
-            return result == null ? NotFound() : Ok(result);
+            return result == null
+                ? NotFound(new { message = "Redeem request not found." })
+                : Ok(result);
         }
 
-        /// <summary>
-        /// Create a new redeem request
-        /// </summary>
-        /// <param name="dto">Create data</param>
-        /// <returns></returns>
+        // ===========================
+        // CREATE
+        // ===========================
+        [HttpPost]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateRedeemRequestDto dto)
         {
-            var result = await _service.CreateAsync(dto);
-            if (result == null)
+            try
             {
-                return BadRequest(new { message = "You don't have enough points to exchange" });
+                var result = await _service.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
             }
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message }); // ✅ 404
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message }); // ✅ 400
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { message = "Internal server error" });
+            }
         }
 
-        /// <summary>
-        /// Update redeem request status (approve/reject)
-        /// </summary>
-        /// <param name="id">Redeem request ID</param>
-        /// <param name="dto">Update status data</param>
-        /// <returns></returns>
+
+        // ===========================
+        // UPDATE STATUS
+        // ===========================
         [HttpPut("{id}/status")]
-        public async Task<IActionResult> ApproveOrReject(int id, [FromBody] UpdateStatusRedeemRequestDto dto)
+        public async Task<IActionResult> UpdateStatus(
+            int id,
+            [FromBody] UpdateStatusRedeemRequestDto dto)
         {
-            var result = await _service.UpdateStatusAsync(id, dto);
-            if (result == null)
+            try
             {
-                return BadRequest(new { message = "Invalid status. Only Approved or Rejected allowed, and only for Pending requests." });
+                var result = await _service.UpdateStatusAsync(id, dto);
+                return Ok(result);
             }
-            return Ok(result);
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message }); // 404
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message }); // 400
+            }
         }
 
-        /// <summary>
-        /// Delete redeem request
-        /// </summary>
-        /// <param name="id">Redeem request ID</param>
-        /// <returns></returns>
+        // ===========================
+        // DELETE
+        // ===========================
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var success = await _service.DeleteAsync(id);
-            return success ? NoContent() : NotFound();
+            try
+            {
+                await _service.DeleteAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message }); // 404
+            }
         }
     }
 }
