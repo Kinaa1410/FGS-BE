@@ -41,11 +41,35 @@ namespace FGS_BE.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CreateTaskDto dto)
+        public async Task<IActionResult> Create([FromBody] CreateTaskDto dto)
         {
-            var result = await _taskService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            try
+            {
+                var result = await _taskService.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    message = "Không thể tạo task.",
+                    detail = ex.Message
+                });
+            }
         }
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, UpdateTaskDto dto)

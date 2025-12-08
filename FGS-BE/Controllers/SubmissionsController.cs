@@ -63,9 +63,29 @@ namespace FGS_BE.API.Controllers
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> Create([FromForm] CreateSubmissionDto dto)
         {
-            var result = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            try
+            {
+                var result = await _service.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Không thể tạo submission.", detail = ex.Message });
+            }
         }
+
 
 
         /// <summary>
