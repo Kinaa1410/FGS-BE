@@ -3,14 +3,14 @@ using FGS_BE.Repo.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Collections;
-using System.Data; // For IsolationLevel
+using System.Data;
 
 namespace FGS_BE.Repo.Repositories.Implements
 {
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ApplicationDbContext _context;
-        private Hashtable? _repositories;
+        private readonly Hashtable _repositories = new();
         private bool disposed = false;
 
         public ISemesterRepository SemesterRepository { get; }
@@ -23,8 +23,10 @@ namespace FGS_BE.Repo.Repositories.Implements
         public ISubmissionRepository SubmissionRepository { get; }
         public IProjectMemberRepository ProjectMemberRepository { get; }
         public IPerformanceScoreRepository PerformanceScoreRepository { get; }
-        public IProjectInvitationRepository ProjectInvitationRepository { get; }
         public IUserRepository UserRepository { get; }
+        public IProjectInvitationRepository ProjectInvitationRepository { get; }
+        public INotificationRepository NotificationRepository { get; }
+        public INotificationTemplateRepository NotificationTemplateRepository { get; }
 
         public UnitOfWork(
             ApplicationDbContext context,
@@ -39,9 +41,13 @@ namespace FGS_BE.Repo.Repositories.Implements
             IProjectMemberRepository projectMemberRepository,
             IPerformanceScoreRepository performanceScoreRepository,
             IUserRepository userRepository,
-            IProjectInvitationRepository projectInvitationRepository)
+            IProjectInvitationRepository projectInvitationRepository,
+            INotificationRepository notificationRepository,
+            INotificationTemplateRepository notificationTemplateRepository
+        )
         {
             _context = context;
+
             SemesterRepository = semesterRepository;
             RewardItemRepository = rewardItemRepository;
             TermKeywordRepository = termKeywordRepository;
@@ -54,36 +60,41 @@ namespace FGS_BE.Repo.Repositories.Implements
             PerformanceScoreRepository = performanceScoreRepository;
             UserRepository = userRepository;
             ProjectInvitationRepository = projectInvitationRepository;
+            NotificationRepository = notificationRepository;
+            NotificationTemplateRepository = notificationTemplateRepository;
         }
 
         public IGenericRepository<T> Repository<T>() where T : class
         {
-            if (_repositories == null)
-                _repositories = new Hashtable();
             var type = typeof(T).Name;
+
             if (!_repositories.ContainsKey(type))
             {
-                var repositoryType = typeof(GenericRepository<>);
-                var repositoryInstance = Activator.CreateInstance(repositoryType.MakeGenericType(typeof(T)), _context);
-                _repositories.Add(type, repositoryInstance);
+                var repoType = typeof(GenericRepository<>).MakeGenericType(typeof(T));
+                var repoInstance = Activator.CreateInstance(repoType, _context);
+                _repositories[type] = repoInstance!;
             }
+
             return (IGenericRepository<T>)_repositories[type]!;
         }
-
         public async Task CommitAsync(CancellationToken cancellationToken = default)
         {
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, CancellationToken cancellationToken = default)
+        public async Task<IDbContextTransaction> BeginTransactionAsync(
+            IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
+            CancellationToken cancellationToken = default)
         {
             return await _context.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
         }
 
         public async Task RollbackAsync()
         {
-            _context.ChangeTracker.Entries().ToList().ForEach(x => x.Reload());
-            await Task.CompletedTask;
+            foreach (var entry in _context.ChangeTracker.Entries())
+            {
+                await entry.ReloadAsync();
+            }
         }
 
         protected virtual void Dispose(bool disposing)

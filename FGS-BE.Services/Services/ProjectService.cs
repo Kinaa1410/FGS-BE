@@ -61,27 +61,12 @@ namespace FGS_BE.Service.Implements
         {
             await ValidateProposerAsync(dto.ProposerId);
             await ValidateSemesterAsync(dto.SemesterId);
-
-            if (dto.MentorId.HasValue)
-                await ValidateMentorAsync(dto.MentorId.Value);
-
-            // Duplicate title check
-            //var existing = await _unitOfWork.ProjectRepository.FindAsync(p => p.Title == dto.Title);
-            //var existingProject = await _unitOfWork.ProjectRepository
-            //.FindAsync(p => p.Title == dto.Title);
-
-            //if (existingProject != null)
-            //{
-            //    throw new InvalidOperationException($"A project with title '{dto.Title}' already exists.");
-            //}
-
-            //
-            var exists = await _unitOfWork.ProjectRepository
-            .ExistsByAsync(p => p.Title == dto.Title);
+            var exists = await _unitOfWork.ProjectRepository.ExistsByAsync(p => p.Title == dto.Title);
 
             if (exists)
                 throw new InvalidOperationException($"A project with title '{dto.Title}' already exists.");
-            //
+            if (dto.MentorId.HasValue)
+                await ValidateMentorAsync(dto.MentorId.Value);
 
             var entity = dto.ToEntity();
             await _unitOfWork.ProjectRepository.CreateAsync(entity);

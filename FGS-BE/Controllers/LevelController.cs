@@ -1,129 +1,116 @@
 ﻿using FGS_BE.Repo.DTOs.Levels;
+using FGS_BE.Repo.DTOs.Levels.Validators;
 using FGS_BE.Repo.DTOs.Pages;
 using FGS_BE.Service.Interfaces;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FGS_BE.API.Controllers;
-
-[ApiController]
-[Route("api/[controller]")]
-public class LevelsController : ControllerBase
+namespace FGS_BE.API.Controllers
 {
-    private readonly ILevelService _service;
-
-    public LevelsController(ILevelService service)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class LevelsController : ControllerBase
     {
-        _service = service;
-    }
+        private readonly ILevelService _service;
+        private readonly IValidator<CreateLevelDto> _createValidator;
+        private readonly IValidator<UpdateLevelDto> _updateValidator;
+        private readonly IValidator<CheckLevelUpRequest> _checkValidator;
 
-    /// <summary>
-    /// Get all levels with pagination, keyword search, and sorting.
-    /// </summary>
-    /// <param name="pageIndex">Current page index (default: 1).</param>
-    /// <param name="pageSize">Items per page (default: 10).</param>
-    /// <param name="keyword">Search by name or description.</param>
-    /// <param name="sortColumn">Column to sort by (default: Id).</param>
-    /// <param name="sortDir">Sort direction: Asc or Desc (default: Asc).</param>
-    /// <returns>Paginated list of levels.</returns>
-    /// <response code="200">Success.</response>
-    [HttpGet]
-    [ProducesResponseType(typeof(PaginatedList<LevelDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<PaginatedList<LevelDto>>> GetAll(
-        [FromQuery] int pageIndex = 1,
-        [FromQuery] int pageSize = 10,
-        [FromQuery] string? keyword = null,
-        [FromQuery] string? sortColumn = "Id",
-        [FromQuery] string? sortDir = "Asc")
-    {
-        var result = await _service.GetPagedAsync(pageIndex, pageSize, keyword, sortColumn, sortDir);
-        return Ok(result);
-    }
+        public LevelsController(
+            ILevelService service,
+            IValidator<CreateLevelDto> createValidator,
+            IValidator<UpdateLevelDto> updateValidator,
+            IValidator<CheckLevelUpRequest> checkValidator)
+        {
+            _service = service;
+            _createValidator = createValidator;
+            _updateValidator = updateValidator;
+            _checkValidator = checkValidator;
+        }
 
-    /// <summary>
-    /// Get level by ID.
-    /// </summary>
-    /// <param name="id">Level ID.</param>
-    /// <returns>Level details or NotFound.</returns>
-    /// <response code="200">Success.</response>
-    /// <response code="404">Not found.</response>
-    [HttpGet("{id}")]
-    [ProducesResponseType(typeof(LevelDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<LevelDto>> GetById(int id)
-    {
-        var result = await _service.GetByIdAsync(id);
-        return result == null ? NotFound() : Ok(result);
-    }
+        [HttpGet]
+        [ProducesResponseType(typeof(PaginatedList<LevelDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<PaginatedList<LevelDto>>> GetAll(
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? keyword = null,
+            [FromQuery] string? sortColumn = "Id",
+            [FromQuery] string? sortDir = "Asc")
+        {
+            var result = await _service.GetPagedAsync(pageIndex, pageSize, keyword, sortColumn, sortDir);
+            return Ok(result);
+        }
 
-    /// <summary>
-    /// Create a new level.
-    /// </summary>
-    /// <param name="dto">Level creation data.</param>
-    /// <returns>Created level with 201 status.</returns>
-    /// <response code="201">Created.</response>
-    /// <response code="400">Invalid input.</response>
-    [HttpPost]
-    [ProducesResponseType(typeof(LevelDto), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<LevelDto>> Create([FromBody] CreateLevelDto dto)
-    {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(LevelDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<LevelDto>> GetById(int id)
+        {
+            if (id <= 0) return BadRequest(new { error = "ID must larger than 0" });
+            var result = await _service.GetByIdAsync(id);
+            return result == null ? NotFound(new { error = "Level doesn't exist" }) : Ok(result);
+        }
 
-        var result = await _service.CreateAsync(dto);
-        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-    }
+        [HttpPost]
+        [ProducesResponseType(typeof(LevelDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<LevelDto>> Create([FromBody] CreateLevelDto dto)
+        {
+            var validationResult = await _createValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new { errors = validationResult.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }) });
+            }
+            var result = await _service.CreateAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        }
 
-    /// <summary>
-    /// Update an existing level.
-    /// </summary>
-    /// <param name="id">Level ID.</param>
-    /// <param name="dto">Updated level data (partial).</param>
-    /// <returns>Updated level or NotFound.</returns>
-    /// <response code="200">Updated.</response>
-    /// <response code="404">Not found.</response>
-    [HttpPut("{id}")]
-    [ProducesResponseType(typeof(LevelDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<LevelDto>> Update(int id, [FromBody] UpdateLevelDto dto)
-    {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
+        [HttpPut("{id}")]
+        [ProducesResponseType(typeof(LevelDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<LevelDto>> Update(int id, [FromBody] UpdateLevelDto dto)
+        {
+            if (id <= 0) return BadRequest(new { error = "ID must larger than 0" });
 
-        var result = await _service.UpdateAsync(id, dto);
-        return result == null ? NotFound() : Ok(result);
-    }
+            var validationResult = await _updateValidator.ValidateAsync(dto);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new { errors = validationResult.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }) });
+            }
 
-    /// <summary>
-    /// Delete a level by ID.
-    /// </summary>
-    /// <param name="id">Level ID.</param>
-    /// <returns>NoContent on success, NotFound otherwise.</returns>
-    /// <response code="204">Deleted.</response>
-    /// <response code="404">Not found.</response>
-    [HttpDelete("{id}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var success = await _service.DeleteAsync(id);
-        return success ? NoContent() : NotFound();
-    }
+            var result = await _service.UpdateAsync(id, dto);
+            return result == null ? NotFound(new { error = "Level doesn't exist" }) : Ok(result);
+        }
 
-    /// <summary>
-    /// Check and auto-assign level to a user if their points meet a condition.
-    /// </summary>
-    /// <param name="userId">User ID.</param>
-    /// <param name="request">Current points to check.</param>
-    /// <returns>Newly assigned user level or NotFound if no upgrade available.</returns>
-    /// <response code="200">Level assigned.</response>
-    /// <response code="404">No eligible upgrade.</response>
-    [HttpPost("user/{userId}/check-level-up")]
-    [ProducesResponseType(typeof(UserLevelDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<UserLevelDto>> CheckAndAssignUserLevel(int userId, [FromBody] CheckLevelUpRequest request)
-    {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Delete(int id)
+        {
+            if (id <= 0) return BadRequest(new { error = "ID must larger than 0" });
+            var success = await _service.DeleteAsync(id);
+            return success ? NoContent() : NotFound(new { error = "Level doesn't exist" });
+        }
 
-        var result = await _service.CheckAndAssignUserLevelAsync(userId, request);
-        return result == null ? NotFound("No eligible level upgrade available.") : Ok(result);
+        [HttpPost("user/{userId}/check-level-up")]
+        [ProducesResponseType(typeof(UserLevelDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<UserLevelDto>> CheckAndAssignUserLevel(int userId, [FromBody] CheckLevelUpRequest request)
+        {
+            if (userId <= 0) return BadRequest(new { error = "User ID must larger than 0" });
+
+            var validationResult = await _checkValidator.ValidateAsync(request);
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(new { errors = validationResult.Errors.Select(e => new { e.PropertyName, e.ErrorMessage }) });
+            }
+
+            var result = await _service.CheckAndAssignUserLevelAsync(userId, request);
+            return result == null ? NotFound(new { error = "Doesn't have suitable level upgrade" }) : Ok(result);
+        }
     }
 }
