@@ -249,7 +249,7 @@ public class UserService(
         var result = await userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded) throw new BadRequestException();
 
-        result = await userManager.AddToRoleAsync(user, RoleEnums.Finance.ToString());
+        result = await userManager.AddToRoleAsync(user, RoleEnums.FinanceOfficer.ToString());
         if (!result.Succeeded) throw new BadRequestException();
 
         var walletRepo = unitOfWork.Repository<UserWallet>();
