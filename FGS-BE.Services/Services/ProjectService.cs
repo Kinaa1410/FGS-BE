@@ -75,6 +75,14 @@ namespace FGS_BE.Service.Implements
             //    throw new InvalidOperationException($"A project with title '{dto.Title}' already exists.");
             //}
 
+            //
+            var exists = await _unitOfWork.ProjectRepository
+            .ExistsByAsync(p => p.Title == dto.Title);
+
+            if (exists)
+                throw new InvalidOperationException($"A project with title '{dto.Title}' already exists.");
+            //
+
             var entity = dto.ToEntity();
             await _unitOfWork.ProjectRepository.CreateAsync(entity);
             await _unitOfWork.CommitAsync();
