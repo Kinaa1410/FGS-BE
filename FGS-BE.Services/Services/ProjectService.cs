@@ -154,5 +154,61 @@ namespace FGS_BE.Service.Implements
             if (mentor == null)
                 throw new ArgumentException("Mentor not found.", nameof(mentorId));
         }
+
+        // GET PAGED BY MENTOR ID
+        // ============================================================
+        public async System.Threading.Tasks.Task<PaginatedList<ProjectDto>> GetByMentorIdPagedAsync(
+            int mentorId,
+            int pageIndex,
+            int pageSize,
+            string? keyword = null,
+            string? status = null,
+            string? sortColumn = "Id",
+            string? sortDir = "Asc")
+        {
+            await ValidateMentorAsync(mentorId); // Optional: Validate mentor exists upfront
+
+            // Assuming ProjectRepository has a GetByMentorIdPagedAsync method that filters by MentorId
+            // and applies the other parameters similar to GetPagedAsync. If not, implement it in the repository.
+            var paged = await _unitOfWork.ProjectRepository.GetByMentorIdPagedAsync(
+                mentorId, pageIndex, pageSize, keyword, status, sortColumn, sortDir);
+
+            var list = paged.Select(x => new ProjectDto(x)).ToList();
+            return new PaginatedList<ProjectDto>(
+                list,
+                paged.TotalItems,
+                paged.PageIndex,
+                paged.PageSize
+            );
+        }
+
+        // ============================================================
+        // GET PAGED BY MEMBER ID
+        // ============================================================
+        public async System.Threading.Tasks.Task<PaginatedList<ProjectDto>> GetByMemberIdPagedAsync(
+            int memberId,
+            int pageIndex,
+            int pageSize,
+            string? keyword = null,
+            string? status = null,
+            string? sortColumn = "Id",
+            string? sortDir = "Asc")
+        {
+            // Assuming UserRepository or ProjectRepository has a way to fetch projects where the user is a member.
+            // This might involve a join with a ProjectMember entity/table. If not, implement GetProjectsByMemberIdPagedAsync
+            // in the ProjectRepository that filters via navigation properties or a query like:
+            // Projects.Where(p => p.ProjectMembers.Any(pm => pm.MemberId == memberId))
+
+            var paged = await _unitOfWork.ProjectRepository.GetByMemberIdPagedAsync(
+                memberId, pageIndex, pageSize, keyword, status, sortColumn, sortDir);
+
+            var list = paged.Select(x => new ProjectDto(x)).ToList();
+            return new PaginatedList<ProjectDto>(
+                list,
+                paged.TotalItems,
+                paged.PageIndex,
+                paged.PageSize
+            );
+        }
     }
 }
