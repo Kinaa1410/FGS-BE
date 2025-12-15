@@ -20,81 +20,57 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.OpenApi.Models; // Add for OpenApiInfo
-
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProjectDtoValidator>();
-
 // Custom extensions (these handle additional registrations like auto-scanning)
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddWebServices(builder.Configuration);
-
-// ADD THESE FOR SWAGGER (if not in your extensions):
-builder.Services.AddEndpointsApiExplorer(); // Discovers API endpoints
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "FGS_BE API",
-        Version = "v1",
-        Description = "Final Grade System Backend API"
-    });
-    // Optional: XML comments for <summary> tags in controllers
-    // var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    // var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    // options.IncludeXmlComments(xmlPath);
-});
-
 // Database Context (overriding the commented MySQL in extensions for SQL Server)
 string defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("DefaultConnection not found in configuration.");
+?? throw new InvalidOperationException("DefaultConnection not found in configuration.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(defaultConnection)
-           .EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
-           .EnableDetailedErrors(builder.Environment.IsDevelopment())
-           .UseProjectables());
-
+options.UseSqlServer(defaultConnection)
+.EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
+.EnableDetailedErrors(builder.Environment.IsDevelopment())
+.UseProjectables());
 // Repositories (all Scoped for per-request lifetime with DbContext)
 builder.Services
-    .AddScoped<ISemesterRepository, SemesterRepository>()
-    .AddScoped<IRewardItemRepository, RewardItemRepository>()
-    .AddScoped<ITermKeywordRepository, TermKeywordRepository>()
-    .AddScoped<IProjectRepository, ProjectRepository>()
-    .AddScoped<IMilestoneRepository, MilestoneRepository>()
-    .AddScoped<ITaskRepository, TaskRepository>()
-    .AddScoped<IRedeemRequestRepository, RedeemRequestRepository>()
-    .AddScoped<ISubmissionRepository, SubmissionRepository>()
-    .AddScoped<IProjectMemberRepository, ProjectMemberRepository>()
-    .AddScoped<ILevelRepository, LevelRepository>()
-    .AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>()
-    .AddScoped<IProjectInvitationRepository, ProjectInvitationRepository>()
-    .AddScoped<INotificationRepository, NotificationRepository>()
-    .AddScoped<INotificationTemplateRepository, NotificationTemplateRepository>()
-    .AddScoped<IUserRepository, UserRepository>();
-
+.AddScoped<ISemesterRepository, SemesterRepository>()
+.AddScoped<IRewardItemRepository, RewardItemRepository>()
+.AddScoped<ITermKeywordRepository, TermKeywordRepository>()
+.AddScoped<IProjectRepository, ProjectRepository>()
+.AddScoped<IMilestoneRepository, MilestoneRepository>()
+.AddScoped<ITaskRepository, TaskRepository>()
+.AddScoped<IRedeemRequestRepository, RedeemRequestRepository>()
+.AddScoped<ISubmissionRepository, SubmissionRepository>()
+.AddScoped<IProjectMemberRepository, ProjectMemberRepository>()
+.AddScoped<ILevelRepository, LevelRepository>()
+.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>()
+.AddScoped<IProjectInvitationRepository, ProjectInvitationRepository>()
+.AddScoped<INotificationRepository, NotificationRepository>()
+.AddScoped<INotificationTemplateRepository, NotificationTemplateRepository>()
+.AddScoped<IUserRepository, UserRepository>();
 // Services (all Scoped to match repositories/DbContext)
 builder.Services
-    .AddScoped<IRedeemRequestService, RedeemRequestService>()
-    .AddScoped<ISemesterService, SemesterService>()
-    .AddScoped<IRewardItemService, RewardItemService>()
-    .AddScoped<ITermKeywordService, TermKeywordService>()
-    .AddScoped<IProjectService, ProjectService>()
-    .AddScoped<IMilestoneService, MilestoneService>()
-    .AddScoped<ITaskService, TaskService>()
-    .AddScoped<ISubmissionService, SubmissionService>()
-    .AddScoped<ICloudinaryService, CloudinaryService>()
-    .AddScoped<IProjectMemberService, ProjectMemberService>()
-    .AddScoped<ILevelService, LevelService>()
-    .AddScoped<INotificationService, NotificationService>()
-    .AddScoped<IPerformanceScoreService, PerformanceScoreService>()
-    .AddScoped<IUserService, UserService>()
-    .AddScoped<INotificationTemplateService, NotificationTemplateService>()
-    .AddScoped<IProjectInvitationService, ProjectInvitationService>();
-
+.AddScoped<IRedeemRequestService, RedeemRequestService>()
+.AddScoped<ISemesterService, SemesterService>()
+.AddScoped<IRewardItemService, RewardItemService>()
+.AddScoped<ITermKeywordService, TermKeywordService>()
+.AddScoped<IProjectService, ProjectService>()
+.AddScoped<IMilestoneService, MilestoneService>()
+.AddScoped<ITaskService, TaskService>()
+.AddScoped<ISubmissionService, SubmissionService>()
+.AddScoped<ICloudinaryService, CloudinaryService>()
+.AddScoped<IProjectMemberService, ProjectMemberService>()
+.AddScoped<ILevelService, LevelService>()
+.AddScoped<INotificationService, NotificationService>()
+.AddScoped<IPerformanceScoreService, PerformanceScoreService>()
+.AddScoped<IUserService, UserService>()
+.AddScoped<INotificationTemplateService, NotificationTemplateService>()
+.AddScoped<IProjectInvitationService, ProjectInvitationService>();
 // UnitOfWork (Scoped factory to inject all repositories)
 builder.Services.AddScoped<IUnitOfWork>(provider =>
 {
@@ -114,38 +90,30 @@ builder.Services.AddScoped<IUnitOfWork>(provider =>
     var notificationTemplateRepo = provider.GetRequiredService<INotificationTemplateRepository>();
     var projectInvitationRepo = provider.GetRequiredService<IProjectInvitationRepository>();
     return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo,
-        projectRepo, milestoneRepo, taskRepo, redeemRequestRepo, submissionRepo,
-        projectMemberRepo, performanceScoreRepo, userRepo, projectInvitationRepo,
-        notificationRepo, notificationTemplateRepo);
+    projectRepo, milestoneRepo, taskRepo, redeemRequestRepo, submissionRepo,
+    projectMemberRepo, performanceScoreRepo, userRepo, projectInvitationRepo,
+    notificationRepo, notificationTemplateRepo);
 });
-
 // Background Services (e.g., for expiring invitations)
 builder.Services.AddHostedService<InvitationExpiryService>();
-
 // Authorization (enables [Authorize] attributes on controllers)
 builder.Services.AddAuthorization();
-
 var app = builder.Build();
-
 // Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment()) // Dev-only for security (remove || IsProduction)
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "FGS_BE API v1");
-        options.RoutePrefix = "swagger"; // Standard: Access at /swagger (change to string.Empty for root)
-    });
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "FGS API v1");
+        options.RoutePrefix = string.Empty; // Optional: Serve Swagger at app root
+    });
 }
-
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
-
 // Essential Middleware Pipeline (using extension for consistency)
 await app.UseWebApplication();
-
 app.MapControllers();
-
 app.Run();
