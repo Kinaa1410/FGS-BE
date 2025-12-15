@@ -191,6 +191,10 @@ namespace FGS_BE.API.Controllers
                     status,
                     sortColumn,
                     sortDir);
+                if (result.TotalItems == 0)
+                {
+                    return Ok(new { message = "No projects found for this mentor.", data = result });
+                }
                 return Ok(result);
             }
             catch (ArgumentException ex)
@@ -238,6 +242,11 @@ namespace FGS_BE.API.Controllers
                     status,
                     sortColumn,
                     sortDir);
+
+                if (result.TotalItems == 0)
+                {
+                    return Ok(new { message = "No projects found for this member.", data = result });
+                }
                 return Ok(result);
             }
             catch (ArgumentException ex)
