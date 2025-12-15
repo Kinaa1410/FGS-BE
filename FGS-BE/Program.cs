@@ -1,5 +1,6 @@
 using FGS_BE;
 using FGS_BE.Repo.Data;
+using FGS_BE.Repo.DTOs.Projects.Validators;
 using FGS_BE.Repo.Entities;
 using FGS_BE.Repo.Repositories.Implements;
 using FGS_BE.Repo.Repositories.Interfaces;
@@ -9,6 +10,8 @@ using FGS_BE.Service.Interfaces;
 using FGS_BE.Service.Services;
 using FGS_BE.Services.Implements;
 using FGS_BE.Services.Interfaces;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
@@ -20,6 +23,10 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreateProjectDtoValidator>();
 // Custom extensions (these handle additional registrations like auto-scanning)
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -48,7 +55,9 @@ builder.Services
     .AddScoped<ILevelRepository, LevelRepository>()
     .AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>()
     .AddScoped<IProjectInvitationRepository, ProjectInvitationRepository>()
-    .AddScoped<IUserRepository, UserRepository>(); // NEW: Add this line for IUserRepository registration
+    .AddScoped<INotificationRepository, NotificationRepository>()
+    .AddScoped<INotificationTemplateRepository, NotificationTemplateRepository>()
+    .AddScoped<IUserRepository, UserRepository>(); 
 
 // Services (all Scoped to match repositories/DbContext)
 builder.Services
@@ -65,6 +74,8 @@ builder.Services
     .AddScoped<ILevelService, LevelService>()
     .AddScoped<INotificationService, NotificationService>()
     .AddScoped<IPerformanceScoreService, PerformanceScoreService>()
+    .AddScoped<IUserService, UserService>()
+    .AddScoped<INotificationTemplateService, NotificationTemplateService>()
     .AddScoped<IProjectInvitationService, ProjectInvitationService>();
 
 // UnitOfWork (Scoped factory to inject all repositories)
@@ -81,11 +92,14 @@ builder.Services.AddScoped<IUnitOfWork>(provider =>
     var submissionRepo = provider.GetRequiredService<ISubmissionRepository>();
     var projectMemberRepo = provider.GetRequiredService<IProjectMemberRepository>();
     var performanceScoreRepo = provider.GetRequiredService<IPerformanceScoreRepository>();
-    var userRepo = provider.GetRequiredService<IUserRepository>(); // NEW: This now resolves correctly
+    var userRepo = provider.GetRequiredService<IUserRepository>();
+    var notificationRepo = provider.GetRequiredService<INotificationRepository>();
+    var notificationTemplateRepo = provider.GetRequiredService<INotificationTemplateRepository>();
     var projectInvitationRepo = provider.GetRequiredService<IProjectInvitationRepository>();
     return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo,
         projectRepo, milestoneRepo, taskRepo, redeemRequestRepo, submissionRepo,
-        projectMemberRepo, performanceScoreRepo, userRepo, projectInvitationRepo);
+        projectMemberRepo, performanceScoreRepo, userRepo, projectInvitationRepo, 
+        notificationRepo,notificationTemplateRepo);
 });
 
 // Background Services (e.g., for expiring invitations)

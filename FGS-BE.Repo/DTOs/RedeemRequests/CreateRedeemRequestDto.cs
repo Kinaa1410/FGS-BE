@@ -6,7 +6,6 @@ namespace FGS_BE.Repo.DTOs.RedeemRequests
     public class CreateRedeemRequestDto
     {
         public int Quantity { get; set; }
-        public decimal TotalPoints { get; set; }
         public int UserId { get; set; }
         public int RewardItemId { get; set; }
 
@@ -15,7 +14,6 @@ namespace FGS_BE.Repo.DTOs.RedeemRequests
             return new RedeemRequest
             {
                 Quantity = this.Quantity,
-                TotalPoints = this.TotalPoints,
                 Status = RedeemRequestStatus.Pending,
                 RequestedAt = DateTime.UtcNow,
                 ProcessedAt = null,

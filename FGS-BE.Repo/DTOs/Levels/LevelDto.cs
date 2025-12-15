@@ -9,7 +9,24 @@ public class LevelDto
     public string? Name { get; set; }
     public string? Description { get; set; }
     public string? ConditionJson { get; set; }
-    public JsonDocument? Condition => !string.IsNullOrEmpty(ConditionJson) ? JsonDocument.Parse(ConditionJson) : null;
+    public JsonDocument? Condition
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(ConditionJson)) return null;
+            if (!IsValidJson(ConditionJson)) return null;
+
+            try
+            {
+                return JsonDocument.Parse(ConditionJson);
+            }
+            catch (JsonException ex)
+            {
+
+                return null;
+            }
+        }
+    }
     public int PointsReward { get; set; }
     public string? Icon { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -29,5 +46,12 @@ public class LevelDto
         CreatedAt = entity.CreatedAt;
         UpdatedAt = entity.UpdatedAt;
         IsActive = entity.IsActive;
+    }
+
+    private static bool IsValidJson(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return false;
+        var firstChar = json.Trim()[0];
+        return firstChar == '{' || firstChar == '[' || char.IsDigit(firstChar) || firstChar == '"' || firstChar == '-' || firstChar == 't' || firstChar == 'f' || firstChar == 'n'; // Basic start chars for JSON
     }
 }
