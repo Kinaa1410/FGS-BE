@@ -20,17 +20,34 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.OpenApi.Models; // Add for OpenApiInfo
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
-
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProjectDtoValidator>();
+
 // Custom extensions (these handle additional registrations like auto-scanning)
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddWebServices(builder.Configuration);
+
+// ADD THESE FOR SWAGGER (if not in your extensions):
+builder.Services.AddEndpointsApiExplorer(); // Discovers API endpoints
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "FGS_BE API",
+        Version = "v1",
+        Description = "Final Grade System Backend API"
+    });
+    // Optional: XML comments for <summary> tags in controllers
+    // var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    // var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    // options.IncludeXmlComments(xmlPath);
+});
 
 // Database Context (overriding the commented MySQL in extensions for SQL Server)
 string defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -57,7 +74,7 @@ builder.Services
     .AddScoped<IProjectInvitationRepository, ProjectInvitationRepository>()
     .AddScoped<INotificationRepository, NotificationRepository>()
     .AddScoped<INotificationTemplateRepository, NotificationTemplateRepository>()
-    .AddScoped<IUserRepository, UserRepository>(); 
+    .AddScoped<IUserRepository, UserRepository>();
 
 // Services (all Scoped to match repositories/DbContext)
 builder.Services
@@ -98,8 +115,8 @@ builder.Services.AddScoped<IUnitOfWork>(provider =>
     var projectInvitationRepo = provider.GetRequiredService<IProjectInvitationRepository>();
     return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo,
         projectRepo, milestoneRepo, taskRepo, redeemRequestRepo, submissionRepo,
-        projectMemberRepo, performanceScoreRepo, userRepo, projectInvitationRepo, 
-        notificationRepo,notificationTemplateRepo);
+        projectMemberRepo, performanceScoreRepo, userRepo, projectInvitationRepo,
+        notificationRepo, notificationTemplateRepo);
 });
 
 // Background Services (e.g., for expiring invitations)
@@ -111,13 +128,13 @@ builder.Services.AddAuthorization();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
+if (app.Environment.IsDevelopment()) // Dev-only for security (remove || IsProduction)
 {
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "FGS API v1");
-        options.RoutePrefix = string.Empty; // Optional: Serve Swagger at app root
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "FGS_BE API v1");
+        options.RoutePrefix = "swagger"; // Standard: Access at /swagger (change to string.Empty for root)
     });
 }
 

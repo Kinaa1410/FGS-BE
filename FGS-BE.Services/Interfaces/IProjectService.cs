@@ -18,5 +18,28 @@ namespace FGS_BE.Service.Interfaces
             string? status = null,
             string? sortColumn = "Id",
             string? sortDir = "Asc");
+
+        // GET PAGED BY MENTOR ID
+        // ============================================================
+        Task<PaginatedList<ProjectDto>> GetByMentorIdPagedAsync(
+            int mentorId,
+            int pageIndex,
+            int pageSize,
+            string? keyword = null,
+            string? status = null,
+            string? sortColumn = "Id",
+            string? sortDir = "Asc");
+
+        // ============================================================
+        // GET PAGED BY MEMBER ID
+        // ============================================================
+        Task<PaginatedList<ProjectDto>> GetByMemberIdPagedAsync(
+            int memberId,
+            int pageIndex,
+            int pageSize,
+            string? keyword = null,
+            string? status = null,
+            string? sortColumn = "Id",
+            string? sortDir = "Asc");
     }
 }
