@@ -1,6 +1,7 @@
 ﻿using FGS_BE.Repo.DTOs.ProjectMembers;
 using FGS_BE.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace FGS_BE.API.Controllers
 {
@@ -74,6 +75,17 @@ namespace FGS_BE.API.Controllers
         {
             var deleted = await _service.DeleteAsync(id);
             return deleted ? NoContent() : NotFound();
+        }
+
+
+        [HttpPost("leave")]
+        public async Task<IActionResult> Leave([FromBody] LeaveProjectDto dto)
+        {
+            if (!int.TryParse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value, out int userId))
+                return Unauthorized("User ID not found in token.");
+
+            var left = await _service.LeaveAsync(userId, dto.ProjectId);
+            return left ? NoContent() : NotFound("Not a member of this project.");
         }
     }
 }

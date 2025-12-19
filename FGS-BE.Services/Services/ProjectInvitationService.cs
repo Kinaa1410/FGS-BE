@@ -23,11 +23,15 @@ public class ProjectInvitationService : IProjectInvitationService
 
     public async Task<ProjectInvitationDto> CreateAsync(CreateProjectInvitationDto dto, int inviterId)
     {
+        // Prevent self-invite
+        if (inviterId == dto.InvitedUserId)
+            throw new Exception("Cannot invite yourself.");
+
         var project = await _unitOfWork.ProjectRepository.FindByIdAsync(dto.ProjectId);
         if (project == null) throw new Exception("Project not found.");
 
-        // Check inviter is member
-        if (!await _unitOfWork.ProjectMemberRepository.Entities.AnyAsync(pm => pm.ProjectId == dto.ProjectId && pm.UserId == inviterId))
+        if (!await _unitOfWork.ProjectMemberRepository.Entities.AnyAsync(
+            pm => pm.ProjectId == dto.ProjectId && pm.UserId == inviterId))
             throw new Exception("Only members can invite.");
 
         // Check available slots (current + reserved < max)
@@ -35,17 +39,38 @@ public class ProjectInvitationService : IProjectInvitationService
             throw new Exception("No available slots (full or locked).");
 
         // Check not already invited/joined
-        if (await _unitOfWork.ProjectInvitationRepository.Entities.AnyAsync(pi => pi.ProjectId == dto.ProjectId && pi.InvitedUserId == dto.InvitedUserId && pi.Status == "pending"))
+        if (await _unitOfWork.ProjectInvitationRepository.Entities.AnyAsync(
+            pi => pi.ProjectId == dto.ProjectId &&
+                  pi.InvitedUserId == dto.InvitedUserId &&
+                  pi.Status == "pending"))
             throw new Exception("Already invited.");
-        if (await _unitOfWork.ProjectMemberRepository.Entities.AnyAsync(pm => pm.ProjectId == dto.ProjectId && pm.UserId == dto.InvitedUserId))
+
+        if (await _unitOfWork.ProjectMemberRepository.Entities.AnyAsync(
+            pm => pm.ProjectId == dto.ProjectId &&
+                  pm.UserId == dto.InvitedUserId))
             throw new Exception("User already joined.");
+
+        // Chặn invite nếu người được mời đang ở project khác cùng semester
+        var targetProject = await _unitOfWork.ProjectRepository.FindByAsync(p => p.Id == dto.ProjectId, q => q.Include(x => x.Semester));  // Lấy SemesterId
+        if (targetProject != null)
+        {
+            bool alreadyInSameSemesterProject = await _unitOfWork.ProjectMemberRepository.Entities
+                .Include(pm => pm.Project)
+                .AnyAsync(pm => pm.UserId == dto.InvitedUserId &&
+                               pm.Project.SemesterId == targetProject.SemesterId &&  
+                               pm.ProjectId != dto.ProjectId); 
+            if (alreadyInSameSemesterProject)
+            {
+                throw new Exception("The invited has already joined another project in current semester.");
+            }
+        }
 
         var entity = dto.ToEntity(inviterId);
 
         using var transaction = await _unitOfWork.BeginTransactionAsync(IsolationLevel.ReadCommitted);
         try
         {
-            await _unitOfWork.ProjectInvitationRepository.CreateAsync(entity); // Now uses specific repo
+            await _unitOfWork.ProjectInvitationRepository.CreateAsync(entity);
             project.ReservedMembers += 1;
             await _unitOfWork.ProjectRepository.UpdateAsync(project);
             await _unitOfWork.CommitAsync();
