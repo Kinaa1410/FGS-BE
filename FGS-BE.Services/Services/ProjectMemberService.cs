@@ -113,6 +113,32 @@ namespace FGS_BE.Service.Implements
             return new ProjectMemberDto(entity);
         }
 
-        
+        public async Task<bool> LeaveAsync(int userId, int projectId)
+        {
+            var entity = await _unitOfWork.ProjectMemberRepository.Entities
+                .FirstOrDefaultAsync(pm => pm.UserId == userId && pm.ProjectId == projectId);
+            if (entity == null) return false; // Not a member—silent fail or throw?
+
+            var project = await _unitOfWork.ProjectRepository.FindByIdAsync(projectId);
+            if (project == null) return false;
+
+            using var transaction = await _unitOfWork.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+            try
+            {
+                project.CurrentMembers = Math.Max(0, project.CurrentMembers - 1);
+                await _unitOfWork.ProjectRepository.UpdateAsync(project);
+                await _unitOfWork.ProjectMemberRepository.DeleteAsync(entity);
+                await transaction.CommitAsync(); // Single commit via transaction
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+            await transaction.DisposeAsync();
+            return true;
+        }
     }
+
 }
+

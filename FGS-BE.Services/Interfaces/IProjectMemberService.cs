@@ -18,5 +18,6 @@ namespace FGS_BE.Services.Interfaces
         Task<ProjectMemberDto> CreateAsync(CreateProjectMemberDto dto);
         Task<ProjectMemberDto?> UpdateAsync(int id, UpdateProjectMemberDto dto);
         Task<bool> DeleteAsync(int id);
+        Task<bool> LeaveAsync(int userId, int projectId);
     }
 }
