@@ -53,8 +53,24 @@ namespace FGS_BE.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateProjectMemberDto dto)
         {
-            var result = await _service.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
+                var result = await _service.CreateAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                // Log if you have ILogger injected
+                return BadRequest(new { message = "An unexpected error occurred while joining the project." });
+            }
         }
 
         /// <summary>
