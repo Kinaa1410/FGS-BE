@@ -1,5 +1,6 @@
 ﻿using FGS_BE.Repo.DTOs.Pages;
 using FGS_BE.Repo.Entities;
+using System.Linq.Expressions;
 
 namespace FGS_BE.Repo.Repositories.Interfaces
 {
@@ -36,5 +37,10 @@ namespace FGS_BE.Repo.Repositories.Interfaces
             string? status = null,
             string? sortColumn = "Id",
             string? sortDir = "Asc");
+
+        Task<List<Project>> GetByAsync(
+            Expression<Func<Project, bool>> predicate,
+            Func<IQueryable<Project>, IQueryable<Project>>? include = null,
+            CancellationToken cancellationToken = default);
     }
 }

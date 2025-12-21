@@ -1,16 +1,13 @@
 ﻿using FGS_BE.Repo.DTOs.Projects;
-using FGS_BE.Repo.DTOs.Pages; // For PaginatedList<ProjectDto> if needed
+using FGS_BE.Repo.DTOs.Pages;
+using FGS_BE.Repo.Enums;
+using System;
+using System.Threading.Tasks;
 
 namespace FGS_BE.Service.Interfaces
 {
     public interface IProjectService
     {
-        Task<ProjectDto> CreateAsync(CreateProjectDto dto);
-        Task<ProjectDto?> UpdateAsync(int id, UpdateProjectDto dto);
-        Task<ProjectDto?> GetByIdAsync(int id);
-        Task<bool> DeleteAsync(int id);
-
-        // FIXED: Full signature for paged query (matches controller call)
         Task<PaginatedList<ProjectDto>> GetPagedAsync(
             int pageIndex,
             int pageSize,
@@ -18,9 +15,10 @@ namespace FGS_BE.Service.Interfaces
             string? status = null,
             string? sortColumn = "Id",
             string? sortDir = "Asc");
-
-        // GET PAGED BY MENTOR ID
-        // ============================================================
+        Task<ProjectDto?> GetByIdAsync(int id);
+        Task<ProjectDto> CreateAsync(CreateProjectDto dto);
+        Task<ProjectDto?> UpdateAsync(int id, UpdateProjectDto dto);
+        Task<bool> DeleteAsync(int id);
         Task<PaginatedList<ProjectDto>> GetByMentorIdPagedAsync(
             int mentorId,
             int pageIndex,
@@ -29,10 +27,6 @@ namespace FGS_BE.Service.Interfaces
             string? status = null,
             string? sortColumn = "Id",
             string? sortDir = "Asc");
-
-        // ============================================================
-        // GET PAGED BY MEMBER ID
-        // ============================================================
         Task<PaginatedList<ProjectDto>> GetByMemberIdPagedAsync(
             int memberId,
             int pageIndex,
@@ -41,5 +35,7 @@ namespace FGS_BE.Service.Interfaces
             string? status = null,
             string? sortColumn = "Id",
             string? sortDir = "Asc");
+        Task<bool> StartByMentorAsync(int projectId, int mentorId);
+        Task<bool> CloseByMentorAsync(int projectId, int mentorId);
     }
 }
