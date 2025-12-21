@@ -1,10 +1,11 @@
-﻿using FGS_BE.Repo.DTOs.Pages;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;  // Explicit for Task (fixes ambiguity)
+using FGS_BE.Repo.DTOs.Pages;
 using FGS_BE.Repo.DTOs.Semesters;
 using FGS_BE.Repo.Entities;
-using FGS_BE.Repo.Repositories.Implements;
 using FGS_BE.Repo.Repositories.Interfaces;
-using FGS_BE.Services.Interfaces;
-using Mapster;
+using FGS_BE.Service.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace FGS_BE.Service.Services
@@ -12,10 +13,12 @@ namespace FGS_BE.Service.Services
     public class SemesterService : ISemesterService
     {
         private readonly IUnitOfWork _unitOfWork;
+
         public SemesterService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
+
         public async Task<PaginatedList<SemesterDto>> GetPagedAsync(
             int pageIndex,
             int pageSize,
@@ -25,21 +28,13 @@ namespace FGS_BE.Service.Services
             string? sortDir = "Asc")
         {
             var pagedEntities = await _unitOfWork.SemesterRepository.GetPagedAsync(
-                pageIndex,
-                pageSize,
-                keyword,
-                status,
-                sortColumn,
-                sortDir
-            );
-
+                pageIndex, pageSize, keyword, status, sortColumn, sortDir);
             var pagedDtos = new PaginatedList<SemesterDto>(
                 pagedEntities.Select(x => new SemesterDto(x)).ToList(),
                 pagedEntities.TotalItems,
                 pagedEntities.PageIndex,
                 pagedEntities.PageSize
             );
-
             return pagedDtos;
         }
 
@@ -51,24 +46,16 @@ namespace FGS_BE.Service.Services
 
         public async Task<SemesterDto> CreateAsync(CreateSemesterDto dto)
         {
-            // Rule 1: Valid Date Range
             if (dto.StartDate == default || dto.EndDate == default)
                 throw new ArgumentException("StartDate and EndDate must be provided and valid.");
-
             var now = DateTime.UtcNow;
             if (dto.StartDate <= now)
                 throw new ArgumentException("StartDate must be in the future.");
-
-            // Rule 2: EndDate > StartDate 
             if (dto.EndDate <= dto.StartDate)
                 throw new ArgumentException("EndDate must be after StartDate.");
-
-            // Rule 3: Minimum Duration
             const int MinDurationDays = 70;
             if ((dto.EndDate - dto.StartDate).TotalDays < MinDurationDays)
                 throw new InvalidOperationException($"Semester duration must be at least {MinDurationDays} days.");
-
-            // Rule 4: Unique Name/Code 
             if (!string.IsNullOrWhiteSpace(dto.Name))
             {
                 var existingName = await _unitOfWork.SemesterRepository.Entities
@@ -77,14 +64,10 @@ namespace FGS_BE.Service.Services
                 if (existingName)
                     throw new InvalidOperationException($"Semester name '{dto.Name}' already exists.");
             }
-
-            // Rule 5: Valid Status 
-            var status = dto.Status ?? "Upcoming"; 
-            var validStatuses = new[] { "Upcoming", "Active", "Inactive", "Planned" }; 
+            var status = dto.Status ?? "Upcoming";
+            var validStatuses = new[] { "Upcoming", "Active", "Inactive", "Planned", "Closed" };
             if (!validStatuses.Contains(status))
                 throw new InvalidOperationException($"Invalid status '{status}'. Must be one of: {string.Join(", ", validStatuses)}.");
-
-            // Rule 6: No Overlaps 
             var overlappingSemester = await _unitOfWork.SemesterRepository.Entities
                 .AsNoTracking()
                 .Where(x => x.Status == "Active")
@@ -98,23 +81,29 @@ namespace FGS_BE.Service.Services
 
             var entity = dto.ToEntity();
             entity.Status = status;
-
+            entity.CreatedAt = now;
             await _unitOfWork.SemesterRepository.CreateAsync(entity);
             await _unitOfWork.CommitAsync();
             return new SemesterDto(entity);
         }
-
-
 
         public async Task<SemesterDto?> UpdateAsync(int id, UpdateSemesterDto dto)
         {
             var entity = await _unitOfWork.SemesterRepository.FindByIdAsync(id);
             if (entity == null) return null;
 
+            if (dto.Status != null)
+            {
+                var validStatuses = new[] { "Upcoming", "Active", "Inactive", "Planned", "Closed" };
+                if (!validStatuses.Contains(dto.Status))
+                    throw new InvalidOperationException($"Invalid status '{dto.Status}'. Must be one of: {string.Join(", ", validStatuses)}.");
+            }
+
             dto.ApplyToEntity(entity);
+            // FIXED: Await to ensure completion
+            await SyncSemesterStatusAsync(id);
             await _unitOfWork.SemesterRepository.UpdateAsync(entity);
             await _unitOfWork.CommitAsync();
-
             return new SemesterDto(entity);
         }
 
@@ -123,9 +112,40 @@ namespace FGS_BE.Service.Services
             var entity = await _unitOfWork.SemesterRepository.FindByIdAsync(id);
             if (entity == null) return false;
 
+            var hasProjects = await _unitOfWork.ProjectRepository.Entities
+                .AnyAsync(p => p.SemesterId == id);
+            if (hasProjects)
+                throw new InvalidOperationException("Cannot delete semester with associated projects.");
+
             await _unitOfWork.SemesterRepository.DeleteAsync(entity);
             await _unitOfWork.CommitAsync();
             return true;
+        }
+
+        // FIXED: Explicit System.Threading.Tasks.Task<string> to match interface & avoid ambiguity
+        public async System.Threading.Tasks.Task<string> GetSemesterStatusAsync(int semesterId)
+        {
+            var semester = await _unitOfWork.SemesterRepository.FindByIdAsync(semesterId);
+            if (semester == null) throw new ArgumentException("Semester not found.", nameof(semesterId));
+
+            var now = DateTime.UtcNow;
+            if (now < semester.StartDate) return "Upcoming";
+            if (now > semester.EndDate) return "Closed";
+            return "Active";
+        }
+
+        // FIXED: Explicit System.Threading.Tasks.Task (no return value), all paths complete (no early exit)
+        public async System.Threading.Tasks.Task SyncSemesterStatusAsync(int semesterId)
+        {
+            var computedStatus = await GetSemesterStatusAsync(semesterId);
+            var entity = await _unitOfWork.SemesterRepository.FindByIdAsync(semesterId);
+            if (entity != null && entity.Status != computedStatus)
+            {
+                entity.Status = computedStatus;
+                await _unitOfWork.SemesterRepository.UpdateAsync(entity);
+                await _unitOfWork.CommitAsync();
+            }
+            // No explicit return - async Task completes here
         }
     }
 }

@@ -12,6 +12,8 @@ using FGS_BE.Services.Implements;
 using FGS_BE.Services.Interfaces;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
@@ -20,57 +22,69 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProjectDtoValidator>();
+
 // Custom extensions (these handle additional registrations like auto-scanning)
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddWebServices(builder.Configuration);
-// Database Context (overriding the commented MySQL in extensions for SQL Server)
+
+// Database Context (SQL Server)
 string defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")
-?? throw new InvalidOperationException("DefaultConnection not found in configuration.");
+    ?? throw new InvalidOperationException("DefaultConnection not found in configuration.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-options.UseSqlServer(defaultConnection)
-.EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
-.EnableDetailedErrors(builder.Environment.IsDevelopment())
-.UseProjectables());
+    options.UseSqlServer(defaultConnection)
+        .EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
+        .EnableDetailedErrors(builder.Environment.IsDevelopment())
+        .UseProjectables());
+
 // Repositories (all Scoped for per-request lifetime with DbContext)
 builder.Services
-.AddScoped<ISemesterRepository, SemesterRepository>()
-.AddScoped<IRewardItemRepository, RewardItemRepository>()
-.AddScoped<ITermKeywordRepository, TermKeywordRepository>()
-.AddScoped<IProjectRepository, ProjectRepository>()
-.AddScoped<IMilestoneRepository, MilestoneRepository>()
-.AddScoped<ITaskRepository, TaskRepository>()
-.AddScoped<IRedeemRequestRepository, RedeemRequestRepository>()
-.AddScoped<ISubmissionRepository, SubmissionRepository>()
-.AddScoped<IProjectMemberRepository, ProjectMemberRepository>()
-.AddScoped<ILevelRepository, LevelRepository>()
-.AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>()
-.AddScoped<IProjectInvitationRepository, ProjectInvitationRepository>()
-.AddScoped<INotificationRepository, NotificationRepository>()
-.AddScoped<INotificationTemplateRepository, NotificationTemplateRepository>()
-.AddScoped<IUserRepository, UserRepository>();
+    .AddScoped<ISemesterRepository, SemesterRepository>()
+    .AddScoped<IRewardItemRepository, RewardItemRepository>()
+    .AddScoped<ITermKeywordRepository, TermKeywordRepository>()
+    .AddScoped<IProjectRepository, ProjectRepository>()
+    .AddScoped<IMilestoneRepository, MilestoneRepository>()
+    .AddScoped<ITaskRepository, TaskRepository>()
+    .AddScoped<IRedeemRequestRepository, RedeemRequestRepository>()
+    .AddScoped<ISubmissionRepository, SubmissionRepository>()
+    .AddScoped<IProjectMemberRepository, ProjectMemberRepository>()
+    .AddScoped<ILevelRepository, LevelRepository>()
+    .AddScoped<IPerformanceScoreRepository, PerformanceScoreRepository>()
+    .AddScoped<IProjectInvitationRepository, ProjectInvitationRepository>()
+    .AddScoped<INotificationRepository, NotificationRepository>()
+    .AddScoped<INotificationTemplateRepository, NotificationTemplateRepository>()
+    .AddScoped<IUserRepository, UserRepository>();
+
 // Services (all Scoped to match repositories/DbContext)
 builder.Services
-.AddScoped<IRedeemRequestService, RedeemRequestService>()
-.AddScoped<ISemesterService, SemesterService>()
-.AddScoped<IRewardItemService, RewardItemService>()
-.AddScoped<ITermKeywordService, TermKeywordService>()
-.AddScoped<IProjectService, ProjectService>()
-.AddScoped<IMilestoneService, MilestoneService>()
-.AddScoped<ITaskService, TaskService>()
-.AddScoped<ISubmissionService, SubmissionService>()
-.AddScoped<ICloudinaryService, CloudinaryService>()
-.AddScoped<IProjectMemberService, ProjectMemberService>()
-.AddScoped<ILevelService, LevelService>()
-.AddScoped<INotificationService, NotificationService>()
-.AddScoped<IPerformanceScoreService, PerformanceScoreService>()
-.AddScoped<IUserService, UserService>()
-.AddScoped<INotificationTemplateService, NotificationTemplateService>()
-.AddScoped<IProjectInvitationService, ProjectInvitationService>();
+    .AddScoped<IRedeemRequestService, RedeemRequestService>()
+    .AddScoped<ISemesterService, SemesterService>()
+    .AddScoped<IRewardItemService, RewardItemService>()
+    .AddScoped<ITermKeywordService, TermKeywordService>()
+    .AddScoped<IProjectService, ProjectService>()
+    .AddScoped<IMilestoneService, MilestoneService>()
+    .AddScoped<ITaskService, TaskService>()
+    .AddScoped<ISubmissionService, SubmissionService>()
+    .AddScoped<ICloudinaryService, CloudinaryService>()
+    .AddScoped<IProjectMemberService, ProjectMemberService>()
+    .AddScoped<ILevelService, LevelService>()
+    .AddScoped<INotificationService, NotificationService>()
+    .AddScoped<IPerformanceScoreService, PerformanceScoreService>()
+    .AddScoped<IUserService, UserService>()
+    .AddScoped<INotificationTemplateService, NotificationTemplateService>()
+    .AddScoped<IProjectInvitationService, ProjectInvitationService>()
+    // Jobs as Scoped services for Hangfire
+    .AddScoped<InvitationExpiryService>()
+    .AddScoped<ProjectClosureService>()
+    .AddScoped<SemesterStatusSyncService>();
+
 // UnitOfWork (Scoped factory to inject all repositories)
 builder.Services.AddScoped<IUnitOfWork>(provider =>
 {
@@ -90,15 +104,25 @@ builder.Services.AddScoped<IUnitOfWork>(provider =>
     var notificationTemplateRepo = provider.GetRequiredService<INotificationTemplateRepository>();
     var projectInvitationRepo = provider.GetRequiredService<IProjectInvitationRepository>();
     return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo,
-    projectRepo, milestoneRepo, taskRepo, redeemRequestRepo, submissionRepo,
-    projectMemberRepo, performanceScoreRepo, userRepo, projectInvitationRepo,
-    notificationRepo, notificationTemplateRepo);
+        projectRepo, milestoneRepo, taskRepo, redeemRequestRepo, submissionRepo,
+        projectMemberRepo, performanceScoreRepo, userRepo, projectInvitationRepo,
+        notificationRepo, notificationTemplateRepo);
 });
-// Background Services (e.g., for expiring invitations)
-builder.Services.AddHostedService<InvitationExpiryService>();
+
 // Authorization (enables [Authorize] attributes on controllers)
 builder.Services.AddAuthorization();
+
+// Hangfire (for all 3 jobs)
+builder.Services.AddHangfire(config => config
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddHangfireServer();
+
 var app = builder.Build();
+
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
@@ -107,13 +131,32 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "FGS API v1");
         options.RoutePrefix = string.Empty; // Optional: Serve Swagger at app root
-    });
+    });
 }
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
+
 // Essential Middleware Pipeline (using extension for consistency)
 await app.UseWebApplication();
+
+// Hangfire Dashboard (secure in prod with auth)
+app.UseHangfireDashboard("/hangfire");
+
+// Schedule 3 Jobs
+RecurringJob.AddOrUpdate<InvitationExpiryService>("invitation-expiry",
+    service => service.ProcessExpiredInvitationsAsync(),
+    Cron.Minutely);  // Every minute
+
+RecurringJob.AddOrUpdate<ProjectClosureService>("project-closure",
+    service => service.AutoCloseProjectsAsync(),
+    Cron.Daily(0, 0));  // Daily at 00:00 UTC
+
+RecurringJob.AddOrUpdate<SemesterStatusSyncService>("semester-status-sync",
+    service => service.SyncAllSemesterStatusesAsync(),
+    Cron.Daily(0, 0));  // Daily at 00:00 UTC
+
 app.MapControllers();
 app.Run();

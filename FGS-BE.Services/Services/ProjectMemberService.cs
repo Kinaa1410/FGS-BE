@@ -48,10 +48,10 @@ namespace FGS_BE.Service.Implements
             if (project == null) throw new Exception("Project not found!");
 
             // Can join only after semester start
-            if (project.Semester?.StartDate > DateTime.UtcNow)
-            {
-                throw new ArgumentException($"Cannot join this project until the semester starts on {project.Semester.StartDate:yyyy-MM-dd}.");
-            }
+            //if (project.Semester?.StartDate > DateTime.UtcNow)
+            //{
+            //    throw new ArgumentException($"Cannot join this project until the semester starts on {project.Semester.StartDate:yyyy-MM-dd}.");
+            //}
 
             // Check total occupied (current + reserved)
             if (project.CurrentMembers + project.ReservedMembers >= project.MaxMembers)

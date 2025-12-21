@@ -1,8 +1,10 @@
 ﻿using FGS_BE.Repo.DTOs.Semesters;
-using FGS_BE.Services.Interfaces;
+using FGS_BE.Service.Interfaces;  // Standardized namespace (no 's')
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;  // For async Task<IActionResult>
 
-namespace FGS_BE.Controllers
+namespace FGS_BE.API.Controllers  // Standardized to API folder
 {
     [ApiController]
     [Route("api/semesters")]
@@ -26,15 +28,27 @@ namespace FGS_BE.Controllers
         /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetAll(
-        [FromQuery] int pageIndex = 1,
-        [FromQuery] int pageSize = 10,
-        [FromQuery] string? keyword = null,
-        [FromQuery] string? status = null,
-        [FromQuery] string? sortColumn = "Id",
-        [FromQuery] string? sortDir = "Asc")
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? keyword = null,
+            [FromQuery] string? status = null,
+            [FromQuery] string? sortColumn = "Id",
+            [FromQuery] string? sortDir = "Asc")
         {
-            var result = await _service.GetPagedAsync(pageIndex, pageSize, keyword, status, sortColumn, sortDir);
-            return Ok(result);
+            try
+            {
+                var result = await _service.GetPagedAsync(pageIndex, pageSize, keyword, status, sortColumn, sortDir);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                // Log if ILogger injected
+                return BadRequest(new { message = "An unexpected error occurred while retrieving semesters." });
+            }
         }
 
         /// <summary>
@@ -45,10 +59,18 @@ namespace FGS_BE.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var semester = await _service.GetByIdAsync(id);
-            if (semester == null)
-                return NotFound();
-            return Ok(semester);
+            try
+            {
+                var semester = await _service.GetByIdAsync(id);
+                if (semester == null)
+                    return NotFound(new { message = "Semester not found." });
+                return Ok(semester);
+            }
+            catch (Exception ex)
+            {
+                // Log if ILogger injected
+                return BadRequest(new { message = "An unexpected error occurred while retrieving the semester." });
+            }
         }
 
         /// <summary>
@@ -59,6 +81,8 @@ namespace FGS_BE.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateSemesterDto dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             try
             {
                 var created = await _service.CreateAsync(dto);
@@ -78,10 +102,10 @@ namespace FGS_BE.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = "Không thể tạo semester.", detail = ex.Message });
+                // Log if possible
+                return BadRequest(new { message = "Cannot create semester.", detail = ex.Message });
             }
         }
-
 
         /// <summary>
         /// update semester
@@ -92,8 +116,26 @@ namespace FGS_BE.Controllers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateSemesterDto dto)
         {
-            var result = await _service.UpdateAsync(id, dto);
-            return result == null ? NotFound() : Ok(result);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            try
+            {
+                var result = await _service.UpdateAsync(id, dto);
+                return result == null ? NotFound(new { message = "Semester not found." }) : Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                // Log if possible
+                return BadRequest(new { message = "An unexpected error occurred while updating the semester." });
+            }
         }
 
         /// <summary>
@@ -104,8 +146,16 @@ namespace FGS_BE.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var success = await _service.DeleteAsync(id);
-            return success ? NoContent() : NotFound();
+            try
+            {
+                var success = await _service.DeleteAsync(id);
+                return success ? NoContent() : NotFound(new { message = "Semester not found." });
+            }
+            catch (Exception ex)
+            {
+                // Log if possible
+                return BadRequest(new { message = "An unexpected error occurred while deleting the semester." });
+            }
         }
     }
 }
