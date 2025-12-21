@@ -47,7 +47,13 @@ namespace FGS_BE.Service.Implements
             var project = await _unitOfWork.ProjectRepository.FindByAsync(p => p.Id == dto.ProjectId, q => q.Include(x => x.Semester));
             if (project == null) throw new Exception("Project not found!");
 
-            // UPDATED: Check total occupied (current + reserved)
+            // Can join only after semester start
+            if (project.Semester?.StartDate > DateTime.UtcNow)
+            {
+                throw new ArgumentException($"Cannot join this project until the semester starts on {project.Semester.StartDate:yyyy-MM-dd}.");
+            }
+
+            // Check total occupied (current + reserved)
             if (project.CurrentMembers + project.ReservedMembers >= project.MaxMembers)
                 throw new Exception($"Project is full or locked (Max: {project.MaxMembers}). Cannot join.");
 
