@@ -134,6 +134,7 @@ namespace FGS_BE.Service.Implements
                 project.CurrentMembers = Math.Max(0, project.CurrentMembers - 1);
                 await _unitOfWork.ProjectRepository.UpdateAsync(project);
                 await _unitOfWork.ProjectMemberRepository.DeleteAsync(entity);
+                await _unitOfWork.CommitAsync();
                 await transaction.CommitAsync(); // Single commit via transaction
             }
             catch
