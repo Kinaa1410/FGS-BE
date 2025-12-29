@@ -25,6 +25,8 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
+
 // FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
@@ -141,6 +143,9 @@ if (!app.Environment.IsDevelopment())
 
 // Essential Middleware Pipeline (using extension for consistency)
 await app.UseWebApplication();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Hangfire Dashboard (secure in prod with auth)
 app.UseHangfireDashboard("/hangfire");
