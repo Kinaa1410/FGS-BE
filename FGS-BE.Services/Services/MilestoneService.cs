@@ -18,85 +18,150 @@ namespace FGS_BE.Services.Implements
         }
 
         public async Task<PaginatedList<MilestoneDto>> GetPagedAsync(
-    int pageIndex,
-    int pageSize,
-    string? keyword = null,
-    string? status = null,
-    int? projectId = null,
-    string? sortColumn = "Id",
-    string? sortDir = "Asc")
+            int pageIndex,
+            int pageSize,
+            string? keyword = null,
+            string? status = null,
+            int? projectId = null,
+            string? sortColumn = "Id",
+            string? sortDir = "Asc")
         {
-            var paged = await _unitOfWork.MilestoneRepository.GetPagedAsync(
-                pageIndex, pageSize, keyword, status, projectId, sortColumn, sortDir);
+            try
+            {
+                var paged = await _unitOfWork.MilestoneRepository.GetPagedAsync(
+                    pageIndex, pageSize, keyword, status, projectId, sortColumn, sortDir);
 
-            return new PaginatedList<MilestoneDto>(
-                paged.Select(x => new MilestoneDto(x)).ToList(),
-                paged.TotalItems,
-                paged.PageIndex,
-                paged.PageSize);
+                return new PaginatedList<MilestoneDto>(
+                    paged.Select(x => new MilestoneDto(x)).ToList(),
+                    paged.TotalItems,
+                    paged.PageIndex,
+                    paged.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể lấy danh sách milestone: " + ex.Message);
+            }
         }
-
 
         public async Task<MilestoneDto?> GetByIdAsync(int id)
         {
-            var entity = await _unitOfWork.MilestoneRepository.FindByIdAsync(id);
-            return entity == null ? null : new MilestoneDto(entity);
+            try
+            {
+                var entity = await _unitOfWork.MilestoneRepository.FindByIdAsync(id);
+                return entity == null ? null : new MilestoneDto(entity);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể lấy thông tin milestone: " + ex.Message);
+            }
         }
 
         public async Task<MilestoneDto> CreateAsync(CreateMilestoneDto dto)
         {
-            if (dto.DueDate <= dto.StartDate)
+            try
             {
-                throw new Exception("The DueDate cannot be less than or equal to the StartDate.");
+                if (string.IsNullOrWhiteSpace(dto.Title))
+                    throw new ArgumentException("Title is required.");
+
+                if (dto.Weight < 0)
+                    throw new ArgumentException("Weight must be >= 0.");
+
+                if (dto.DueDate <= dto.StartDate)
+                    throw new ArgumentException("The DueDate must be greater than the StartDate.");
+
+                var project = await _unitOfWork.ProjectRepository.FindByIdAsync(dto.ProjectId);
+                if (project == null)
+                    throw new InvalidOperationException("Project does not exist.");
+
+                var overlappingMilestone = await _unitOfWork.MilestoneRepository.Entities
+                    .AsNoTracking()
+                    .Where(x =>
+                        x.ProjectId == dto.ProjectId &&
+                        (
+                            (dto.StartDate >= x.StartDate && dto.StartDate <= x.DueDate) ||
+                            (dto.DueDate >= x.StartDate && dto.DueDate <= x.DueDate) ||
+                            (dto.StartDate <= x.StartDate && dto.DueDate >= x.DueDate)
+                        )
+                    )
+                    .FirstOrDefaultAsync();
+
+                if (overlappingMilestone != null)
+                    throw new InvalidOperationException("The milestone duration overlaps with existing milestone.");
+
+                var entity = dto.ToEntity();
+
+                await _unitOfWork.MilestoneRepository.CreateAsync(entity);
+                await _unitOfWork.CommitAsync();
+
+                return new MilestoneDto(entity);
             }
-
-            var overlappingMilestone = await _unitOfWork.MilestoneRepository.Entities
-                .AsNoTracking()
-                .Where(x =>
-                    (dto.StartDate >= x.StartDate && dto.StartDate <= x.DueDate) ||
-                    (dto.DueDate >= x.StartDate && dto.DueDate <= x.DueDate) ||
-                    (dto.StartDate <= x.StartDate && dto.DueDate >= x.DueDate))
-                .FirstOrDefaultAsync();
-
-            if (overlappingMilestone != null)
+            catch
             {
-                throw new Exception("The duration of this semester coincides with the current semester.");
+                throw;
             }
-
-            var entity = dto.ToEntity();
-
-            await _unitOfWork.MilestoneRepository.CreateAsync(entity);
-            await _unitOfWork.CommitAsync();
-
-            return new MilestoneDto(entity);
         }
+
 
         public async Task<MilestoneDto?> UpdateAsync(int id, UpdateMilestoneDto dto)
         {
-            var entity = await _unitOfWork.MilestoneRepository.FindByIdAsync(id);
-            if (entity == null) return null;
+            try
+            {
+                var entity = await _unitOfWork.MilestoneRepository.FindByIdAsync(id);
+                if (entity == null) return null;
 
-            entity.Title = dto.Title ?? entity.Title;
-            entity.Description = dto.Description ?? entity.Description;
-            entity.StartDate = dto.StartDate;
-            entity.DueDate = dto.DueDate;
-            entity.Weight = dto.Weight;
-            entity.Status = dto.Status ?? entity.Status;
+                if (dto.StartDate >= dto.DueDate)
+                    throw new ArgumentException("DueDate must be greater than StartDate.");
 
-            await _unitOfWork.MilestoneRepository.UpdateAsync(entity);
-            await _unitOfWork.CommitAsync();
+                var overlappingMilestone = await _unitOfWork.MilestoneRepository.Entities
+                    .AsNoTracking()
+                    .Where(x =>
+                        x.ProjectId == entity.ProjectId &&
+                        x.Id != id &&
+                        (
+                            (dto.StartDate >= x.StartDate && dto.StartDate <= x.DueDate) ||
+                            (dto.DueDate >= x.StartDate && dto.DueDate <= x.DueDate) ||
+                            (dto.StartDate <= x.StartDate && dto.DueDate >= x.DueDate)
+                        )
+                    )
+                    .FirstOrDefaultAsync();
 
-            return new MilestoneDto(entity);
+                if (overlappingMilestone != null)
+                    throw new InvalidOperationException("The milestone duration overlaps with another milestone.");
+
+                entity.Title = dto.Title ?? entity.Title;
+                entity.Description = dto.Description ?? entity.Description;
+                entity.StartDate = dto.StartDate;
+                entity.DueDate = dto.DueDate;
+                entity.Weight = dto.Weight;
+                entity.Status = dto.Status ?? entity.Status;
+
+                await _unitOfWork.MilestoneRepository.UpdateAsync(entity);
+                await _unitOfWork.CommitAsync();
+
+                return new MilestoneDto(entity);
+            }
+            catch
+            {
+                throw;
+            }
         }
+
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var entity = await _unitOfWork.MilestoneRepository.FindByIdAsync(id);
-            if (entity == null) return false;
+            try
+            {
+                var entity = await _unitOfWork.MilestoneRepository.FindByIdAsync(id);
+                if (entity == null) return false;
 
-            await _unitOfWork.MilestoneRepository.DeleteAsync(entity);
-            await _unitOfWork.CommitAsync();
-            return true;
+                await _unitOfWork.MilestoneRepository.DeleteAsync(entity);
+                await _unitOfWork.CommitAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể xóa milestone: " + ex.Message);
+            }
         }
     }
 }

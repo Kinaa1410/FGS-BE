@@ -15,58 +15,130 @@ namespace FGS_BE.Service.Implements
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<PaginatedList<TermKeywordDto>> GetPagedAsync(int pageIndex, int pageSize, string? keyword, string? sortColumn, string? sortDir, int? semesterId)
+        public async Task<PaginatedList<TermKeywordDto>> GetPagedAsync(
+            int pageIndex,
+            int pageSize,
+            string? keyword,
+            string? sortColumn,
+            string? sortDir,
+            int? semesterId)
         {
-            var result = await _unitOfWork.TermKeywordRepository.GetPagedAsync(pageIndex, pageSize, keyword, sortColumn, sortDir, semesterId);
-            return new PaginatedList<TermKeywordDto>(
-                result.Select(x => new TermKeywordDto(x)).ToList(),
-                result.TotalItems,
-                result.PageIndex,
-                result.PageSize
-            );
+            try
+            {
+                var result = await _unitOfWork.TermKeywordRepository.GetPagedAsync(
+                    pageIndex, pageSize, keyword, sortColumn, sortDir, semesterId);
+
+                return new PaginatedList<TermKeywordDto>(
+                    result.Select(x => new TermKeywordDto(x)).ToList(),
+                    result.TotalItems,
+                    result.PageIndex,
+                    result.PageSize
+                );
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể lấy danh sách term keyword: " + ex.Message);
+            }
         }
 
         public async Task<TermKeywordDto?> GetByIdAsync(int id)
         {
-            var entity = await _unitOfWork.TermKeywordRepository.FindByIdAsync(id);
-            return entity == null ? null : new TermKeywordDto(entity);
+            try
+            {
+                var entity = await _unitOfWork.TermKeywordRepository.FindByIdAsync(id);
+                return entity == null ? null : new TermKeywordDto(entity);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể lấy thông tin term keyword: " + ex.Message);
+            }
         }
 
         public async Task<TermKeywordDto> CreateAsync(CreateTermKeywordDto dto)
         {
-            var entity = new TermKeyword
+            try
             {
-                Keyword = dto.Keyword,
-                BasePoints = dto.BasePoints,
-                RuleBonus = dto.RuleBonus,
-                SemesterId = dto.SemesterId
-            };
-            await _unitOfWork.TermKeywordRepository.CreateAsync(entity);
-            await _unitOfWork.CommitAsync();
-            return new TermKeywordDto(entity);
+                if (string.IsNullOrWhiteSpace(dto.Keyword))
+                    throw new ArgumentException("Keyword is required.");
+
+                if (dto.BasePoints < 0)
+                    throw new ArgumentException("BasePoints must be >= 0.");
+
+                if (dto.RuleBonus < 0)
+                    throw new ArgumentException("RuleBonus must be >= 0.");
+
+                // Optional – bật nếu cần validate semester tồn tại
+                // var semester = await _unitOfWork.SemesterRepository.FindByIdAsync(dto.SemesterId);
+                // if (semester == null) throw new InvalidOperationException("Semester does not exist.");
+
+                var entity = new TermKeyword
+                {
+                    Keyword = dto.Keyword,
+                    BasePoints = dto.BasePoints,
+                    RuleBonus = dto.RuleBonus,
+                    SemesterId = dto.SemesterId
+                };
+
+                await _unitOfWork.TermKeywordRepository.CreateAsync(entity);
+                await _unitOfWork.CommitAsync();
+                return new TermKeywordDto(entity);
+            }
+            catch (ArgumentException)
+            {
+                throw;
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể tạo term keyword: " + ex.Message);
+            }
         }
 
         public async Task<TermKeywordDto?> UpdateAsync(int id, UpdateTermKeywordDto dto)
         {
-            var entity = await _unitOfWork.TermKeywordRepository.FindByIdAsync(id);
-            if (entity == null) return null;
+            try
+            {
+                var entity = await _unitOfWork.TermKeywordRepository.FindByIdAsync(id);
+                if (entity == null) return null;
 
-            entity.Keyword = dto.Keyword;
-            entity.BasePoints = dto.BasePoints;
-            entity.RuleBonus = dto.RuleBonus;
+                if (dto.BasePoints < 0)
+                    throw new ArgumentException("BasePoints must be >= 0.");
 
-            await _unitOfWork.TermKeywordRepository.UpdateAsync(entity);
-            await _unitOfWork.CommitAsync();
-            return new TermKeywordDto(entity);
+                if (dto.RuleBonus < 0)
+                    throw new ArgumentException("RuleBonus must be >= 0.");
+
+                entity.Keyword = dto.Keyword;
+                entity.BasePoints = dto.BasePoints;
+                entity.RuleBonus = dto.RuleBonus;
+
+                await _unitOfWork.TermKeywordRepository.UpdateAsync(entity);
+                await _unitOfWork.CommitAsync();
+                return new TermKeywordDto(entity);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể cập nhật term keyword: " + ex.Message);
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var entity = await _unitOfWork.TermKeywordRepository.FindByIdAsync(id);
-            if (entity == null) return false;
-            await _unitOfWork.TermKeywordRepository.DeleteAsync(entity);
-            await _unitOfWork.CommitAsync();
-            return true;
+            try
+            {
+                var entity = await _unitOfWork.TermKeywordRepository.FindByIdAsync(id);
+                if (entity == null) return false;
+
+                await _unitOfWork.TermKeywordRepository.DeleteAsync(entity);
+                await _unitOfWork.CommitAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể xóa term keyword: " + ex.Message);
+            }
         }
     }
 }
