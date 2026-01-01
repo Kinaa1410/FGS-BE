@@ -24,59 +24,108 @@ namespace FGS_BE.Service.Implements
             string? sortColumn = "Id",
             string? sortDir = "Asc")
         {
-            var paged = await _unitOfWork.PerformanceScoreRepository.GetPagedAsync(
-                pageIndex, pageSize, keyword, userId, projectId, milestoneId, taskId, sortColumn, sortDir);
+            try
+            {
+                var paged = await _unitOfWork.PerformanceScoreRepository.GetPagedAsync(
+                    pageIndex, pageSize, keyword, userId, projectId, milestoneId, taskId, sortColumn, sortDir);
 
-            return new PaginatedList<PerformanceScoreDto>(
-                paged.Select(x => new PerformanceScoreDto(x)).ToList(),
-                paged.TotalItems,
-                paged.PageIndex,
-                paged.PageSize);
+                return new PaginatedList<PerformanceScoreDto>(
+                    paged.Select(x => new PerformanceScoreDto(x)).ToList(),
+                    paged.TotalItems,
+                    paged.PageIndex,
+                    paged.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể lấy danh sách điểm hiệu suất: " + ex.Message);
+            }
         }
 
         public async Task<PerformanceScoreDto?> GetByIdAsync(int id)
         {
-            var entity = await _unitOfWork.PerformanceScoreRepository.FindByIdAsync(id);
-            return entity == null ? null : new PerformanceScoreDto(entity);
+            try
+            {
+                var entity = await _unitOfWork.PerformanceScoreRepository.FindByIdAsync(id);
+                return entity == null ? null : new PerformanceScoreDto(entity);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể lấy thông tin điểm hiệu suất: " + ex.Message);
+            }
         }
 
         public async Task<PerformanceScoreDto> CreateAsync(CreatePerformanceScoreDto dto)
         {
-            var entity = dto.ToEntity();
+            try
+            {
+                if (dto.Score < 0)
+                    throw new ArgumentException("Score must be >= 0.");
+                if (dto.Score > 100)
+                    throw new ArgumentException("Score must be <= 100.");
 
-            await _unitOfWork.PerformanceScoreRepository.CreateAsync(entity);
-            await _unitOfWork.CommitAsync();
+                var entity = dto.ToEntity();
 
-            return new PerformanceScoreDto(entity);
+                await _unitOfWork.PerformanceScoreRepository.CreateAsync(entity);
+                await _unitOfWork.CommitAsync();
+
+                return new PerformanceScoreDto(entity);
+            }
+            catch (ArgumentException)
+            {
+                throw;
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể tạo điểm hiệu suất: " + ex.Message);
+            }
         }
 
         public async Task<PerformanceScoreDto?> UpdateAsync(int id, UpdatePerformanceScoreDto dto)
         {
-            var entity = await _unitOfWork.PerformanceScoreRepository.FindByIdAsync(id);
+            try
+            {
+                var entity = await _unitOfWork.PerformanceScoreRepository.FindByIdAsync(id);
+                if (entity == null) return null;
 
-            if (entity == null)
-                return null;
+                if (dto.Score < 0)
+                    throw new ArgumentException("Score must be >= 0.");
+                if (dto.Score > 100)
+                    throw new ArgumentException("Score must be <= 100.");
 
-            entity.Score = dto.Score;
-            entity.Comment = dto.Comment;
+                entity.Score = dto.Score;
+                entity.Comment = dto.Comment;
 
-            await _unitOfWork.PerformanceScoreRepository.UpdateAsync(entity);
-            await _unitOfWork.CommitAsync();
+                await _unitOfWork.PerformanceScoreRepository.UpdateAsync(entity);
+                await _unitOfWork.CommitAsync();
 
-            return new PerformanceScoreDto(entity);
+                return new PerformanceScoreDto(entity);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể cập nhật điểm hiệu suất: " + ex.Message);
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var entity = await _unitOfWork.PerformanceScoreRepository.FindByIdAsync(id);
+            try
+            {
+                var entity = await _unitOfWork.PerformanceScoreRepository.FindByIdAsync(id);
+                if (entity == null) return false;
 
-            if (entity == null)
-                return false;
+                await _unitOfWork.PerformanceScoreRepository.DeleteAsync(entity);
+                await _unitOfWork.CommitAsync();
 
-            await _unitOfWork.PerformanceScoreRepository.DeleteAsync(entity);
-            await _unitOfWork.CommitAsync();
-
-            return true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể xóa điểm hiệu suất: " + ex.Message);
+            }
         }
     }
 }

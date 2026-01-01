@@ -30,131 +30,184 @@ namespace FGS_BE.Service.Implements
             string? sortColumn = "Id",
             string? sortDir = "Asc")
         {
-            var paged = await _unitOfWork.SubmissionRepository.GetPagedAsync(
-                pageIndex, pageSize, userId, taskId, sortColumn, sortDir);
+            try
+            {
+                var paged = await _unitOfWork.SubmissionRepository.GetPagedAsync(
+                    pageIndex, pageSize, userId, taskId, sortColumn, sortDir);
 
-            return new PaginatedList<SubmissionDto>(
-                paged.Select(x => new SubmissionDto(x)).ToList(),
-                paged.TotalItems, paged.PageIndex, paged.PageSize);
+                return new PaginatedList<SubmissionDto>(
+                    paged.Select(x => new SubmissionDto(x)).ToList(),
+                    paged.TotalItems, paged.PageIndex, paged.PageSize);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể lấy danh sách submissions: " + ex.Message);
+            }
         }
 
         public async Task<SubmissionDto?> GetByIdAsync(int id)
         {
-            var entity = await _unitOfWork.SubmissionRepository.FindByIdAsync(id);
-            return entity == null ? null : new SubmissionDto(entity);
+            try
+            {
+                if (id <= 0) throw new ArgumentException("Invalid submission ID.");
+
+                var entity = await _unitOfWork.SubmissionRepository.FindByIdAsync(id);
+                return entity == null ? null : new SubmissionDto(entity);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể lấy thông tin submission: " + ex.Message);
+            }
         }
 
         public async Task<SubmissionDto> CreateAsync(CreateSubmissionDto dto)
         {
-            if (dto.File == null || dto.File.Length == 0)
+            try
             {
-                throw new Exception("File is required.");
+                if (dto.File == null || dto.File.Length == 0)
+                    throw new ArgumentException("File is required.");
+
+                if (dto.TaskId <= 0)
+                    throw new ArgumentException("TaskId is invalid.");
+
+                if (dto.UserId <= 0)
+                    throw new ArgumentException("UserId is invalid.");
+
+                string fileExtension = Path.GetExtension(dto.File.FileName);
+                string newFileName = $"{Guid.NewGuid()}{fileExtension}";
+
+                var uploadResult = await _cloudinaryService.UploadImage(newFileName, dto.File);
+
+                if (uploadResult == null)
+                    throw new Exception("Error uploading file. Please try again.");
+
+                var entity = new Submission
+                {
+                    TaskId = dto.TaskId,
+                    UserId = dto.UserId,
+                    FileUrl = uploadResult.ImageUrl,
+                    SubmittedAt = DateTime.UtcNow,
+                    Status = SubmissionStatus.Pending
+                };
+
+                await _unitOfWork.SubmissionRepository.CreateAsync(entity);
+                await _unitOfWork.CommitAsync();
+
+                return new SubmissionDto(entity);
             }
-
-            string fileExtension = Path.GetExtension(dto.File.FileName);
-            string newFileName = $"{Guid.NewGuid()}{fileExtension}";
-
-            var uploadResult = await _cloudinaryService.UploadImage(newFileName, dto.File);
-
-            if (uploadResult == null)
+            catch (ArgumentException)
             {
-                throw new Exception("Error uploading file. Please try again.");
+                throw;
             }
-
-            var entity = new Submission
+            catch (InvalidOperationException)
             {
-                TaskId = dto.TaskId,
-                UserId = dto.UserId,
-                FileUrl = uploadResult.ImageUrl,
-                SubmittedAt = DateTime.UtcNow,
-                Status = SubmissionStatus.Pending
-            };
-
-            await _unitOfWork.SubmissionRepository.CreateAsync(entity);
-            await _unitOfWork.CommitAsync();
-            return new SubmissionDto(entity);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể tạo submission: " + ex.Message);
+            }
         }
 
         public async Task<SubmissionDto?> UpdateAsync(int id, UpdateSubmissionDto dto)
         {
-            var entity = await _unitOfWork.SubmissionRepository.FindByIdAsync(id);
-            if (entity == null) return null;
+            try
+            {
+                if (id <= 0) throw new ArgumentException("Invalid submission ID.");
 
-            entity.FileUrl = dto.FileUrl ?? entity.FileUrl;
-            entity.Status = dto.Status ?? entity.Status;
-            entity.Grade = dto.Grade ?? entity.Grade;
-            entity.Feedback = dto.Feedback ?? entity.Feedback;
-            entity.IsFinal = dto.IsFinal ?? entity.IsFinal;
+                var entity = await _unitOfWork.SubmissionRepository.FindByIdAsync(id);
+                if (entity == null) return null;
 
-            await _unitOfWork.SubmissionRepository.UpdateAsync(entity);
-            await _unitOfWork.CommitAsync();
-            return new SubmissionDto(entity);
+                entity.FileUrl = dto.FileUrl ?? entity.FileUrl;
+                entity.Status = dto.Status ?? entity.Status;
+                entity.Grade = dto.Grade ?? entity.Grade;
+                entity.Feedback = dto.Feedback ?? entity.Feedback;
+                entity.IsFinal = dto.IsFinal ?? entity.IsFinal;
+
+                await _unitOfWork.SubmissionRepository.UpdateAsync(entity);
+                await _unitOfWork.CommitAsync();
+
+                return new SubmissionDto(entity);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể cập nhật submission: " + ex.Message);
+            }
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var entity = await _unitOfWork.SubmissionRepository.FindByIdAsync(id);
-            if (entity == null) return false;
-            await _unitOfWork.SubmissionRepository.DeleteAsync(entity);
-            await _unitOfWork.CommitAsync();
-            return true;
+            try
+            {
+                if (id <= 0) throw new ArgumentException("Invalid submission ID.");
+
+                var entity = await _unitOfWork.SubmissionRepository.FindByIdAsync(id);
+                if (entity == null) return false;
+
+                await _unitOfWork.SubmissionRepository.DeleteAsync(entity);
+                await _unitOfWork.CommitAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể xóa submission: " + ex.Message);
+            }
         }
-
-        //public async Task<SubmissionDto?> GradeSubmissionAsync(int submissionId, GradeSubmissionDto dto)
-        //{
-        //    var submission = await _unitOfWork.SubmissionRepository.FindByIdAsync(submissionId);
-        //    if (submission == null)
-        //        return null;
-
-        //    submission.Grade = dto.Grade;
-        //    submission.Feedback = dto.Feedback;
-        //    submission.Status = SubmissionStatus.Graded;
-
-        //    await _unitOfWork.SubmissionRepository.UpdateAsync(submission);
-        //    await _unitOfWork.CommitAsync();
-
-        //    return new SubmissionDto(submission);
-        //}
 
         public async Task<SubmissionDto?> GradeSubmissionAsync(int submissionId, GradeSubmissionDto dto)
         {
-            var submission = await _unitOfWork.SubmissionRepository.FindByAsync(
-                x => x.Id == submissionId,
-                q => q
-                    .Include(s => s.Task)
-                        .ThenInclude(t => t.Milestone)
-                            .ThenInclude(m => m.Project)
-            );
-
-            if (submission == null)
-                return null;
-
-            submission.Grade = dto.Grade;
-            submission.Feedback = dto.Feedback;
-            submission.Status = SubmissionStatus.Graded;
-
-            await _unitOfWork.SubmissionRepository.UpdateAsync(submission);
-
-            var milestone = submission.Task.Milestone;
-            var project = milestone.Project;
-
-            var scoreEntity = new PerformanceScore
+            try
             {
-                UserId = submission.UserId,
-                TaskId = submission.TaskId,
-                MilestoneId = milestone.Id,
-                ProjectId = project.Id,
-                Score = dto.Grade,
-                Comment = dto.Feedback,
-                CreatedAt = DateTime.UtcNow
-            };
+                if (submissionId <= 0) throw new ArgumentException("Invalid submission ID.");
+                if (dto.Grade < 0 || dto.Grade > 10)
+                    throw new ArgumentException("Grade must be between 0 and 10.");
+                if (!string.IsNullOrEmpty(dto.Feedback) && dto.Feedback.Length > 500)
+                    throw new ArgumentException("Feedback must be less than 500 characters.");
 
-            await _unitOfWork.PerformanceScoreRepository.CreateAsync(scoreEntity);
+                var submission = await _unitOfWork.SubmissionRepository.FindByAsync(
+                    x => x.Id == submissionId,
+                    q => q
+                        .Include(s => s.Task)
+                            .ThenInclude(t => t.Milestone)
+                                .ThenInclude(m => m.Project)
+                );
 
-            await _unitOfWork.CommitAsync();
+                if (submission == null)
+                    return null;
 
-            return new SubmissionDto(submission);
+                submission.Grade = dto.Grade;
+                submission.Feedback = dto.Feedback;
+                submission.Status = SubmissionStatus.Graded;
+
+                await _unitOfWork.SubmissionRepository.UpdateAsync(submission);
+
+                var milestone = submission.Task.Milestone;
+                var project = milestone.Project;
+
+                var scoreEntity = new PerformanceScore
+                {
+                    UserId = submission.UserId,
+                    TaskId = submission.TaskId,
+                    MilestoneId = milestone.Id,
+                    ProjectId = project.Id,
+                    Score = dto.Grade,
+                    Comment = dto.Feedback,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                await _unitOfWork.PerformanceScoreRepository.CreateAsync(scoreEntity);
+                await _unitOfWork.CommitAsync();
+
+                return new SubmissionDto(submission);
+            }
+            catch (ArgumentException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không thể chấm điểm submission: " + ex.Message);
+            }
         }
-
     }
 }
