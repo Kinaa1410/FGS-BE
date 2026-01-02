@@ -154,13 +154,17 @@ namespace FGS_BE.Service.Implements
             }
         }
 
-        public async Task<SubmissionDto?> GradeSubmissionAsync(int submissionId, GradeSubmissionDto dto)
+        public async Task<SubmissionDto?> ReviewSubmissionAsync(int submissionId, ReviewSubmissionDto dto)
         {
             try
             {
-                if (submissionId <= 0) throw new ArgumentException("Invalid submission ID.");
-                if (dto.Grade < 0 || dto.Grade > 10)
-                    throw new ArgumentException("Grade must be between 0 and 10.");
+                if (submissionId <= 0)
+                    throw new ArgumentException("Invalid submission ID.");
+
+                var decision = dto.Decision?.ToLower();
+                if (decision != "approve" && decision != "reject")
+                    throw new ArgumentException("Decision must be 'approve' or 'reject'.");
+
                 if (!string.IsNullOrEmpty(dto.Feedback) && dto.Feedback.Length > 500)
                     throw new ArgumentException("Feedback must be less than 500 characters.");
 
@@ -175,27 +179,39 @@ namespace FGS_BE.Service.Implements
                 if (submission == null)
                     return null;
 
-                submission.Grade = dto.Grade;
                 submission.Feedback = dto.Feedback;
-                submission.Status = SubmissionStatus.Graded;
+
+                if (decision == "approve")
+                {
+                    if (!dto.Score.HasValue || dto.Score < 0 || dto.Score > 10)
+                        throw new ArgumentException("Score must be between 0 and 10 when approving.");
+
+                    submission.Status = SubmissionStatus.Approved;
+                    submission.Grade = dto.Score.Value;
+
+                    var milestone = submission.Task!.Milestone;
+                    var project = milestone.Project;
+
+                    var scoreEntity = new PerformanceScore
+                    {
+                        UserId = submission.UserId,
+                        TaskId = submission.TaskId,
+                        MilestoneId = milestone.Id,
+                        ProjectId = project.Id,
+                        Score = dto.Score.Value,
+                        Comment = dto.Feedback,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    await _unitOfWork.PerformanceScoreRepository.CreateAsync(scoreEntity);
+                }
+                else
+                {
+                    submission.Status = SubmissionStatus.Rejected;
+                    submission.Grade = null;
+                }
 
                 await _unitOfWork.SubmissionRepository.UpdateAsync(submission);
-
-                var milestone = submission.Task.Milestone;
-                var project = milestone.Project;
-
-                var scoreEntity = new PerformanceScore
-                {
-                    UserId = submission.UserId,
-                    TaskId = submission.TaskId,
-                    MilestoneId = milestone.Id,
-                    ProjectId = project.Id,
-                    Score = dto.Grade,
-                    Comment = dto.Feedback,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                await _unitOfWork.PerformanceScoreRepository.CreateAsync(scoreEntity);
                 await _unitOfWork.CommitAsync();
 
                 return new SubmissionDto(submission);
@@ -206,8 +222,9 @@ namespace FGS_BE.Service.Implements
             }
             catch (Exception ex)
             {
-                throw new Exception("Không thể chấm điểm submission: " + ex.Message);
+                throw new Exception("Không thể duyệt submission: " + ex.Message);
             }
         }
+
     }
 }

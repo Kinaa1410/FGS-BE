@@ -18,6 +18,6 @@ namespace FGS_BE.Service.Interfaces
         Task<SubmissionDto> CreateAsync(CreateSubmissionDto dto);
         Task<SubmissionDto?> UpdateAsync(int id, UpdateSubmissionDto dto);
         Task<bool> DeleteAsync(int id);
-        Task<SubmissionDto?> GradeSubmissionAsync(int submissionId, GradeSubmissionDto dto);
+        Task<SubmissionDto?> ReviewSubmissionAsync(int submissionId, ReviewSubmissionDto dto);
     }
 }
