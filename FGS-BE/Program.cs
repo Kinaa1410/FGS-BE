@@ -46,6 +46,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         .EnableDetailedErrors(builder.Environment.IsDevelopment())
         .UseProjectables());
 
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+
 // Repositories (all Scoped for per-request lifetime with DbContext)
 builder.Services
     .AddScoped<ISemesterRepository, SemesterRepository>()

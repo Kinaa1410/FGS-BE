@@ -1,4 +1,5 @@
 ﻿using FGS_BE.Repo.DTOs.Submissions;
+using FGS_BE.Service.Implements;
 using FGS_BE.Service.Interfaces;
 using FGS_BE.Services.Implements;
 using Microsoft.AspNetCore.Mvc;
@@ -119,14 +120,24 @@ namespace FGS_BE.API.Controllers
         /// <param name="id"></param>
         /// <param name="dto"></param>
         /// <returns></returns>
-        [HttpPut("{id}/grade")]
-        public async Task<IActionResult> GradeSubmission(int id, [FromBody] GradeSubmissionDto dto)
+        [HttpPut("{id:int}/review")]
+        public async Task<IActionResult> Review(int id, [FromBody] ReviewSubmissionDto dto)
         {
-            var result = await _service.GradeSubmissionAsync(id, dto);
-            if (result == null)
-                return NotFound();
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            return Ok(result);
+            var result = await _service.ReviewSubmissionAsync(id, dto);
+
+            if (result == null)
+                return NotFound(new { message = "Submission không tồn tại" });
+
+            return Ok(new
+            {
+                message = dto.Decision.ToLower() == "approve"
+                    ? "Duyệt thành công"
+                    : "Từ chối thành công",
+                data = result
+            });
         }
     }
 }
