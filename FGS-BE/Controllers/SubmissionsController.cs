@@ -115,7 +115,7 @@ namespace FGS_BE.API.Controllers
         }
 
         /// <summary>
-        /// grade and feedback submission by id
+        /// fill "approve" or "reject"
         /// </summary>
         /// <param name="id"></param>
         /// <param name="dto"></param>
