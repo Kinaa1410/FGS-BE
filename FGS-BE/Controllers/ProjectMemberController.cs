@@ -21,22 +21,45 @@ namespace FGS_BE.API.Controllers
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetPaged(
-            int pageIndex = 1,
-            int pageSize = 10,
-            string? keyword = null,
-            int? projectId = null,
-            int? userId = null,
-            string? sortColumn = "Id",
-            string? sortDir = "Asc")
+    int pageIndex = 1,
+    int pageSize = 10,
+    string? keyword = null,
+    int? projectId = null,
+    int? userId = null,
+    string? sortColumn = "Id",
+    string? sortDir = "Asc")
         {
-            // Input validation (basic range checks)
-            if (pageIndex < 1) return BadRequest("PageIndex must be at least 1.");
-            if (pageSize < 1 || pageSize > 100) return BadRequest("PageSize must be between 1 and 100.");
-            if (!new[] { "Asc", "Desc" }.Contains(sortDir?.ToLowerInvariant())) return BadRequest("SortDir must be 'Asc' or 'Desc'.");
+            // Validate paging
+            if (pageIndex < 1)
+                return BadRequest("PageIndex must be at least 1.");
 
-            var result = await _service.GetPagedAsync(pageIndex, pageSize, keyword, projectId, userId, sortColumn, sortDir);
+            if (pageSize < 1 || pageSize > 100)
+                return BadRequest("PageSize must be between 1 and 100.");
+
+            // Validate sort direction (case-insensitive)
+            if (!new[] { "Asc", "Desc" }
+                .Contains(sortDir, StringComparer.OrdinalIgnoreCase))
+            {
+                return BadRequest("SortDir must be 'Asc' or 'Desc'.");
+            }
+
+            // Normalize sortDir (optional but recommended)
+            sortDir = sortDir!.Equals("Desc", StringComparison.OrdinalIgnoreCase)
+                ? "Desc"
+                : "Asc";
+
+            var result = await _service.GetPagedAsync(
+                pageIndex,
+                pageSize,
+                keyword,
+                projectId,
+                userId,
+                sortColumn,
+                sortDir);
+
             return Ok(result);
         }
+
 
         /// <summary>
         /// Get project member by ID
