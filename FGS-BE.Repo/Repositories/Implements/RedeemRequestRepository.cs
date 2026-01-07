@@ -21,6 +21,7 @@ namespace FGS_BE.Repo.Repositories.Implements
             string? status = null,
             int? userId = null,
             int? rewardItemId = null,
+            bool? collected = null,  // New: Filter for approved but not collected (true: collected, false: pending collection, null: all)
             string? sortColumn = "Id",
             string? sortDir = "Asc",
             CancellationToken cancellationToken = default)
@@ -31,7 +32,7 @@ namespace FGS_BE.Repo.Repositories.Implements
 
             if (!string.IsNullOrWhiteSpace(keyword))
             {
-                query = query.Where(x => x.RewardItem.Name.Contains(keyword) || x.RewardItem.Description.Contains(keyword)); // Assuming RewardItem has Name/Description
+                query = query.Where(x => x.RewardItem.Name.Contains(keyword) || x.RewardItem.Description.Contains(keyword));
             }
 
             if (!string.IsNullOrWhiteSpace(status))
@@ -42,15 +43,25 @@ namespace FGS_BE.Repo.Repositories.Implements
                 }
             }
 
+            if (collected.HasValue)
+            {
+                if (collected.Value)
+                {
+                    query = query.Where(x => x.Status == RedeemRequestStatus.PickedUp && x.CollectedAt != null);
+                }
+                else
+                {
+                    query = query.Where(x => x.Status == RedeemRequestStatus.Approved && x.CollectedAt == null);
+                }
+            }
+
             if (userId.HasValue)
                 query = query.Where(x => x.UserId == userId.Value);
-
             if (rewardItemId.HasValue)
                 query = query.Where(x => x.RewardItemId == rewardItemId.Value);
 
             var order = $"{sortColumn} {sortDir}";
             query = query.OrderBy(order);
-
             return await query.PaginatedListAsync(pageIndex, pageSize, cancellationToken);
         }
 
@@ -59,6 +70,7 @@ namespace FGS_BE.Repo.Repositories.Implements
             int pageIndex,
             int pageSize,
             string? status = null,
+            bool? collected = null,  // New: Same filter as above
             string? sortColumn = "Id",
             string? sortDir = "Asc",
             CancellationToken cancellationToken = default)
@@ -76,9 +88,20 @@ namespace FGS_BE.Repo.Repositories.Implements
                 }
             }
 
+            if (collected.HasValue)
+            {
+                if (collected.Value)
+                {
+                    query = query.Where(x => x.Status == RedeemRequestStatus.PickedUp && x.CollectedAt != null);
+                }
+                else
+                {
+                    query = query.Where(x => x.Status == RedeemRequestStatus.Approved && x.CollectedAt == null);
+                }
+            }
+
             var order = $"{sortColumn} {sortDir}";
             query = query.OrderBy(order);
-
             return await query.PaginatedListAsync(pageIndex, pageSize, cancellationToken);
         }
 

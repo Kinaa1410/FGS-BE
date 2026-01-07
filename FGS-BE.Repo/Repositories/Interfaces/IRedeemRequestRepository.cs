@@ -12,6 +12,7 @@ namespace FGS_BE.Repo.Repositories.Interfaces
             string? status = null,
             int? userId = null,
             int? rewardItemId = null,
+            bool? collected = null,
             string? sortColumn = "Id",
             string? sortDir = "Asc",
             CancellationToken cancellationToken = default);
@@ -21,6 +22,7 @@ namespace FGS_BE.Repo.Repositories.Interfaces
             int pageIndex,
             int pageSize,
             string? status = null,
+            bool? collected = null,
             string? sortColumn = "Id",
             string? sortDir = "Asc",
             CancellationToken cancellationToken = default);
