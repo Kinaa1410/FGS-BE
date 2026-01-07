@@ -14,7 +14,7 @@ public class User : IdentityUser<int>
 
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-
+    public string? VerificationToken { get; set; } = null;
     public virtual ICollection<UserRole> UserRoles { get; set; } = new HashSet<UserRole>();
 
     [Projectable]

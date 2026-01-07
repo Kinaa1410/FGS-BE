@@ -12,7 +12,8 @@ public class RedeemRequest
     [Column(TypeName = "nvarchar(24)")]
     public RedeemRequestStatus Status { get; set; }
     public DateTime RequestedAt { get; set; }
-    public DateTime? ProcessedAt { get; set; } 
+    public DateTime? ProcessedAt { get; set; }
+    public DateTime? CollectedAt { get; set; }
 
     [ForeignKey(nameof(UserId))]
     public int UserId { get; set; }

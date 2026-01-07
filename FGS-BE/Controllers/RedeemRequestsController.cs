@@ -16,7 +16,7 @@ namespace FGS_BE.API.Controllers
         }
 
         // ===========================
-        // GET ALL
+        // GET ALL (Updated: Add 'collected' query param)
         // ===========================
         [HttpGet]
         public async Task<IActionResult> GetAll(
@@ -26,17 +26,17 @@ namespace FGS_BE.API.Controllers
             [FromQuery] string? status = null,
             [FromQuery] int? userId = null,
             [FromQuery] int? rewardItemId = null,
+            [FromQuery] bool? collected = null,  // New
             [FromQuery] string? sortColumn = "Id",
             [FromQuery] string? sortDir = "Asc")
         {
             var result = await _service.GetPagedAsync(
-                pageIndex, pageSize, keyword, status, userId, rewardItemId, sortColumn, sortDir);
-
+                pageIndex, pageSize, keyword, status, userId, rewardItemId, collected, sortColumn, sortDir);
             return Ok(result);
         }
 
         // ===========================
-        // GET BY USER
+        // GET BY USER (Updated: Add 'collected' query param)
         // ===========================
         [HttpGet("by-user/{userId}")]
         public async Task<IActionResult> GetByUser(
@@ -44,17 +44,17 @@ namespace FGS_BE.API.Controllers
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 10,
             [FromQuery] string? status = null,
+            [FromQuery] bool? collected = null,  // New: e.g., ?collected=false for pending pickups
             [FromQuery] string? sortColumn = "Id",
             [FromQuery] string? sortDir = "Asc")
         {
             var result = await _service.GetPagedByUserAsync(
-                userId, pageIndex, pageSize, status, sortColumn, sortDir);
-
+                userId, pageIndex, pageSize, status, collected, sortColumn, sortDir);
             return Ok(result);
         }
 
         // ===========================
-        // GET BY ID
+        // GET BY ID (No changes)
         // ===========================
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
@@ -66,9 +66,8 @@ namespace FGS_BE.API.Controllers
         }
 
         // ===========================
-        // CREATE
+        // CREATE (No changes)
         // ===========================
-        [HttpPost]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateRedeemRequestDto dto)
         {
@@ -79,11 +78,11 @@ namespace FGS_BE.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new { message = ex.Message }); // ✅ 404
+                return NotFound(new { message = ex.Message });
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { message = ex.Message }); // ✅ 400
+                return BadRequest(new { message = ex.Message });
             }
             catch (Exception)
             {
@@ -91,9 +90,8 @@ namespace FGS_BE.API.Controllers
             }
         }
 
-
         // ===========================
-        // UPDATE STATUS
+        // UPDATE STATUS (No changes)
         // ===========================
         [HttpPut("{id}/status")]
         public async Task<IActionResult> UpdateStatus(
@@ -107,16 +105,37 @@ namespace FGS_BE.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new { message = ex.Message }); // 404
+                return NotFound(new { message = ex.Message });
             }
             catch (InvalidOperationException ex)
             {
-                return BadRequest(new { message = ex.Message }); // 400
+                return BadRequest(new { message = ex.Message });
             }
         }
 
         // ===========================
-        // DELETE
+        // NEW: MARK AS COLLECTED
+        // ===========================
+        [HttpPut("{id}/collect")]
+        public async Task<IActionResult> MarkAsCollected(int id)
+        {
+            try
+            {
+                var result = await _service.MarkAsCollectedAsync(id);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // ===========================
+        // DELETE (No changes)
         // ===========================
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
@@ -128,7 +147,7 @@ namespace FGS_BE.API.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(new { message = ex.Message }); // 404
+                return NotFound(new { message = ex.Message });
             }
         }
     }

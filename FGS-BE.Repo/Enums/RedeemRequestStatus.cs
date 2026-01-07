@@ -3,5 +3,6 @@ public enum RedeemRequestStatus
 {
     Pending,
     Approved,
+    PickedUp,
     Rejected
 }
