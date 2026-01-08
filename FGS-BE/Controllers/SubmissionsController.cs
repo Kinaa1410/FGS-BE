@@ -1,4 +1,4 @@
-﻿using FGS_BE.Repo.DTOs.Submissions;
+using FGS_BE.Repo.DTOs.Submissions;
 using FGS_BE.Service.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -127,6 +127,7 @@ namespace FGS_BE.API.Controllers
         /// <param name="dto">Review decision, score, and feedback</param>
         /// <returns>Reviewed submission</returns>
         [HttpPut("{id:int}/review")]
+        [Authorize(Roles = "Mentor")]
         public async Task<IActionResult> Review(int id, [FromBody] ReviewSubmissionDto dto)
         {
             if (!ModelState.IsValid)
