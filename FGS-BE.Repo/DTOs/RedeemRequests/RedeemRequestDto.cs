@@ -11,6 +11,7 @@ namespace FGS_BE.Repo.DTOs.RedeemRequests
         public RedeemRequestStatus Status { get; set; }
         public DateTime RequestedAt { get; set; }
         public DateTime? ProcessedAt { get; set; }
+        public DateTime? CollectedAt { get; set; }
         public int UserId { get; set; }
         public int RewardItemId { get; set; }
 
@@ -24,6 +25,7 @@ namespace FGS_BE.Repo.DTOs.RedeemRequests
             Status = entity.Status;
             RequestedAt = entity.RequestedAt;
             ProcessedAt = entity.ProcessedAt;
+            CollectedAt = entity.CollectedAt;
             UserId = entity.UserId;
             RewardItemId = entity.RewardItemId;
         }

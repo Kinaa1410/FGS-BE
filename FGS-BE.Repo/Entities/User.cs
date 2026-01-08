@@ -14,7 +14,7 @@ public class User : IdentityUser<int>
 
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-
+    public string? VerificationToken { get; set; } = null;
     public virtual ICollection<UserRole> UserRoles { get; set; } = new HashSet<UserRole>();
 
     [Projectable]
@@ -27,6 +27,7 @@ public class User : IdentityUser<int>
     public virtual ICollection<PerformanceScore> PerformanceScores { get; set; } = new HashSet<PerformanceScore>();
     public virtual ICollection<Submission> Submissions { get; set; } = new HashSet<Submission>();
     public virtual ICollection<ProjectMember> ProjectMembers { get; set; } = new HashSet<ProjectMember>();
+    public virtual ICollection<UserProjectStats> ProjectStats { get; set; } = new HashSet<UserProjectStats>();  // New
     public virtual ICollection<Notification> Notifications { get; set; } = new HashSet<Notification>();
 
     public virtual ICollection<ChatParticipant> ChatParticipants { get; set; } = new HashSet<ChatParticipant>();

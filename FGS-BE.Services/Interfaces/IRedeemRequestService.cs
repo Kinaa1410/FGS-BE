@@ -12,6 +12,7 @@ namespace FGS_BE.Service.Interfaces
             string? status = null,
             int? userId = null,
             int? rewardItemId = null,
+            bool? collected = null,
             string? sortColumn = "Id",
             string? sortDir = "Asc");
 
@@ -20,14 +21,16 @@ namespace FGS_BE.Service.Interfaces
             int pageIndex,
             int pageSize,
             string? status = null,
+            bool? collected = null,
             string? sortColumn = "Id",
             string? sortDir = "Asc");
 
         Task<RedeemRequestDto?> GetByIdAsync(int id);
 
-        Task<RedeemRequestDto?> CreateAsync(CreateRedeemRequestDto dto); 
+        Task<RedeemRequestDto> CreateAsync(CreateRedeemRequestDto dto);
 
         Task<RedeemRequestDto?> UpdateStatusAsync(int id, UpdateStatusRedeemRequestDto dto);
+        Task<RedeemRequestDto> MarkAsCollectedAsync(int id);
 
         Task<bool> DeleteAsync(int id);
     }

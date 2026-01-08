@@ -4,6 +4,7 @@ using FGS_BE.Repo.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FGS_BE.Repo.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260107131248_AddVerificationTokenToUserAndAddNewStatusToRedeemRequest")]
+    partial class AddVerificationTokenToUserAndAddNewStatusToRedeemRequest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -213,18 +216,9 @@ namespace FGS_BE.Repo.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("DueDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDelayed")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<DateTime?>("OriginalDueDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("ProjectId")
@@ -237,8 +231,7 @@ namespace FGS_BE.Repo.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Weight")
                         .HasColumnType("decimal(18,2)");
@@ -752,27 +745,17 @@ namespace FGS_BE.Repo.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Feedback")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FileUrl")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("Grade")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("IsFinal")
                         .HasColumnType("bit");
-
-                    b.Property<bool>("IsResubmission")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<DateTime?>("RejectionDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -795,8 +778,6 @@ namespace FGS_BE.Repo.Migrations
                     b.HasIndex("TaskId");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("UserId", "TaskId", "Status");
 
                     b.ToTable("Submissions");
                 });
@@ -999,42 +980,6 @@ namespace FGS_BE.Repo.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserLevels");
-                });
-
-            modelBuilder.Entity("FGS_BE.Repo.Entities.UserProjectStats", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("FailureCount")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
-
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectId");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("UserId", "ProjectId")
-                        .IsUnique();
-
-                    b.ToTable("UserProjectStats");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.UserRole", b =>
@@ -1520,25 +1465,6 @@ namespace FGS_BE.Repo.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("FGS_BE.Repo.Entities.UserProjectStats", b =>
-                {
-                    b.HasOne("FGS_BE.Repo.Entities.Project", "Project")
-                        .WithMany("UserStats")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("FGS_BE.Repo.Entities.User", "User")
-                        .WithMany("ProjectStats")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Project");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("FGS_BE.Repo.Entities.UserRole", b =>
                 {
                     b.HasOne("FGS_BE.Repo.Entities.Role", "Role")
@@ -1648,8 +1574,6 @@ namespace FGS_BE.Repo.Migrations
                     b.Navigation("ProjectKeywords");
 
                     b.Navigation("ProjectMembers");
-
-                    b.Navigation("UserStats");
                 });
 
             modelBuilder.Entity("FGS_BE.Repo.Entities.RewardItem", b =>
@@ -1700,8 +1624,6 @@ namespace FGS_BE.Repo.Migrations
                     b.Navigation("PerformanceScores");
 
                     b.Navigation("ProjectMembers");
-
-                    b.Navigation("ProjectStats");
 
                     b.Navigation("RedeemRequests");
 

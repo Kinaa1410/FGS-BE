@@ -8,6 +8,7 @@ using FGS_BE.Service.Interfaces;
 using FGS_BE.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace FGS_BE.Service.Implements
 {
@@ -34,7 +35,6 @@ namespace FGS_BE.Service.Implements
             {
                 var paged = await _unitOfWork.SubmissionRepository.GetPagedAsync(
                     pageIndex, pageSize, userId, taskId, sortColumn, sortDir);
-
                 return new PaginatedList<SubmissionDto>(
                     paged.Select(x => new SubmissionDto(x)).ToList(),
                     paged.TotalItems, paged.PageIndex, paged.PageSize);
@@ -50,7 +50,6 @@ namespace FGS_BE.Service.Implements
             try
             {
                 if (id <= 0) throw new ArgumentException("Invalid submission ID.");
-
                 var entity = await _unitOfWork.SubmissionRepository.FindByIdAsync(id);
                 return entity == null ? null : new SubmissionDto(entity);
             }
@@ -66,18 +65,37 @@ namespace FGS_BE.Service.Implements
             {
                 if (dto.File == null || dto.File.Length == 0)
                     throw new ArgumentException("File is required.");
-
                 if (dto.TaskId <= 0)
                     throw new ArgumentException("TaskId is invalid.");
-
                 if (dto.UserId <= 0)
                     throw new ArgumentException("UserId is invalid.");
 
+                // Rule 1: Grace Period for Resubmission (72 hours, 1 attempt)
+                var latestRejection = await _unitOfWork.SubmissionRepository.FindByAsync(
+                    predicate: s => s.UserId == dto.UserId && s.TaskId == dto.TaskId && s.Status == SubmissionStatus.Rejected,
+                    includeExpression: q => q.OrderByDescending(s => s.SubmittedAt).Take(1)
+                );
+
+                bool isResubmission = false;
+                int version = 1;
+                if (latestRejection != null)
+                {
+                    var hoursSinceRejection = (DateTime.UtcNow - latestRejection.RejectionDate!.Value).TotalHours;
+                    if (hoursSinceRejection > 72)
+                        throw new ArgumentException("Đã hết thời hạn 72 giờ để nộp lại submission. Vui lòng liên hệ quản lý dự án.");
+
+                    var resubCount = await _unitOfWork.SubmissionRepository.CountAsync(
+                        predicate: s => s.UserId == dto.UserId && s.TaskId == dto.TaskId && s.IsResubmission);
+                    if (resubCount >= 1)
+                        throw new ArgumentException("Chỉ được phép nộp lại 1 lần cho task này.");
+
+                    isResubmission = true;
+                    version = latestRejection.Version + 1;
+                }
+
                 string fileExtension = Path.GetExtension(dto.File.FileName);
                 string newFileName = $"{Guid.NewGuid()}{fileExtension}";
-
                 var uploadResult = await _cloudinaryService.UploadImage(newFileName, dto.File);
-
                 if (uploadResult == null)
                     throw new Exception("Error uploading file. Please try again.");
 
@@ -87,12 +105,13 @@ namespace FGS_BE.Service.Implements
                     UserId = dto.UserId,
                     FileUrl = uploadResult.ImageUrl,
                     SubmittedAt = DateTime.UtcNow,
-                    Status = SubmissionStatus.Pending
+                    Status = SubmissionStatus.Pending,
+                    IsResubmission = isResubmission,
+                    Version = version
                 };
 
                 await _unitOfWork.SubmissionRepository.CreateAsync(entity);
                 await _unitOfWork.CommitAsync();
-
                 return new SubmissionDto(entity);
             }
             catch (ArgumentException)
@@ -114,19 +133,15 @@ namespace FGS_BE.Service.Implements
             try
             {
                 if (id <= 0) throw new ArgumentException("Invalid submission ID.");
-
                 var entity = await _unitOfWork.SubmissionRepository.FindByIdAsync(id);
                 if (entity == null) return null;
-
                 entity.FileUrl = dto.FileUrl ?? entity.FileUrl;
                 entity.Status = dto.Status ?? entity.Status;
                 entity.Grade = dto.Grade ?? entity.Grade;
                 entity.Feedback = dto.Feedback ?? entity.Feedback;
                 entity.IsFinal = dto.IsFinal ?? entity.IsFinal;
-
                 await _unitOfWork.SubmissionRepository.UpdateAsync(entity);
                 await _unitOfWork.CommitAsync();
-
                 return new SubmissionDto(entity);
             }
             catch (Exception ex)
@@ -140,10 +155,8 @@ namespace FGS_BE.Service.Implements
             try
             {
                 if (id <= 0) throw new ArgumentException("Invalid submission ID.");
-
                 var entity = await _unitOfWork.SubmissionRepository.FindByIdAsync(id);
                 if (entity == null) return false;
-
                 await _unitOfWork.SubmissionRepository.DeleteAsync(entity);
                 await _unitOfWork.CommitAsync();
                 return true;
@@ -160,20 +173,21 @@ namespace FGS_BE.Service.Implements
             {
                 if (submissionId <= 0)
                     throw new ArgumentException("Invalid submission ID.");
-
-                var decision = dto.Decision?.ToLower();
+                var decision = dto.Decision?.ToLower();  // Declared early to fix scope
                 if (decision != "approve" && decision != "reject")
                     throw new ArgumentException("Decision must be 'approve' or 'reject'.");
-
                 if (!string.IsNullOrEmpty(dto.Feedback) && dto.Feedback.Length > 500)
                     throw new ArgumentException("Feedback must be less than 500 characters.");
+                if (decision == "approve" && (!dto.Score.HasValue || dto.Score < 0 || dto.Score > 10))
+                    throw new ArgumentException("Score must be between 0 and 10 when approving.");
 
                 var submission = await _unitOfWork.SubmissionRepository.FindByAsync(
-                    x => x.Id == submissionId,
-                    q => q
-                        .Include(s => s.Task)
-                            .ThenInclude(t => t.Milestone)
-                                .ThenInclude(m => m.Project)
+                    predicate: x => x.Id == submissionId,
+                    includeExpression: q => q
+                        .Include(s => s.Task)!
+                        .ThenInclude(t => t.Milestone)!
+                        .ThenInclude(m => m.Project)!
+                        .ThenInclude(p => p.ProjectMembers)
                 );
 
                 if (submission == null)
@@ -181,17 +195,16 @@ namespace FGS_BE.Service.Implements
 
                 submission.Feedback = dto.Feedback;
 
+                await using var transaction = await _unitOfWork.BeginTransactionAsync();
+
                 if (decision == "approve")
                 {
-                    if (!dto.Score.HasValue || dto.Score < 0 || dto.Score > 10)
-                        throw new ArgumentException("Score must be between 0 and 10 when approving.");
-
                     submission.Status = SubmissionStatus.Approved;
                     submission.Grade = dto.Score.Value;
+                    submission.IsFinal = true;
 
                     var milestone = submission.Task!.Milestone;
                     var project = milestone.Project;
-
                     var scoreEntity = new PerformanceScore
                     {
                         UserId = submission.UserId,
@@ -202,17 +215,59 @@ namespace FGS_BE.Service.Implements
                         Comment = dto.Feedback,
                         CreatedAt = DateTime.UtcNow
                     };
-
                     await _unitOfWork.PerformanceScoreRepository.CreateAsync(scoreEntity);
                 }
                 else
                 {
                     submission.Status = SubmissionStatus.Rejected;
                     submission.Grade = null;
+                    submission.RejectionDate = DateTime.UtcNow;  // Starts grace period clock
+
+                    // Rule 2: Team Milestone Delay Buffer (36 hours for 4-member projects, once per milestone)
+                    var project = submission.Task!.Milestone.Project;
+                    if (project.ProjectMembers.Count == 4 && !submission.Task.Milestone.IsDelayed)
+                    {
+                        var milestone = submission.Task.Milestone;
+                        milestone.OriginalDueDate ??= milestone.DueDate;
+                        milestone.DueDate = milestone.DueDate.AddHours(36);
+                        milestone.IsDelayed = true;
+                        await _unitOfWork.MilestoneRepository.UpdateAsync(milestone);
+                    }
+
+                    // Rule 3: Escalation Threshold (flag in feedback; no email)
+                    var projectId = project.Id;
+                    var stats = await _unitOfWork.UserProjectStatsRepository.FindByAsync(
+                        predicate: s => s.UserId == submission.UserId && s.ProjectId == projectId
+                    );
+
+                    if (stats == null)
+                    {
+                        stats = new UserProjectStats
+                        {
+                            UserId = submission.UserId,
+                            ProjectId = projectId,
+                            FailureCount = 1
+                        };
+                        await _unitOfWork.UserProjectStatsRepository.CreateAsync(stats);
+                    }
+                    else
+                    {
+                        stats.FailureCount++;
+                        stats.UpdatedAt = DateTime.UtcNow;
+                        await _unitOfWork.UserProjectStatsRepository.UpdateAsync(stats);
+                    }
+
+                    if (stats.FailureCount >= 2)
+                    {
+                        // Flag in feedback (no email)
+                        submission.Feedback += $"\n[CẢNH BÁO: Đã đạt ngưỡng thất bại {stats.FailureCount}/2. Yêu cầu đánh giá hiệu suất với mentor dự án.]";
+                        // TODO: Integrate real notification (e.g., via Hangfire or in-app)
+                    }
                 }
 
                 await _unitOfWork.SubmissionRepository.UpdateAsync(submission);
                 await _unitOfWork.CommitAsync();
+                await transaction.CommitAsync();
 
                 return new SubmissionDto(submission);
             }
@@ -225,6 +280,5 @@ namespace FGS_BE.Service.Implements
                 throw new Exception("Không thể duyệt submission: " + ex.Message);
             }
         }
-
     }
 }

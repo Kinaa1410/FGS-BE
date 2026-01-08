@@ -1,4 +1,6 @@
-﻿namespace FGS_BE.Repo.DTOs.Milestones
+﻿using FGS_BE.Repo.Entities;
+
+namespace FGS_BE.Repo.DTOs.Milestones
 {
     public class MilestoneDto
     {
@@ -11,6 +13,8 @@
         public string? Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public int ProjectId { get; set; }
+        public bool IsDelayed { get; set; }
+        public DateTime? OriginalDueDate { get; set; }
 
         public MilestoneDto() { }
 
@@ -25,6 +29,8 @@
             Status = entity.Status;
             CreatedAt = entity.CreatedAt;
             ProjectId = entity.ProjectId;
+            IsDelayed = entity.IsDelayed;  
+            OriginalDueDate = entity.OriginalDueDate; 
         }
     }
 }

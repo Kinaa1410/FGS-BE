@@ -1,7 +1,6 @@
-﻿using FGS_BE.Repo.DTOs.Submissions;
-using FGS_BE.Service.Implements;
+using FGS_BE.Repo.DTOs.Submissions;
 using FGS_BE.Service.Interfaces;
-using FGS_BE.Services.Implements;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FGS_BE.API.Controllers
@@ -18,15 +17,15 @@ namespace FGS_BE.API.Controllers
         }
 
         /// <summary>
-        /// get pages submissions with filter
+        /// Get paginated submissions with filters
         /// </summary>
-        /// <param name="pageIndex"></param>
-        /// <param name="pageSize"></param>
-        /// <param name="userId"></param>
-        /// <param name="taskId"></param>
-        /// <param name="sortColumn"></param>
-        /// <param name="sortDir"></param>
-        /// <returns></returns>
+        /// <param name="pageIndex">Current page number</param>
+        /// <param name="pageSize">Number of records per page</param>
+        /// <param name="userId">Filter by UserId</param>
+        /// <param name="taskId">Filter by TaskId</param>
+        /// <param name="sortColumn">Column name for sorting</param>
+        /// <param name="sortDir">Sort direction: Asc (ascending), Desc (descending)</param>
+        /// <returns>Paginated submissions</returns>
         [HttpGet]
         public async Task<IActionResult> GetPagedAsync(
             [FromQuery] int pageIndex = 1,
@@ -41,25 +40,24 @@ namespace FGS_BE.API.Controllers
         }
 
         /// <summary>
-        /// get submission by id
+        /// Get submission by ID
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
+        /// <param name="id">Submission ID</param>
+        /// <returns>Submission details</returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<SubmissionDto>> GetById(int id)
         {
             var submission = await _service.GetByIdAsync(id);
             if (submission == null)
-                return NotFound();
-
+                return NotFound(new { message = "Submission not found." });
             return Ok(submission);
         }
 
         /// <summary>
-        /// add new submission
+        /// Create a new submission
         /// </summary>
-        /// <param name="dto"></param>
-        /// <returns></returns>
+        /// <param name="dto">Submission creation data (with file)</param>
+        /// <returns>Created submission</returns>
         [HttpPost]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> Create([FromForm] CreateSubmissionDto dto)
@@ -77,67 +75,84 @@ namespace FGS_BE.API.Controllers
             {
                 return Conflict(new { message = ex.Message });
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
             catch (Exception ex)
             {
-                return BadRequest(new { message = "Không thể tạo submission.", detail = ex.Message });
+                return StatusCode(500, new { message = "Unable to create submission.", detail = ex.Message });
             }
         }
 
-
-
         /// <summary>
-        /// update submission by id
+        /// Update submission by ID
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="dto"></param>
-        /// <returns></returns>
+        /// <param name="id">Submission ID</param>
+        /// <param name="dto">Updated submission data</param>
+        /// <returns>Updated submission</returns>
         [HttpPut("{id:int}")]
         public async Task<IActionResult> UpdateAsync(int id, UpdateSubmissionDto dto)
         {
-            var updated = await _service.UpdateAsync(id, dto);
-            return updated == null ? NotFound() : Ok(updated);
+            try
+            {
+                var updated = await _service.UpdateAsync(id, dto);
+                return updated == null ? NotFound(new { message = "Submission not found." }) : Ok(updated);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Unable to update submission.", detail = ex.Message });
+            }
         }
 
         /// <summary>
-        /// delete submission by id
+        /// Delete submission by ID
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
+        /// <param name="id">Submission ID</param>
+        /// <returns>No content if successful</returns>
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
-            var deleted = await _service.DeleteAsync(id);
-            return deleted ? NoContent() : NotFound();
+            try
+            {
+                var deleted = await _service.DeleteAsync(id);
+                return deleted ? NoContent() : NotFound(new { message = "Submission not found." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Unable to delete submission.", detail = ex.Message });
+            }
         }
 
         /// <summary>
-        /// fill "approve" or "reject"
+        /// Review/grade submission by ID (approve/reject with score/feedback)
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="dto"></param>
-        /// <returns></returns>
+        /// <param name="id">Submission ID</param>
+        /// <param name="dto">Review decision, score, and feedback</param>
+        /// <returns>Reviewed submission</returns>
         [HttpPut("{id:int}/review")]
+        [Authorize(Roles = "Mentor")]
         public async Task<IActionResult> Review(int id, [FromBody] ReviewSubmissionDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
-
-            var result = await _service.ReviewSubmissionAsync(id, dto);
-
-            if (result == null)
-                return NotFound(new { message = "Submission không tồn tại" });
-
-            return Ok(new
+            try
             {
-                message = dto.Decision.ToLower() == "approve"
-                    ? "Duyệt thành công"
-                    : "Từ chối thành công",
-                data = result
-            });
+                var result = await _service.ReviewSubmissionAsync(id, dto);
+                if (result == null)
+                    return NotFound(new { message = "Submission not found." });
+                return Ok(new
+                {
+                    message = dto.Decision?.ToLower() == "approve"
+                        ? "Approved successfully"
+                        : "Rejected successfully",
+                    data = result
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Unable to review submission.", detail = ex.Message });
+            }
         }
     }
 }

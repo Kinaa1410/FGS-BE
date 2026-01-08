@@ -19,6 +19,7 @@ namespace FGS_BE.Repo.Repositories.Interfaces
         IProjectInvitationRepository ProjectInvitationRepository { get; }
         INotificationRepository NotificationRepository { get; }
         INotificationTemplateRepository NotificationTemplateRepository { get; }
+        IUserProjectStatsRepository UserProjectStatsRepository { get; }
         IGenericRepository<T> Repository<T>() where T : class;
 
         Task CommitAsync(CancellationToken cancellationToken = default);
