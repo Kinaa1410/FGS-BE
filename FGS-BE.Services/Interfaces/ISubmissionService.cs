@@ -13,7 +13,6 @@ namespace FGS_BE.Service.Interfaces
             int? taskId = null,
             string? sortColumn = "Id",
             string? sortDir = "Asc");
-
         Task<SubmissionDto?> GetByIdAsync(int id);
         Task<SubmissionDto> CreateAsync(CreateSubmissionDto dto);
         Task<SubmissionDto?> UpdateAsync(int id, UpdateSubmissionDto dto);
