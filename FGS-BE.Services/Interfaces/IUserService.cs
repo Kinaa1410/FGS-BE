@@ -1,6 +1,8 @@
 ﻿using FGS_BE.Repo.DTOs.Pages;
 using FGS_BE.Repo.DTOs.Users;
+using FGS_BE.Repo.Entities;
 using Microsoft.AspNetCore.Authentication.BearerToken;
+using Task = System.Threading.Tasks.Task;
 
 namespace FGS_BE.Services.Interfaces;
 public interface IUserService
@@ -15,4 +17,7 @@ public interface IUserService
     Task ChangePasswordAsync(int userId, ChangePasswordRequest request);
     Task RegisterMentorAsync(RegisterStaffRequest request);
     Task RegisterFinanceAsync(RegisterStaffRequest request);
+
+    Task<User> RegisterCustomer(RegisterDTO customer);
+    Task<VerifyResponse> Verify(string token);
 }

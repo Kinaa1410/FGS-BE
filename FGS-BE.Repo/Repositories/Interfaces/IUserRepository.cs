@@ -12,5 +12,6 @@ namespace FGS_BE.Repo.Repositories.Interfaces
             string? sortColumn = "Id",
             string? sortDir = "Asc",
             CancellationToken cancellationToken = default);
+
     }
 }

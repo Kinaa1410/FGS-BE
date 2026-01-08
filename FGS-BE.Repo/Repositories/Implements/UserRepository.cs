@@ -44,5 +44,10 @@ namespace FGS_BE.Repo.Repositories.Implements
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
 
+        public async Task<User> Verify(string token)
+        {
+            return await Entities.FirstOrDefaultAsync(t => t.VerificationToken == token);
+        }
+
     }
 }
