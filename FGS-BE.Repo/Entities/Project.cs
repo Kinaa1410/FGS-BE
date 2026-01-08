@@ -31,5 +31,6 @@ public class Project
     public virtual ICollection<PerformanceScore> PerformanceScores { get; set; } = new HashSet<PerformanceScore>();
     public virtual ICollection<ProjectKeyword> ProjectKeywords { get; set; } = new HashSet<ProjectKeyword>();
     public virtual ICollection<ProjectMember> ProjectMembers { get; set; } = new HashSet<ProjectMember>();
+    public virtual ICollection<UserProjectStats> UserStats { get; set; } = new HashSet<UserProjectStats>(); 
     public virtual ICollection<ProjectInvitation> ProjectInvitations { get; set; } = new HashSet<ProjectInvitation>();
 }

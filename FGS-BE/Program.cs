@@ -22,21 +22,16 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-
 var builder = WebApplication.CreateBuilder(args);
-
 JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
-
 // FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProjectDtoValidator>();
-
 // Custom extensions (these handle additional registrations like auto-scanning)
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddWebServices(builder.Configuration);
-
 // Database Context (SQL Server)
 string defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("DefaultConnection not found in configuration.");
@@ -45,9 +40,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         .EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
         .EnableDetailedErrors(builder.Environment.IsDevelopment())
         .UseProjectables());
-
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
-
 // Repositories (all Scoped for per-request lifetime with DbContext)
 builder.Services
     .AddScoped<ISemesterRepository, SemesterRepository>()
@@ -64,8 +57,8 @@ builder.Services
     .AddScoped<IProjectInvitationRepository, ProjectInvitationRepository>()
     .AddScoped<INotificationRepository, NotificationRepository>()
     .AddScoped<INotificationTemplateRepository, NotificationTemplateRepository>()
-    .AddScoped<IUserRepository, UserRepository>();
-
+    .AddScoped<IUserRepository, UserRepository>()
+    .AddScoped<IUserProjectStatsRepository, UserProjectStatsRepository>();  // New: For escalation threshold
 // Services (all Scoped to match repositories/DbContext)
 builder.Services
     .AddScoped<IRedeemRequestService, RedeemRequestService>()
@@ -88,7 +81,6 @@ builder.Services
     .AddScoped<InvitationExpiryService>()
     .AddScoped<ProjectClosureService>()
     .AddScoped<SemesterStatusSyncService>();
-
 // UnitOfWork (Scoped factory to inject all repositories)
 builder.Services.AddScoped<IUnitOfWork>(provider =>
 {
@@ -107,26 +99,22 @@ builder.Services.AddScoped<IUnitOfWork>(provider =>
     var notificationRepo = provider.GetRequiredService<INotificationRepository>();
     var notificationTemplateRepo = provider.GetRequiredService<INotificationTemplateRepository>();
     var projectInvitationRepo = provider.GetRequiredService<IProjectInvitationRepository>();
+    var userProjectStatsRepo = provider.GetRequiredService<IUserProjectStatsRepository>();  // New: Inject for escalation
     return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo,
         projectRepo, milestoneRepo, taskRepo, redeemRequestRepo, submissionRepo,
         projectMemberRepo, performanceScoreRepo, userRepo, projectInvitationRepo,
-        notificationRepo, notificationTemplateRepo);
+        notificationRepo, notificationTemplateRepo, userProjectStatsRepo);  // Updated: Include new repo
 });
-
 // Authorization (enables [Authorize] attributes on controllers)
 builder.Services.AddAuthorization();
-
 // Hangfire (for all 3 jobs)
 builder.Services.AddHangfire(config => config
     .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
     .UseSimpleAssemblyNameTypeSerializer()
     .UseRecommendedSerializerSettings()
     .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 builder.Services.AddHangfireServer();
-
 var app = builder.Build();
-
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
@@ -137,33 +125,25 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
         options.RoutePrefix = string.Empty; // Optional: Serve Swagger at app root
     });
 }
-
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
-
 // Essential Middleware Pipeline (using extension for consistency)
 await app.UseWebApplication();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 // Hangfire Dashboard (secure in prod with auth)
 app.UseHangfireDashboard("/hangfire");
-
 // Schedule 3 Jobs
 RecurringJob.AddOrUpdate<InvitationExpiryService>("invitation-expiry",
     service => service.ProcessExpiredInvitationsAsync(),
-    Cron.Minutely);  // Every minute
-
+    Cron.Minutely); // Every minute
 RecurringJob.AddOrUpdate<ProjectClosureService>("project-closure",
     service => service.AutoCloseProjectsAsync(),
-    Cron.Daily(0, 0));  // Daily at 00:00 UTC
-
+    Cron.Daily(0, 0)); // Daily at 00:00 UTC
 RecurringJob.AddOrUpdate<SemesterStatusSyncService>("semester-status-sync",
     service => service.SyncAllSemesterStatusesAsync(),
-    Cron.Daily(0, 0));  // Daily at 00:00 UTC
-
+    Cron.Daily(0, 0)); // Daily at 00:00 UTC
 app.MapControllers();
 app.Run();

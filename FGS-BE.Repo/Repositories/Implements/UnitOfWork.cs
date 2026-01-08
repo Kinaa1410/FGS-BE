@@ -27,6 +27,7 @@ namespace FGS_BE.Repo.Repositories.Implements
         public IProjectInvitationRepository ProjectInvitationRepository { get; }
         public INotificationRepository NotificationRepository { get; }
         public INotificationTemplateRepository NotificationTemplateRepository { get; }
+        public IUserProjectStatsRepository UserProjectStatsRepository { get; }  // New: For escalation threshold
 
         public UnitOfWork(
             ApplicationDbContext context,
@@ -43,11 +44,11 @@ namespace FGS_BE.Repo.Repositories.Implements
             IUserRepository userRepository,
             IProjectInvitationRepository projectInvitationRepository,
             INotificationRepository notificationRepository,
-            INotificationTemplateRepository notificationTemplateRepository
+            INotificationTemplateRepository notificationTemplateRepository,
+            IUserProjectStatsRepository userProjectStatsRepository  // New: Inject this
         )
         {
             _context = context;
-
             SemesterRepository = semesterRepository;
             RewardItemRepository = rewardItemRepository;
             TermKeywordRepository = termKeywordRepository;
@@ -62,21 +63,21 @@ namespace FGS_BE.Repo.Repositories.Implements
             ProjectInvitationRepository = projectInvitationRepository;
             NotificationRepository = notificationRepository;
             NotificationTemplateRepository = notificationTemplateRepository;
+            UserProjectStatsRepository = userProjectStatsRepository;  // New: Assign
         }
 
         public IGenericRepository<T> Repository<T>() where T : class
         {
             var type = typeof(T).Name;
-
             if (!_repositories.ContainsKey(type))
             {
                 var repoType = typeof(GenericRepository<>).MakeGenericType(typeof(T));
                 var repoInstance = Activator.CreateInstance(repoType, _context);
                 _repositories[type] = repoInstance!;
             }
-
             return (IGenericRepository<T>)_repositories[type]!;
         }
+
         public async Task CommitAsync(CancellationToken cancellationToken = default)
         {
             await _context.SaveChangesAsync(cancellationToken);
