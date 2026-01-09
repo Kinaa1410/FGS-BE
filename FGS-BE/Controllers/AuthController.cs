@@ -65,5 +65,20 @@ public class AuthController(IUserService service) : ControllerBase
         return new MessageResponse(Resource.CreatedSuccess);
     }
 
+    //
+
+    [HttpPost("register-mail-account")]
+    public async Task<ActionResult<MessageResponse>> RegisterMailAcc([FromBody] RegisterDTO request)
+    {
+        await service.RegisterMailAcc(request);
+        return Ok(new MessageResponse("Created Success, please verify your account!"));
+    }
+
+    [HttpPost("verify")]
+    public async Task<IActionResult> Verify([FromBody] VerifyTokenRequest request)
+    {
+        await service.Verify(request.Token);
+        return Ok(new MessageResponse("Verify account successfully"));
+    }
 
 }

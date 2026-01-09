@@ -18,9 +18,17 @@ namespace FGS_BE.Service.Services;
 public class UserService(
     IUnitOfWork unitOfWork,
     UserManager<User> userManager,
-    IJwtService jwtService) : IUserService
+    IJwtService jwtService,
+    IEmailService emailService
+) : IUserService
 {
-    private readonly IGenericRepository<User> _userRepository = unitOfWork.Repository<User>();
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly UserManager<User> _userManager = userManager;
+    private readonly IJwtService _jwtService = jwtService;
+    private readonly IEmailService _emailService = emailService;
+
+    private readonly IGenericRepository<User> _userRepository
+        = unitOfWork.Repository<User>();
 
     public async Task<PaginatedResponse<UserResponse>> FindAsync(GetUsersQuery request)
     {
@@ -66,6 +74,105 @@ public class UserService(
             return null;
 
         return await jwtService.GenerateTokenAsync(user);
+    }
+
+    public async Task<VerifyResponse> Verify(string token)
+    {
+        var user = await _unitOfWork
+            .Repository<User>()
+            .Entities
+            .FirstOrDefaultAsync(x => x.VerificationToken == token);
+
+        if (user == null)
+        {
+            return new VerifyResponse
+            {
+                Success = false,
+                Message = "Invalid or expired token"
+            };
+        }
+
+        user.Status = "Active";
+        user.VerificationToken = null;
+
+        await _unitOfWork.CommitAsync();
+
+        return new VerifyResponse
+        {
+            Success = true,
+            Message = "Account verified successfully"
+        };
+    }
+
+
+    public async Task<User> RegisterMailAcc(RegisterDTO customer)
+    {
+        var exitMail = await _userRepository.FindByAsync(x => x.Email == customer.Email);
+
+        if (exitMail != null)
+        {
+            throw new Exception("Email already exists");
+        }
+
+
+        var token = _emailService.GenerateRandomNumber();
+
+        var user = new User
+        {
+            UserName = customer.Username,
+            Email = customer.Email,
+            FullName = customer.FullName ?? string.Empty,
+            Status = "Pending",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        await _emailService.SendOtpMail(customer.FullName, token, customer.Email);
+
+        var result = await userManager.CreateAsync(user, customer.Password);
+        if (!result.Succeeded) throw new BadRequestException();
+
+        result = await userManager.AddToRoleAsync(user, RoleEnums.User.ToString());
+        if (!result.Succeeded) throw new BadRequestException();
+
+        // New: Create UserWallet with balance=0
+        var walletRepo = unitOfWork.Repository<UserWallet>();
+        var wallet = new UserWallet
+        {
+            UserId = user.Id,
+            Balance = 0, // Starting balance (matches entity property)
+            LastUpdatedAt = DateTime.UtcNow // Matches entity property
+        };
+        await walletRepo.CreateAsync(wallet);
+
+        // New: Auto-assign lowest level (dynamic query for smallest threshold)
+        var levelRepo = unitOfWork.Repository<Level>();
+        var userLevelRepo = unitOfWork.Repository<UserLevel>();
+
+        // Fixed: Load active levels to memory first, then sort client-side to avoid EF translation error
+        var activeLevels = await levelRepo.Entities
+            .Where(l => l.IsActive)
+            .ToListAsync();
+
+        var lowestLevel = activeLevels
+            .OrderBy(l => GetThresholdFromCondition(l.ConditionJson)) // Now safe in memory
+            .FirstOrDefault();
+
+        if (lowestLevel != null)
+        {
+            var initialUserLevel = new UserLevel
+            {
+                UserId = user.Id,
+                LevelId = lowestLevel.Id,
+                UnlockedAt = DateTime.UtcNow
+            };
+            await userLevelRepo.CreateAsync(initialUserLevel);
+        }
+
+        // Commit all changes atomically
+        await unitOfWork.CommitAsync();
+
+        return user;
     }
 
 

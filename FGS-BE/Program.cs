@@ -10,6 +10,7 @@ using FGS_BE.Service.Interfaces;
 using FGS_BE.Service.Services;
 using FGS_BE.Services.Implements;
 using FGS_BE.Services.Interfaces;
+using FGS_BE.Services.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Hangfire;
@@ -41,6 +42,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         .EnableDetailedErrors(builder.Environment.IsDevelopment())
         .UseProjectables());
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 // Repositories (all Scoped for per-request lifetime with DbContext)
 builder.Services
     .AddScoped<ISemesterRepository, SemesterRepository>()
@@ -77,6 +79,7 @@ builder.Services
     .AddScoped<IUserService, UserService>()
     .AddScoped<INotificationTemplateService, NotificationTemplateService>()
     .AddScoped<IProjectInvitationService, ProjectInvitationService>()
+    .AddScoped<IEmailService, EmailService>()
     // Jobs as Scoped services for Hangfire
     .AddScoped<InvitationExpiryService>()
     .AddScoped<ProjectClosureService>()
