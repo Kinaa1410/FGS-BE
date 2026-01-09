@@ -173,14 +173,13 @@ namespace FGS_BE.Service.Implements
             {
                 if (submissionId <= 0)
                     throw new ArgumentException("Invalid submission ID.");
-                var decision = dto.Decision?.ToLower();  // Declared early to fix scope
+                var decision = dto.Decision?.ToLower(); 
                 if (decision != "approve" && decision != "reject")
                     throw new ArgumentException("Decision must be 'approve' or 'reject'.");
                 if (!string.IsNullOrEmpty(dto.Feedback) && dto.Feedback.Length > 500)
                     throw new ArgumentException("Feedback must be less than 500 characters.");
                 if (decision == "approve" && (!dto.Score.HasValue || dto.Score < 0 || dto.Score > 10))
                     throw new ArgumentException("Score must be between 0 and 10 when approving.");
-
                 var submission = await _unitOfWork.SubmissionRepository.FindByAsync(
                     predicate: x => x.Id == submissionId,
                     includeExpression: q => q
@@ -189,20 +188,15 @@ namespace FGS_BE.Service.Implements
                         .ThenInclude(m => m.Project)!
                         .ThenInclude(p => p.ProjectMembers)
                 );
-
                 if (submission == null)
                     return null;
-
                 submission.Feedback = dto.Feedback;
-
                 await using var transaction = await _unitOfWork.BeginTransactionAsync();
-
                 if (decision == "approve")
                 {
                     submission.Status = SubmissionStatus.Approved;
                     submission.Grade = dto.Score.Value;
                     submission.IsFinal = true;
-
                     var milestone = submission.Task!.Milestone;
                     var project = milestone.Project;
                     var scoreEntity = new PerformanceScore
@@ -223,9 +217,10 @@ namespace FGS_BE.Service.Implements
                     submission.Grade = null;
                     submission.RejectionDate = DateTime.UtcNow;  // Starts grace period clock
 
-                    // Rule 2: Team Milestone Delay Buffer (36 hours for 4-member projects, once per milestone)
+                    // Rule 2: Team Milestone Delay Buffer (conditional on mentor choice)
                     var project = submission.Task!.Milestone.Project;
-                    if (project.ProjectMembers.Count == 4 && !submission.Task.Milestone.IsDelayed)
+                    var shouldExtend = dto.ExtendDeadline ?? true;
+                    if (shouldExtend && project.ProjectMembers.Count == 4 && !submission.Task.Milestone.IsDelayed)
                     {
                         var milestone = submission.Task.Milestone;
                         milestone.OriginalDueDate ??= milestone.DueDate;
@@ -233,13 +228,11 @@ namespace FGS_BE.Service.Implements
                         milestone.IsDelayed = true;
                         await _unitOfWork.MilestoneRepository.UpdateAsync(milestone);
                     }
-
-                    // Rule 3: Escalation Threshold (flag in feedback; no email)
+                    // Rule 3: Escalation Threshold
                     var projectId = project.Id;
                     var stats = await _unitOfWork.UserProjectStatsRepository.FindByAsync(
                         predicate: s => s.UserId == submission.UserId && s.ProjectId == projectId
                     );
-
                     if (stats == null)
                     {
                         stats = new UserProjectStats
@@ -256,19 +249,14 @@ namespace FGS_BE.Service.Implements
                         stats.UpdatedAt = DateTime.UtcNow;
                         await _unitOfWork.UserProjectStatsRepository.UpdateAsync(stats);
                     }
-
                     if (stats.FailureCount >= 2)
                     {
-                        // Flag in feedback (no email)
-                        submission.Feedback += $"\n[CẢNH BÁO: Đã đạt ngưỡng thất bại {stats.FailureCount}/2. Yêu cầu đánh giá hiệu suất với mentor dự án.]";
-                        // TODO: Integrate real notification (e.g., via Hangfire or in-app)
+                        submission.Feedback += $"\n[WARNING: Reached failure threshold {stats.FailureCount}/2. Performance review required with project mentor.]";
                     }
                 }
-
                 await _unitOfWork.SubmissionRepository.UpdateAsync(submission);
                 await _unitOfWork.CommitAsync();
                 await transaction.CommitAsync();
-
                 return new SubmissionDto(submission);
             }
             catch (ArgumentException)
@@ -277,7 +265,7 @@ namespace FGS_BE.Service.Implements
             }
             catch (Exception ex)
             {
-                throw new Exception("Không thể duyệt submission: " + ex.Message);
+                throw new Exception("Unable to review submission: " + ex.Message);
             }
         }
     }

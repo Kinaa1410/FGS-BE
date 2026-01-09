@@ -136,11 +136,11 @@ namespace FGS_BE.API.Controllers
                 var result = await _service.ReviewSubmissionAsync(id, dto);
                 if (result == null)
                     return NotFound(new { message = "Submission not found." });
+                var extensionMessage = dto.ExtendDeadline == true ? "Deadline extended." : "No deadline adjustment.";
                 return Ok(new
                 {
-                    message = dto.Decision?.ToLower() == "approve"
-                        ? "Approved successfully"
-                        : "Rejected successfully",
+                    message = dto.Decision?.ToLower() == "approve" ? "Approved successfully" : "Rejected successfully",
+                    extensionMessage, 
                     data = result
                 });
             }
