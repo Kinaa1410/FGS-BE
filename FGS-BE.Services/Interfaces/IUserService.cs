@@ -18,6 +18,6 @@ public interface IUserService
     Task RegisterMentorAsync(RegisterStaffRequest request);
     Task RegisterFinanceAsync(RegisterStaffRequest request);
 
-    Task<User> RegisterCustomer(RegisterDTO customer);
+    Task<User> RegisterMailAcc(RegisterDTO customer);
     Task<VerifyResponse> Verify(string token);
 }

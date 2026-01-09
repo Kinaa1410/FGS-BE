@@ -11,11 +11,8 @@ namespace FGS_BE.Repo.DTOs.Users
     {
         public string Username { get; init; } = default!;
         public string Email { get; set; }
-
-        public required string Password { get; init; }
         [MaxLength(100)] // Optional: Limit length
         public string? FullName { get; set; }
-        [MaxLength(50)] // Optional: Limit length
-        public string? StudentCode { get; set; }
+        public required string Password { get; init; }
     }
 }

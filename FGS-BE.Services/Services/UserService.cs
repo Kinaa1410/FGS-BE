@@ -18,10 +18,17 @@ namespace FGS_BE.Service.Services;
 public class UserService(
     IUnitOfWork unitOfWork,
     UserManager<User> userManager,
-    IJwtService jwtService) : IUserService
+    IJwtService jwtService,
+    IEmailService emailService
+) : IUserService
 {
-    private readonly IGenericRepository<User> _userRepository = unitOfWork.Repository<User>();
-    private readonly IEmailService _emailService;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly UserManager<User> _userManager = userManager;
+    private readonly IJwtService _jwtService = jwtService;
+    private readonly IEmailService _emailService = emailService;
+
+    private readonly IGenericRepository<User> _userRepository
+        = unitOfWork.Repository<User>();
 
     public async Task<PaginatedResponse<UserResponse>> FindAsync(GetUsersQuery request)
     {
@@ -71,9 +78,12 @@ public class UserService(
 
     public async Task<VerifyResponse> Verify(string token)
     {
-        var verify = await _userRepository.Verify(token);
+        var user = await _unitOfWork
+            .Repository<User>()
+            .Entities
+            .FirstOrDefaultAsync(x => x.VerificationToken == token);
 
-        if (verify == null)
+        if (user == null)
         {
             return new VerifyResponse
             {
@@ -82,9 +92,10 @@ public class UserService(
             };
         }
 
-        verify.Status = "Active";
-        verify.VerificationToken = null; // xoá token sau khi verify
-        await _userRepository.UpdateAsync(verify);
+        user.Status = "Active";
+        user.VerificationToken = null;
+
+        await _unitOfWork.CommitAsync();
 
         return new VerifyResponse
         {
@@ -93,7 +104,8 @@ public class UserService(
         };
     }
 
-    public async Task<User> RegisterCustomer(RegisterDTO customer)
+
+    public async Task<User> RegisterMailAcc(RegisterDTO customer)
     {
         var exitMail = await _userRepository.FindByAsync(x => x.Email == customer.Email);
 
@@ -110,7 +122,6 @@ public class UserService(
             UserName = customer.Username,
             Email = customer.Email,
             FullName = customer.FullName ?? string.Empty,
-            StudentCode = customer.StudentCode ?? string.Empty,
             Status = "Pending",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
