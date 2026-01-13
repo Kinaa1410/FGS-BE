@@ -13,5 +13,6 @@
         public DateTime? DueDate { get; set; }
         public int? AssigneeId { get; set; }
         public int? ParentTaskId { get; set; }
+        public int MilestoneId { get; set; }
     }
 }

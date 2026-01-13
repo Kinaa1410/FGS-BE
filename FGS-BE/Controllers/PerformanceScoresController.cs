@@ -83,5 +83,12 @@ namespace FGS_BE.API.Controllers
             bool success = await _service.DeleteAsync(id);
             return success ? NoContent() : NotFound();
         }
+
+        [HttpGet("{projectId}/users/{userId}/score")]
+        public async Task<IActionResult> GetUserProjectScore(int projectId, int userId)
+        {
+            var result = await _service.GetUserProjectScoreAsync(projectId, userId);
+            return Ok(result);
+        }
     }
 }

@@ -2,6 +2,7 @@
 using FGS_BE.Repo.DTOs.Tasks;
 using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Service.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace FGS_BE.Service.Implements
 {
@@ -60,16 +61,22 @@ namespace FGS_BE.Service.Implements
 
         public async Task<TaskDto> CreateAsync(CreateTaskDto dto)
         {
-            try
-            {
                 if (string.IsNullOrWhiteSpace(dto.Label))
                     throw new ArgumentException("Label is required.");
 
                 if (dto.EstimatedHours < 0)
                     throw new ArgumentException("EstimatedHours must be >= 0.");
 
-                if (dto.Weight < 0)
-                    throw new ArgumentException("Weight must be >= 0.");
+                if (dto.Weight <= 0 || dto.Weight > 1)
+                    throw new ArgumentException("Weight must be > 0 and <= 1.");
+
+                var totalWeight = await _unitOfWork.TaskRepository.Entities
+                    .Where(x => x.MilestoneId == dto.MilestoneId)
+                    .SumAsync(x => x.Weight);
+
+                if (totalWeight + dto.Weight > 1)
+                    throw new InvalidOperationException("Total task weight cannot exceed 1.");
+
 
                 if (dto.StartDate != null && dto.DueDate != null && dto.DueDate < dto.StartDate)
                     throw new ArgumentException("DueDate must be greater than or equal to StartDate.");
@@ -77,34 +84,17 @@ namespace FGS_BE.Service.Implements
                 if (dto.AssigneeId.HasValue && dto.AssigneeId <= 0)
                     throw new ArgumentException("AssigneeId is invalid.");
 
-                if (dto.ParentTaskId.HasValue && dto.ParentTaskId <= 0)
-                    throw new ArgumentException("ParentTaskId is invalid.");
-
                 var entity = dto.ToEntity();
+                entity.ParentTaskId = null;
 
                 await _unitOfWork.TaskRepository.CreateAsync(entity);
                 await _unitOfWork.CommitAsync();
 
                 return new TaskDto(entity);
-            }
-            catch (ArgumentException)
-            {
-                throw;
-            }
-            catch (InvalidOperationException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Không thể tạo mới task: " + ex.Message);
-            }
         }
 
         public async Task<TaskDto?> UpdateAsync(int id, UpdateTaskDto dto)
         {
-            try
-            {
                 if (id <= 0)
                     throw new ArgumentException("Id không hợp lệ.");
 
@@ -114,17 +104,22 @@ namespace FGS_BE.Service.Implements
                 if (dto.EstimatedHours < 0)
                     throw new ArgumentException("EstimatedHours must be >= 0.");
 
-                if (dto.Weight < 0)
-                    throw new ArgumentException("Weight must be >= 0.");
+                if (dto.Weight <= 0 || dto.Weight > 1)
+                    throw new ArgumentException("Weight must be > 0 and <= 1.");
+
+                var totalWeight = await _unitOfWork.TaskRepository.Entities
+                    .Where(x => x.MilestoneId == dto.MilestoneId)
+                    .SumAsync(x => x.Weight);
+
+                if (totalWeight + dto.Weight > 1)
+                    throw new InvalidOperationException("Total task weight cannot exceed 1.");
+
 
                 if (dto.StartDate != null && dto.DueDate != null && dto.DueDate < dto.StartDate)
                     throw new ArgumentException("DueDate must be greater than or equal to StartDate.");
 
                 if (dto.AssigneeId.HasValue && dto.AssigneeId <= 0)
                     throw new ArgumentException("AssigneeId is invalid.");
-
-                if (dto.ParentTaskId.HasValue && dto.ParentTaskId <= 0)
-                    throw new ArgumentException("ParentTaskId is invalid.");
 
                 entity.Label = dto.Label;
                 entity.Description = dto.Description;
@@ -136,21 +131,14 @@ namespace FGS_BE.Service.Implements
                 entity.StartDate = dto.StartDate;
                 entity.DueDate = dto.DueDate;
                 entity.AssigneeId = dto.AssigneeId;
-                entity.ParentTaskId = dto.ParentTaskId;
+                entity.ParentTaskId = null;
+                entity.MilestoneId = dto.MilestoneId;
 
                 await _unitOfWork.TaskRepository.UpdateAsync(entity);
                 await _unitOfWork.CommitAsync();
 
                 return new TaskDto(entity);
-            }
-            catch (ArgumentException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Không thể cập nhật task: " + ex.Message);
-            }
+
         }
 
         public async Task<bool> DeleteAsync(int id)

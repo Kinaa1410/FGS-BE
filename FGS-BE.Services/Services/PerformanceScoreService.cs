@@ -1,7 +1,8 @@
-﻿using FGS_BE.Repo.Repositories.Interfaces;
-using FGS_BE.Service.Interfaces;
+﻿using FGS_BE.Repo.DTOs.Pages;
 using FGS_BE.Repo.DTOs.PerformanceScores;
-using FGS_BE.Repo.DTOs.Pages;
+using FGS_BE.Repo.Repositories.Interfaces;
+using FGS_BE.Service.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace FGS_BE.Service.Implements
 {
@@ -37,7 +38,7 @@ namespace FGS_BE.Service.Implements
             }
             catch (Exception ex)
             {
-                throw new Exception("Không thể lấy danh sách điểm hiệu suất: " + ex.Message);
+                throw new Exception("Fail to get list of performance score: " + ex.Message);
             }
         }
 
@@ -50,7 +51,7 @@ namespace FGS_BE.Service.Implements
             }
             catch (Exception ex)
             {
-                throw new Exception("Không thể lấy thông tin điểm hiệu suất: " + ex.Message);
+                throw new Exception("Fail to get this performance score: " + ex.Message);
             }
         }
 
@@ -80,7 +81,7 @@ namespace FGS_BE.Service.Implements
             }
             catch (Exception ex)
             {
-                throw new Exception("Không thể tạo điểm hiệu suất: " + ex.Message);
+                throw new Exception("Create failed: " + ex.Message);
             }
         }
 
@@ -106,7 +107,7 @@ namespace FGS_BE.Service.Implements
             }
             catch (Exception ex)
             {
-                throw new Exception("Không thể cập nhật điểm hiệu suất: " + ex.Message);
+                throw new Exception("Update failed: " + ex.Message);
             }
         }
 
@@ -124,8 +125,64 @@ namespace FGS_BE.Service.Implements
             }
             catch (Exception ex)
             {
-                throw new Exception("Không thể xóa điểm hiệu suất: " + ex.Message);
+                throw new Exception("Delete failed: " + ex.Message);
             }
         }
+
+        public async Task<UserProjectScoreDto> GetUserProjectScoreAsync(
+    int projectId,
+    int userId)
+        {
+            if (projectId <= 0 || userId <= 0)
+                throw new ArgumentException("Invalid projectId or userId.");
+
+            var rows = await _unitOfWork.PerformanceScoreRepository.Entities
+                .AsNoTracking()
+                .Where(ps =>
+                    ps.ProjectId == projectId &&
+                    ps.UserId == userId
+                )
+                .Select(ps => new
+                {
+                    ps.Score,
+                    ps.MilestoneId,
+                    MilestoneWeight = ps.Milestone.Weight,
+                    TaskWeight = ps.Task.Weight
+                })
+                .ToListAsync();
+
+            const decimal projectMaxScore = 100m;
+
+            var milestoneScores = rows
+                .GroupBy(x => new { x.MilestoneId, x.MilestoneWeight })
+                .Select(g =>
+                {
+                    var earned = g.Sum(x =>
+                        projectMaxScore *
+                        x.MilestoneWeight *
+                        x.TaskWeight *
+                        (x.Score / 10m)  
+                    );
+
+                    return new MilestoneScoreDto
+                    {
+                        MilestoneId = g.Key.MilestoneId,
+                        MilestoneWeight = g.Key.MilestoneWeight,
+                        MilestoneMaxScore = g.Key.MilestoneWeight * projectMaxScore,
+                        EarnedScore = Math.Round(earned, 2)
+                    };
+                })
+                .ToList();
+
+            return new UserProjectScoreDto
+            {
+                ProjectId = projectId,
+                UserId = userId,
+                TotalScore = Math.Round(milestoneScores.Sum(x => x.EarnedScore), 2),
+                MaxScore = projectMaxScore,
+                Milestones = milestoneScores
+            };
+        }
+
     }
 }
