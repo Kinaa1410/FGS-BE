@@ -7,7 +7,7 @@ namespace FGS_BE.API.Controllers
 {
     [ApiController]
     [Route("api/milestones")]
-    [Authorize]  // New: Require auth (e.g., mentor role for updates/delays)
+    //[Authorize]  // New: Require auth (e.g., mentor role for updates/delays)
     public class MilestonesController : ControllerBase
     {
         private readonly IMilestoneService _service;

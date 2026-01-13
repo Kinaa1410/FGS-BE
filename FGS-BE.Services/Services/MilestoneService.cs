@@ -56,93 +56,99 @@ namespace FGS_BE.Services.Implements
             }
         }
 
-        public async System.Threading.Tasks.Task<MilestoneDto> CreateAsync(CreateMilestoneDto dto)
+        public async Task<MilestoneDto> CreateAsync(CreateMilestoneDto dto)
         {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(dto.Title))
-                    throw new ArgumentException("Title is required.");
-                if (dto.Weight < 0)
-                    throw new ArgumentException("Weight must be >= 0.");
-                if (dto.DueDate <= dto.StartDate)
-                    throw new ArgumentException("The DueDate must be greater than the StartDate.");
+            if (string.IsNullOrWhiteSpace(dto.Title))
+                throw new ArgumentException("Title is required.");
 
-                var project = await _unitOfWork.ProjectRepository.FindByIdAsync(dto.ProjectId);
-                if (project == null)
-                    throw new InvalidOperationException("Project does not exist.");
+            if (dto.Weight <= 0 || dto.Weight > 1)
+                throw new ArgumentException("Weight must be > 0 and <= 1.");
 
-                var overlappingMilestone = await _unitOfWork.MilestoneRepository.Entities
-                    .AsNoTracking()
-                    .Where(x =>
-                        x.ProjectId == dto.ProjectId &&
-                        (
-                            (dto.StartDate >= x.StartDate && dto.StartDate <= x.DueDate) ||
-                            (dto.DueDate >= x.StartDate && dto.DueDate <= x.DueDate) ||
-                            (dto.StartDate <= x.StartDate && dto.DueDate >= x.DueDate)
-                        )
-                    )
-                    .FirstOrDefaultAsync();
-                if (overlappingMilestone != null)
-                    throw new InvalidOperationException("The milestone duration overlaps with existing milestone.");
+            if (dto.DueDate <= dto.StartDate)
+                throw new ArgumentException("The DueDate must be greater than the StartDate.");
 
-                var entity = dto.ToEntity();
-                entity.IsDelayed = false;  // Default for new milestones
-                entity.OriginalDueDate = null;  // No original on create
+            var project = await _unitOfWork.ProjectRepository.FindByIdAsync(dto.ProjectId)
+                ?? throw new InvalidOperationException("Project does not exist.");
 
-                await _unitOfWork.MilestoneRepository.CreateAsync(entity);
-                await _unitOfWork.CommitAsync();
-                return new MilestoneDto(entity);
-            }
-            catch
-            {
-                throw;
-            }
+            var totalWeight = await _unitOfWork.MilestoneRepository.Entities
+                .Where(x => x.ProjectId == dto.ProjectId)
+                .SumAsync(x => x.Weight);
+
+            if (totalWeight + dto.Weight > 1)
+                throw new InvalidOperationException("Total milestone weight cannot exceed 1.");
+
+            var hasOverlap = await _unitOfWork.MilestoneRepository.Entities
+                .AnyAsync(x =>
+                    x.ProjectId == dto.ProjectId &&
+                    dto.StartDate < x.DueDate &&
+                    dto.DueDate > x.StartDate
+                );
+
+            if (hasOverlap)
+                throw new InvalidOperationException("The milestone duration overlaps with existing milestone.");
+
+            var entity = dto.ToEntity();
+            entity.IsDelayed = false;
+
+            await _unitOfWork.MilestoneRepository.CreateAsync(entity);
+            await _unitOfWork.CommitAsync();
+
+            return new MilestoneDto(entity);
         }
 
-        public async System.Threading.Tasks.Task<MilestoneDto?> UpdateAsync(int id, UpdateMilestoneDto dto)
+
+        public async Task<MilestoneDto?> UpdateAsync(int id, UpdateMilestoneDto dto)
         {
-            try
+            var entity = await _unitOfWork.MilestoneRepository.FindByIdAsync(id);
+            if (entity == null) return null;
+
+            if (dto.StartDate >= dto.DueDate)
+                throw new ArgumentException("DueDate must be greater than StartDate.");
+
+            if (dto.Weight.HasValue)
             {
-                var entity = await _unitOfWork.MilestoneRepository.FindByIdAsync(id);
-                if (entity == null) return null;
-                if (dto.StartDate >= dto.DueDate)
-                    throw new ArgumentException("DueDate must be greater than StartDate.");
-                if (dto.Weight.GetValueOrDefault() < 0)
-                    throw new ArgumentException("Weight must be >= 0.");
+                if (dto.Weight <= 0 || dto.Weight > 1)
+                    throw new ArgumentException("Weight must be > 0 and <= 1.");
 
-                var overlappingMilestone = await _unitOfWork.MilestoneRepository.Entities
-                    .AsNoTracking()
-                    .Where(x =>
-                        x.ProjectId == entity.ProjectId &&
-                        x.Id != id &&
-                        (
-                            (dto.StartDate >= x.StartDate && dto.StartDate <= x.DueDate) ||
-                            (dto.DueDate >= x.StartDate && dto.DueDate <= x.DueDate) ||
-                            (dto.StartDate <= x.StartDate && dto.DueDate >= x.DueDate)
-                        )
-                    )
-                    .FirstOrDefaultAsync();
-                if (overlappingMilestone != null)
-                    throw new InvalidOperationException("The milestone duration overlaps with another milestone.");
+                var totalWeightExceptCurrent = await _unitOfWork.MilestoneRepository.Entities
+                    .Where(x => x.ProjectId == entity.ProjectId && x.Id != id)
+                    .SumAsync(x => x.Weight);
 
-                entity.Title = dto.Title ?? entity.Title;
-                entity.Description = dto.Description ?? entity.Description;
+                if (totalWeightExceptCurrent + dto.Weight.Value > 1)
+                    throw new InvalidOperationException("Total milestone weight cannot exceed 1.");
+            }
+
+            var hasOverlap = await _unitOfWork.MilestoneRepository.Entities
+                .AnyAsync(x =>
+                    x.ProjectId == entity.ProjectId &&
+                    x.Id != id &&
+                    dto.StartDate < x.DueDate &&
+                    dto.DueDate > x.StartDate
+                );
+
+            if (hasOverlap)
+                throw new InvalidOperationException("The milestone duration overlaps with another milestone.");
+
+            entity.Title = dto.Title ?? entity.Title;
+            entity.Description = dto.Description ?? entity.Description;
+            entity.Status = dto.Status ?? entity.Status;
+            entity.IsDelayed = dto.IsDelayed ?? entity.IsDelayed;
+
+            if (dto.StartDate != default)
                 entity.StartDate = dto.StartDate;
-                entity.DueDate = dto.DueDate;
-                entity.Weight = dto.Weight.GetValueOrDefault(entity.Weight);  // Handle nullable decimal
-                entity.Status = dto.Status ?? entity.Status;
-                entity.IsDelayed = dto.IsDelayed ?? entity.IsDelayed;  // New: Update if provided
-                entity.OriginalDueDate = dto.OriginalDueDate ?? entity.OriginalDueDate;  // New: Allow update
 
-                await _unitOfWork.MilestoneRepository.UpdateAsync(entity);
-                await _unitOfWork.CommitAsync();
-                return new MilestoneDto(entity);
-            }
-            catch
-            {
-                throw;
-            }
+            if (dto.DueDate != default)
+                entity.DueDate = dto.DueDate;
+
+            if (dto.Weight.HasValue)
+                entity.Weight = dto.Weight.Value;
+
+            await _unitOfWork.MilestoneRepository.UpdateAsync(entity);
+            await _unitOfWork.CommitAsync();
+
+            return new MilestoneDto(entity);
         }
+
 
         public async System.Threading.Tasks.Task<bool> DeleteAsync(int id)
         {

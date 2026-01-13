@@ -19,5 +19,7 @@ namespace FGS_BE.Service.Interfaces
         Task<PerformanceScoreDto> CreateAsync(CreatePerformanceScoreDto dto);
         Task<PerformanceScoreDto?> UpdateAsync(int id, UpdatePerformanceScoreDto dto);
         Task<bool> DeleteAsync(int id);
+
+        Task<UserProjectScoreDto> GetUserProjectScoreAsync(int projectId, int userId);
     }
 }
