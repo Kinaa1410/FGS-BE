@@ -30,9 +30,11 @@ public class ProjectInvitationService : IProjectInvitationService
         var project = await _unitOfWork.ProjectRepository.FindByIdAsync(dto.ProjectId);
         if (project == null) throw new Exception("Project not found.");
 
-        if (!await _unitOfWork.ProjectMemberRepository.Entities.AnyAsync(
-            pm => pm.ProjectId == dto.ProjectId && pm.UserId == inviterId))
-            throw new Exception("Only members can invite.");
+        var isInviterMember = await _unitOfWork.ProjectMemberRepository.Entities.AnyAsync(pm => pm.ProjectId == dto.ProjectId && pm.UserId == inviterId);
+        if (!isInviterMember)
+        {
+            throw new Exception("Only members can invite other members to the project.");
+        }
 
         // Check available slots (current + reserved < max)
         if (project.CurrentMembers + project.ReservedMembers >= project.MaxMembers)
