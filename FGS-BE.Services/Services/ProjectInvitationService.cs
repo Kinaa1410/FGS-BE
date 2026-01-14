@@ -91,32 +91,44 @@ public class ProjectInvitationService : IProjectInvitationService
     public async Task<ProjectInvitationDto?> AcceptOrDenyAsync(AcceptProjectInvitationDto dto, int userId)
     {
         var invitation = await _unitOfWork.ProjectInvitationRepository.Entities
-            .FirstOrDefaultAsync(pi => pi.InviteCode == dto.InviteCode && pi.InvitedUserId == userId && pi.Status == "pending" && pi.ExpiryAt > DateTime.UtcNow);
-        if (invitation == null) throw new Exception("Invalid or expired invite.");
+            .FirstOrDefaultAsync(pi => pi.InviteCode == dto.InviteCode
+                                    && pi.InvitedUserId == userId
+                                    && pi.Status == "pending"
+                                    && pi.ExpiryAt > DateTime.UtcNow);
+
+        if (invitation == null)
+            throw new Exception("Invalid or expired invite.");
 
         var project = await _unitOfWork.ProjectRepository.FindByIdAsync(invitation.ProjectId);
-        if (project == null) throw new Exception("Project not found.");
+        if (project == null)
+            throw new Exception("Project not found.");
 
         using var transaction = await _unitOfWork.BeginTransactionAsync(IsolationLevel.ReadCommitted);
         try
         {
             if (dto.Accept)
             {
-                // Accept: Join, unlock reserved, increment current
+                // Update project slots
                 project.ReservedMembers -= 1;
                 project.CurrentMembers += 1;
                 await _unitOfWork.ProjectRepository.UpdateAsync(project);
 
+                // Update invitation status
                 invitation.Status = "accepted";
-                await _unitOfWork.ProjectInvitationRepository.UpdateAsync(invitation); // Specific repo
+                await _unitOfWork.ProjectInvitationRepository.UpdateAsync(invitation);
+                var memberEntity = new ProjectMember
+                {
+                    ProjectId = invitation.ProjectId,
+                    UserId = userId,
+                    Role = "member",
+                    // add other required fields if any
+                };
 
-                // Auto-join (reuses existing logic for semester checks)
-                var memberDto = new CreateProjectMemberDto { ProjectId = invitation.ProjectId, UserId = userId, Role = "member" };
-                await _projectMemberService.CreateAsync(memberDto);
+                await _unitOfWork.ProjectMemberRepository.CreateAsync(memberEntity);
+                // NO Commit here — we'll do it at the end
             }
             else
             {
-                // Deny: Unlock reserved
                 project.ReservedMembers -= 1;
                 await _unitOfWork.ProjectRepository.UpdateAsync(project);
 
@@ -124,6 +136,7 @@ public class ProjectInvitationService : IProjectInvitationService
                 await _unitOfWork.ProjectInvitationRepository.UpdateAsync(invitation);
             }
 
+            // Only ONE commit — at the end
             await _unitOfWork.CommitAsync();
             await transaction.CommitAsync();
         }
@@ -132,7 +145,6 @@ public class ProjectInvitationService : IProjectInvitationService
             await transaction.RollbackAsync();
             throw;
         }
-        await transaction.DisposeAsync();
 
         return new ProjectInvitationDto(invitation);
     }
