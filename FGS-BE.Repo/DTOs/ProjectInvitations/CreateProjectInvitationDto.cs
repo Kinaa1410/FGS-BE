@@ -18,7 +18,7 @@ public class CreateProjectInvitationDto
             InviteCode = Guid.NewGuid().ToString("N")[..8].ToUpper(), // Short code
             Status = "pending",
             CreatedAt = DateTime.UtcNow,
-            ExpiryAt = DateTime.UtcNow.AddMinutes(15), // 15-min lock
+            ExpiryAt = DateTime.UtcNow.AddHours(3), // 3 hours lock
             Message = Message
         };
     }
