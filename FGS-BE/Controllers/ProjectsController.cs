@@ -281,5 +281,68 @@ namespace FGS_BE.API.Controllers  // Assume API folder
                 return BadRequest(new { message = "An unexpected error occurred while retrieving member's projects." });
             }
         }
+
+        /// <summary>
+        /// Get the full participation history of a user (current and past projects)
+        /// </summary>
+        /// <param name="userId">The ID of the user</param>
+        /// <param name="pageIndex">Page number (starting from 1)</param>
+        /// <param name="pageSize">Number of items per page</param>
+        /// <param name="sortColumn">Column to sort by (default: Id)</param>
+        /// <param name="sortDir">Sort direction: Asc or Desc (default: Desc for newest first)</param>
+        /// <returns>Paginated list of projects the user has joined</returns>
+        [HttpGet("history/{userId}")]
+        public async Task<IActionResult> GetParticipationHistory(
+            int userId,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 20,
+            [FromQuery] string? sortColumn = "Id",
+            [FromQuery] string? sortDir = "Desc")
+        {
+            // Validate paging parameters
+            if (pageIndex < 1)
+                return BadRequest(new { message = "PageIndex must be at least 1." });
+            if (pageSize < 1 || pageSize > 100)
+                return BadRequest(new { message = "PageSize must be between 1 and 100." });
+
+            // Validate sort direction
+            if (!string.Equals(sortDir, "Asc", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(sortDir, "Desc", StringComparison.OrdinalIgnoreCase))
+            {
+                return BadRequest(new { message = "sortDir must be 'Asc' or 'Desc'." });
+            }
+
+            // Normalize sort direction
+            sortDir = string.Equals(sortDir, "Desc", StringComparison.OrdinalIgnoreCase) ? "Desc" : "Asc";
+
+            try
+            {
+                var result = await _projectService.GetByMemberIdPagedAsync(
+                    userId, pageIndex, pageSize, keyword: null, status: null, sortColumn, sortDir);
+
+                if (result.TotalItems == 0)
+                {
+                    return Ok(new
+                    {
+                        message = "This user has not participated in any projects yet.",
+                        data = result
+                    });
+                }
+
+                return Ok(new
+                {
+                    message = "User's project participation history retrieved successfully.",
+                    data = result
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving participation history." });
+            }
+        }
     }
 }
