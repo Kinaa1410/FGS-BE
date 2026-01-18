@@ -21,13 +21,13 @@ namespace FGS_BE.API.Controllers
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetPaged(
-    int pageIndex = 1,
-    int pageSize = 10,
-    string? keyword = null,
-    int? projectId = null,
-    int? userId = null,
-    string? sortColumn = "Id",
-    string? sortDir = "Asc")
+            int pageIndex = 1,
+            int pageSize = 10,
+            string? keyword = null,
+            int? projectId = null,
+            int? userId = null,
+            string? sortColumn = "Id",
+            string? sortDir = "Asc")
         {
             // Validate paging
             if (pageIndex < 1)
