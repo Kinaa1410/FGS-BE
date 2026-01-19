@@ -23,7 +23,7 @@ public class AuthController(IUserService service) : ControllerBase
         var token = await service.LoginAsync(request);
 
         if (token == null)
-            return Unauthorized(new { message = "Invalid username or password" });
+            return BadRequest(new { message = "Invalid username or password" });
 
         return Ok(token);
     }
