@@ -60,7 +60,8 @@ builder.Services
     .AddScoped<INotificationRepository, NotificationRepository>()
     .AddScoped<INotificationTemplateRepository, NotificationTemplateRepository>()
     .AddScoped<IUserRepository, UserRepository>()
-    .AddScoped<IUserProjectStatsRepository, UserProjectStatsRepository>();  // New: For escalation threshold
+    .AddScoped<IUserProjectStatsRepository, UserProjectStatsRepository>()
+.AddScoped<IUserWalletRepository, UserWalletRepository>();
 // Services (all Scoped to match repositories/DbContext)
 builder.Services
     .AddScoped<IRedeemRequestService, RedeemRequestService>()
@@ -103,10 +104,11 @@ builder.Services.AddScoped<IUnitOfWork>(provider =>
     var notificationTemplateRepo = provider.GetRequiredService<INotificationTemplateRepository>();
     var projectInvitationRepo = provider.GetRequiredService<IProjectInvitationRepository>();
     var userProjectStatsRepo = provider.GetRequiredService<IUserProjectStatsRepository>();  // New: Inject for escalation
+    var userWalletRepo = provider.GetRequiredService<IUserWalletRepository>();
     return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo,
         projectRepo, milestoneRepo, taskRepo, redeemRequestRepo, submissionRepo,
         projectMemberRepo, performanceScoreRepo, userRepo, projectInvitationRepo,
-        notificationRepo, notificationTemplateRepo, userProjectStatsRepo);  // Updated: Include new repo
+        notificationRepo, notificationTemplateRepo, userProjectStatsRepo, userWalletRepo);  // Updated: Include new repo
 });
 // Authorization (enables [Authorize] attributes on controllers)
 builder.Services.AddAuthorization();

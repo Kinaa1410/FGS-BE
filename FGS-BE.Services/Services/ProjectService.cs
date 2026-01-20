@@ -1,13 +1,16 @@
 ﻿using FGS_BE.Repo.DTOs.Pages;
 using FGS_BE.Repo.DTOs.Projects;
+using FGS_BE.Repo.Entities;
 using FGS_BE.Repo.Enums;
 using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Service.Interfaces;
 using FGS_BE.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using ProjectTask = FGS_BE.Repo.Entities.Task;
+using Task = System.Threading.Tasks.Task;
 
 namespace FGS_BE.Service.Implements
 {
@@ -15,11 +18,13 @@ namespace FGS_BE.Service.Implements
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ISemesterService _semesterService;
+        private readonly IPerformanceScoreService _performanceScoreService;
 
-        public ProjectService(IUnitOfWork unitOfWork, ISemesterService semesterService)
+        public ProjectService(IUnitOfWork unitOfWork, ISemesterService semesterService, IPerformanceScoreService performanceScoreService)
         {
             _unitOfWork = unitOfWork;
             _semesterService = semesterService;
+            _performanceScoreService = performanceScoreService;
         }
 
         public async Task<PaginatedList<ProjectDto>> GetPagedAsync(
@@ -110,6 +115,89 @@ namespace FGS_BE.Service.Implements
             await _semesterService.SyncSemesterStatusAsync(entity.SemesterId);
             return new ProjectDto(entity);
         }
+
+        public async Task<CompleteProjectResultDto> CompleteByMentorAsync(
+    int projectId,
+    int mentorId)
+        {
+            using var transaction = await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                var project = await _unitOfWork.ProjectRepository
+                    .Entities
+                    .Include(p => p.ProjectMembers)
+                    .FirstOrDefaultAsync(p => p.Id == projectId);
+
+                if (project == null)
+                    throw new ArgumentException("Project not found.");
+
+                if (project.MentorId != mentorId)
+                    throw new InvalidOperationException("You are not the mentor of this project.");
+
+                if (project.Status != ProjectStatus.InProcess)
+                    throw new InvalidOperationException(
+                        $"Project must be InProcess to complete. Current status: {project.Status}");
+
+                foreach (var member in project.ProjectMembers)
+                {
+                    var scoreDto = await _performanceScoreService
+                        .GetUserProjectScoreAsync(projectId, member.UserId);
+
+                    var earnedPoint = scoreDto.TotalScore;
+                    if (earnedPoint <= 0) continue;
+
+                    var wallet = await _unitOfWork.UserWalletRepository
+                        .Entities
+                        .Include(w => w.PointTransactions)
+                        .FirstOrDefaultAsync(w => w.UserId == member.UserId);
+
+                    if (wallet == null)
+                    {
+                        wallet = new UserWallet
+                        {
+                            UserId = member.UserId,
+                            Balance = 0,
+                            LastUpdatedAt = DateTime.UtcNow
+                        };
+                        await _unitOfWork.UserWalletRepository.CreateAsync(wallet);
+                    }
+
+                    wallet.Balance += earnedPoint;
+                    wallet.LastUpdatedAt = DateTime.UtcNow;
+
+                    wallet.PointTransactions.Add(new PointTransaction
+                    {
+                        Amount = earnedPoint,
+                        CreatedAt = DateTime.UtcNow,
+                        Note = $"Complete project #{project.Id}",
+                        Type = PointTransactionType.Earned,
+                        SourceType = PointTransactionSourceType.Project
+                    });
+
+                    await _unitOfWork.UserWalletRepository.UpdateAsync(wallet);
+                }
+
+                project.Status = ProjectStatus.Complete;
+                await _unitOfWork.ProjectRepository.UpdateAsync(project);
+
+                // ✅ ĐÚNG THỨ TỰ
+                await _unitOfWork.CommitAsync();
+                await transaction.CommitAsync();
+
+                return new CompleteProjectResultDto
+                {
+                    ProjectId = project.Id,
+                    Status = project.Status
+                };
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+
 
         public async Task<bool> DeleteAsync(int id)
         {

@@ -344,5 +344,18 @@ namespace FGS_BE.API.Controllers  // Assume API folder
                 return StatusCode(500, new { message = "An error occurred while retrieving participation history." });
             }
         }
+
+
+
+        [HttpPost("{projectId}/complete")]
+        public async Task<IActionResult> CompleteProject(
+            [FromRoute] int projectId,
+            [FromQuery] int mentorId)
+        {
+            var result = await _projectService
+                .CompleteByMentorAsync(projectId, mentorId);
+
+            return Ok(result);
+        }
     }
 }
