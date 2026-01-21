@@ -37,5 +37,7 @@ namespace FGS_BE.Service.Interfaces
             string? sortDir = "Asc");
         Task<bool> StartByMentorAsync(int projectId, int mentorId);
         Task<bool> CloseByMentorAsync(int projectId, int mentorId);
+        Task<CompleteProjectResultDto> CompleteByMentorAsync(int projectId, int mentorId);
+
     }
 }

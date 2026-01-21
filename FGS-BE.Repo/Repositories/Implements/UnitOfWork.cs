@@ -28,6 +28,7 @@ namespace FGS_BE.Repo.Repositories.Implements
         public INotificationRepository NotificationRepository { get; }
         public INotificationTemplateRepository NotificationTemplateRepository { get; }
         public IUserProjectStatsRepository UserProjectStatsRepository { get; }  // New: For escalation threshold
+        public IUserWalletRepository UserWalletRepository { get; }
 
         public UnitOfWork(
             ApplicationDbContext context,
@@ -46,6 +47,11 @@ namespace FGS_BE.Repo.Repositories.Implements
             INotificationRepository notificationRepository,
             INotificationTemplateRepository notificationTemplateRepository,
             IUserProjectStatsRepository userProjectStatsRepository  // New: Inject this
+,
+            IUserWalletRepository userWalletRepository
+
+
+
         )
         {
             _context = context;
@@ -64,6 +70,7 @@ namespace FGS_BE.Repo.Repositories.Implements
             NotificationRepository = notificationRepository;
             NotificationTemplateRepository = notificationTemplateRepository;
             UserProjectStatsRepository = userProjectStatsRepository;  // New: Assign
+            UserWalletRepository = userWalletRepository;
         }
 
         public IGenericRepository<T> Repository<T>() where T : class

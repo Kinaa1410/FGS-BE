@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
+﻿using FGS_BE.Repo.Entities;
+using Microsoft.EntityFrameworkCore.Storage;
 using System.Data;
+using Task = System.Threading.Tasks.Task;
 
 namespace FGS_BE.Repo.Repositories.Interfaces
 {
@@ -20,6 +22,7 @@ namespace FGS_BE.Repo.Repositories.Interfaces
         INotificationRepository NotificationRepository { get; }
         INotificationTemplateRepository NotificationTemplateRepository { get; }
         IUserProjectStatsRepository UserProjectStatsRepository { get; }
+        IUserWalletRepository UserWalletRepository { get; }
         IGenericRepository<T> Repository<T>() where T : class;
 
         Task CommitAsync(CancellationToken cancellationToken = default);
