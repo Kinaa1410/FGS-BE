@@ -32,10 +32,10 @@ namespace FGS_BE.Repo.DTOs.RewardItems.Validators
                 .WithMessage("Quantity must be greater than or equal to 0.")
                 .When(x => x.Quantity.HasValue);
 
-            RuleFor(x => x.Type)
-                .IsInEnum()
-                .WithMessage("Invalid reward item type.")
-                .When(x => x.Type.HasValue);
+            //RuleFor(x => x.Type)
+            //    .IsInEnum()
+            //    .WithMessage("Invalid reward item type.")
+            //    .When(x => x.Type.HasValue);
         }
     }
 }
