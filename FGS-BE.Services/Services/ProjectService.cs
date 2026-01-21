@@ -2,6 +2,7 @@
 using FGS_BE.Repo.DTOs.Projects;
 using FGS_BE.Repo.Entities;
 using FGS_BE.Repo.Enums;
+using FGS_BE.Repo.Exceptions;
 using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Service.Interfaces;
 using FGS_BE.Services.Interfaces;
@@ -129,13 +130,13 @@ namespace FGS_BE.Service.Implements
                     .FirstOrDefaultAsync(p => p.Id == projectId);
 
                 if (project == null)
-                    throw new ArgumentException("Project not found.");
+                    throw new NotFoundException("Project not found.");
 
                 if (project.MentorId != mentorId)
-                    throw new InvalidOperationException("You are not the mentor of this project.");
+                    throw new ForbiddenAccessException("You are not the mentor of this project.");
 
                 if (project.Status != ProjectStatus.InProcess)
-                    throw new InvalidOperationException(
+                    throw new BadRequestException(
                         $"Project must be InProcess to complete. Current status: {project.Status}");
 
                 foreach (var member in project.ProjectMembers)
