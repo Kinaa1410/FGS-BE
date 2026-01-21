@@ -13,7 +13,7 @@ namespace FGS_BE.Repo.DTOs.RewardItems
         public string? Description { get; set; } = string.Empty;
         public decimal PriceInPoints { get; set; }
         public int Quantity { get; set; }
-        public RewardItemType Type { get; set; }
+        //public RewardItemType Type { get; set; }
         public bool IsActive { get; set; } = true;
 
         public Entities.RewardItem ToEntity()
@@ -24,7 +24,7 @@ namespace FGS_BE.Repo.DTOs.RewardItems
                 Description = Description,
                 PriceInPoints = PriceInPoints,
                 Quantity = Quantity,
-                Type = Type,
+                //Type = Type,
                 IsActive = IsActive,
                 CreatedAt = DateTime.UtcNow
             };

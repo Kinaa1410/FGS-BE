@@ -44,7 +44,7 @@ namespace FGS_BE.Service.Services
             }
             catch (Exception ex)
             {
-                throw new Exception("Không thể lấy danh sách reward item: " + ex.Message);
+                throw new Exception("Cannot get reward item list: " + ex.Message);
             }
         }
 
@@ -57,7 +57,7 @@ namespace FGS_BE.Service.Services
             }
             catch (Exception ex)
             {
-                throw new Exception("Không thể lấy thông tin reward item: " + ex.Message);
+                throw new Exception("Cannot get reward item's details: " + ex.Message);
             }
         }
 
@@ -80,7 +80,7 @@ namespace FGS_BE.Service.Services
             }
             catch (Exception ex)
             {
-                throw new Exception("Không thể tạo reward item: " + ex.Message);
+                throw new Exception("Cannot add reward item: " + ex.Message);
             }
         }
 
@@ -92,14 +92,14 @@ namespace FGS_BE.Service.Services
                 if (entity == null) return null;
 
                 dto.ApplyToEntity(entity);
-                _unitOfWork.RewardItemRepository.UpdateAsync(entity);
+                await _unitOfWork.RewardItemRepository.UpdateAsync(entity);
                 await _unitOfWork.CommitAsync();
 
                 return new RewardItemDto(entity);
             }
             catch (Exception ex)
             {
-                throw new Exception("Không thể cập nhật reward item: " + ex.Message);
+                throw new Exception("Cannot update reward item: " + ex.Message);
             }
         }
 
@@ -116,7 +116,7 @@ namespace FGS_BE.Service.Services
             }
             catch (Exception ex)
             {
-                throw new Exception("Không thể xóa reward item: " + ex.Message);
+                throw new Exception("Cannot delete reward item: " + ex.Message);
             }
         }
     }

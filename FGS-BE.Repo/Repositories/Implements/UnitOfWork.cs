@@ -27,8 +27,9 @@ namespace FGS_BE.Repo.Repositories.Implements
         public IProjectInvitationRepository ProjectInvitationRepository { get; }
         public INotificationRepository NotificationRepository { get; }
         public INotificationTemplateRepository NotificationTemplateRepository { get; }
-        public IUserProjectStatsRepository UserProjectStatsRepository { get; }  // New: For escalation threshold
-        public IUserWalletRepository UserWalletRepository { get; }
+        public IUserProjectStatsRepository UserProjectStatsRepository { get; }
+        public IUserWalletRepository UserWalletRepository { get; }   // Từ remote
+        public IWalletRepository WalletRepository { get; }           // Từ local (của bạn) - giữ lại!
 
         public UnitOfWork(
             ApplicationDbContext context,
@@ -46,15 +47,12 @@ namespace FGS_BE.Repo.Repositories.Implements
             IProjectInvitationRepository projectInvitationRepository,
             INotificationRepository notificationRepository,
             INotificationTemplateRepository notificationTemplateRepository,
-            IUserProjectStatsRepository userProjectStatsRepository  // New: Inject this
-,
-            IUserWalletRepository userWalletRepository
-
-
-
+            IUserProjectStatsRepository userProjectStatsRepository,
+            IUserWalletRepository userWalletRepository,               // Từ remote
+            IWalletRepository walletRepository                         // Từ local (của bạn) - giữ lại!
         )
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             SemesterRepository = semesterRepository;
             RewardItemRepository = rewardItemRepository;
             TermKeywordRepository = termKeywordRepository;
@@ -69,8 +67,9 @@ namespace FGS_BE.Repo.Repositories.Implements
             ProjectInvitationRepository = projectInvitationRepository;
             NotificationRepository = notificationRepository;
             NotificationTemplateRepository = notificationTemplateRepository;
-            UserProjectStatsRepository = userProjectStatsRepository;  // New: Assign
+            UserProjectStatsRepository = userProjectStatsRepository;
             UserWalletRepository = userWalletRepository;
+            WalletRepository = walletRepository;                       // Gán thêm dòng này
         }
 
         public IGenericRepository<T> Repository<T>() where T : class

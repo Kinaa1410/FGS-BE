@@ -46,44 +46,56 @@ namespace FGS_BE.Service.Services
 
         public async Task<SemesterDto> CreateAsync(CreateSemesterDto dto)
         {
+            // 1. Validate ngày tháng
             if (dto.StartDate == default || dto.EndDate == default)
                 throw new ArgumentException("StartDate and EndDate must be provided and valid.");
+
             var now = DateTime.UtcNow;
+
             if (dto.StartDate <= now)
                 throw new ArgumentException("StartDate must be in the future.");
+
             if (dto.EndDate <= dto.StartDate)
                 throw new ArgumentException("EndDate must be after StartDate.");
+
             const int MinDurationDays = 70;
             if ((dto.EndDate - dto.StartDate).TotalDays < MinDurationDays)
                 throw new InvalidOperationException($"Semester duration must be at least {MinDurationDays} days.");
-            if (!string.IsNullOrWhiteSpace(dto.Name))
-            {
-                var existingName = await _unitOfWork.SemesterRepository.Entities
-                    .AsNoTracking()
-                    .AnyAsync(x => x.Name == dto.Name);
-                if (existingName)
-                    throw new InvalidOperationException($"Semester name '{dto.Name}' already exists.");
-            }
-            var status = dto.Status ?? "Upcoming";
-            var validStatuses = new[] { "Upcoming", "Active", "Inactive", "Planned", "Closed" };
-            if (!validStatuses.Contains(status))
-                throw new InvalidOperationException($"Invalid status '{status}'. Must be one of: {string.Join(", ", validStatuses)}.");
+
+            // 2. Validate Name (bắt buộc hoặc unique nếu có)
+            if (string.IsNullOrWhiteSpace(dto.Name))
+                throw new ArgumentException("Semester name is required.");
+
+            var existingName = await _unitOfWork.SemesterRepository.Entities
+                .AsNoTracking()
+                .AnyAsync(x => x.Name == dto.Name.Trim());
+
+            if (existingName)
+                throw new InvalidOperationException($"Semester name '{dto.Name}' already exists.");
+
+            // 3. Kiểm tra overlap thời gian với bất kỳ semester nào (không phụ thuộc Status DB)
             var overlappingSemester = await _unitOfWork.SemesterRepository.Entities
                 .AsNoTracking()
-                .Where(x => x.Status == "Active")
-                .Where(x =>
+                .FirstOrDefaultAsync(x =>
                     (dto.StartDate >= x.StartDate && dto.StartDate <= x.EndDate) ||
                     (dto.EndDate >= x.StartDate && dto.EndDate <= x.EndDate) ||
-                    (dto.StartDate <= x.StartDate && dto.EndDate >= x.EndDate))
-                .FirstOrDefaultAsync();
-            if (overlappingSemester != null)
-                throw new InvalidOperationException("The duration of this semester overlaps with an active semester.");
+                    (dto.StartDate <= x.StartDate && dto.EndDate >= x.EndDate));
 
+            if (overlappingSemester != null)
+                throw new InvalidOperationException(
+                    $"The new semester overlaps with existing semester '{overlappingSemester.Name}' " +
+                    $"(from {overlappingSemester.StartDate:yyyy-MM-dd} to {overlappingSemester.EndDate:yyyy-MM-dd}).");
+
+            // 4. Tạo entity – KHÔNG dùng dto.Status nữa
             var entity = dto.ToEntity();
-            entity.Status = status;
+
+            entity.Status = "Upcoming";
             entity.CreatedAt = now;
+
             await _unitOfWork.SemesterRepository.CreateAsync(entity);
             await _unitOfWork.CommitAsync();
+
+            // Trả về DTO với status được tính realtime (Upcoming ngay lập tức vì StartDate > now)
             return new SemesterDto(entity);
         }
 

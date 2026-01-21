@@ -87,13 +87,23 @@ namespace FGS_BE.API.Controllers
         /// <param name="id">Submission ID</param>
         /// <param name="dto">Updated submission data</param>
         /// <returns>Updated submission</returns>
+        /// <summary>
+        /// Update submission (allow replacing file if provided)
+        /// </summary>
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateAsync(int id, UpdateSubmissionDto dto)
+        [Consumes("multipart/form-data")] 
+        public async Task<IActionResult> UpdateAsync(int id, [FromForm] UpdateSubmissionDto dto)
         {
             try
             {
                 var updated = await _service.UpdateAsync(id, dto);
-                return updated == null ? NotFound(new { message = "Submission not found." }) : Ok(updated);
+                return updated == null
+                    ? NotFound(new { message = "Submission not found." })
+                    : Ok(updated);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {

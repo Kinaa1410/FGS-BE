@@ -26,10 +26,10 @@ namespace FGS_BE.Repo.DTOs.Semesters.Validators
                 .NotEmpty().WithMessage("End date is required.")
                 .GreaterThan(x => x.StartDate).WithMessage("End date must be after start date.");
 
-            RuleFor(x => x.Status)
-                .NotEmpty().WithMessage("Status cannot be empty.")
-                .Must(s => ValidStatuses.Contains(s, StringComparer.OrdinalIgnoreCase))
-                .WithMessage($"Invalid semester status. Valid values: {string.Join(", ", ValidStatuses)}.");
+            //RuleFor(x => x.Status)
+            //    .NotEmpty().WithMessage("Status cannot be empty.")
+            //    .Must(s => ValidStatuses.Contains(s, StringComparer.OrdinalIgnoreCase))
+            //    .WithMessage($"Invalid semester status. Valid values: {string.Join(", ", ValidStatuses)}.");
         }
     }
 }

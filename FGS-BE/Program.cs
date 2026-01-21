@@ -61,7 +61,8 @@ builder.Services
     .AddScoped<INotificationTemplateRepository, NotificationTemplateRepository>()
     .AddScoped<IUserRepository, UserRepository>()
     .AddScoped<IUserProjectStatsRepository, UserProjectStatsRepository>()
-.AddScoped<IUserWalletRepository, UserWalletRepository>();
+    .AddScoped<IWalletRepository, WalletRepository>();
+
 // Services (all Scoped to match repositories/DbContext)
 builder.Services
     .AddScoped<IRedeemRequestService, RedeemRequestService>()
@@ -81,10 +82,13 @@ builder.Services
     .AddScoped<INotificationTemplateService, NotificationTemplateService>()
     .AddScoped<IProjectInvitationService, ProjectInvitationService>()
     .AddScoped<IEmailService, EmailService>()
+    .AddScoped<IUserWalletRepository, UserWalletRepository>()
+    .AddScoped<IWalletService, WalletService>()
     // Jobs as Scoped services for Hangfire
     .AddScoped<InvitationExpiryService>()
     .AddScoped<ProjectClosureService>()
     .AddScoped<SemesterStatusSyncService>();
+// UnitOfWork (Scoped factory to inject all repositories)
 // UnitOfWork (Scoped factory to inject all repositories)
 builder.Services.AddScoped<IUnitOfWork>(provider =>
 {
@@ -103,12 +107,14 @@ builder.Services.AddScoped<IUnitOfWork>(provider =>
     var notificationRepo = provider.GetRequiredService<INotificationRepository>();
     var notificationTemplateRepo = provider.GetRequiredService<INotificationTemplateRepository>();
     var projectInvitationRepo = provider.GetRequiredService<IProjectInvitationRepository>();
-    var userProjectStatsRepo = provider.GetRequiredService<IUserProjectStatsRepository>();  // New: Inject for escalation
-    var userWalletRepo = provider.GetRequiredService<IUserWalletRepository>();
+    var userProjectStatsRepo = provider.GetRequiredService<IUserProjectStatsRepository>();
+    var userWalletRepo = provider.GetRequiredService<IUserWalletRepository>();   
+    var walletRepo = provider.GetRequiredService<IWalletRepository>();               
     return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo,
         projectRepo, milestoneRepo, taskRepo, redeemRequestRepo, submissionRepo,
         projectMemberRepo, performanceScoreRepo, userRepo, projectInvitationRepo,
-        notificationRepo, notificationTemplateRepo, userProjectStatsRepo, userWalletRepo);  // Updated: Include new repo
+        notificationRepo, notificationTemplateRepo, userProjectStatsRepo,
+        userWalletRepo, walletRepo);
 });
 // Authorization (enables [Authorize] attributes on controllers)
 builder.Services.AddAuthorization();
