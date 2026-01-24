@@ -39,12 +39,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         CancellationToken cancellationToken = default)
     {
         IQueryable<T> query = dbSet;
-
-        if (includeFunc != null)
-        {
-            query = includeFunc(query);
-        }
-
+        if (includeFunc != null) query = includeFunc(query);
         return await query.FirstOrDefaultAsync(expression, cancellationToken);
     }
 
@@ -67,22 +62,9 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         CancellationToken cancellationToken = default)
     {
         IQueryable<T> query = dbSet;
-
-        if (isAsNoTracking)
-        {
-            query = query.AsNoTracking();
-        }
-
-        if (expression != null)
-        {
-            query = query.Where(expression);
-        }
-
-        if (orderBy != null)
-        {
-            query = orderBy(query);
-        }
-
+        if (isAsNoTracking) query = query.AsNoTracking();
+        if (expression != null) query = query.Where(expression);
+        if (orderBy != null) query = orderBy(query);
         return await query.ToListAsync(cancellationToken);
     }
 
@@ -91,11 +73,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         CancellationToken cancellationToken = default)
     {
         IQueryable<T> query = dbSet;
-
-        if (expression != null)
-        {
-            query = query.Where(expression);
-        }
+        if (expression != null) query = query.Where(expression);
         return await query.AnyAsync(cancellationToken);
     }
 
@@ -104,11 +82,8 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         CancellationToken cancellationToken = default) where TDTO : class
     {
         IQueryable<T> query = dbSet;
-
         query = query.Where(expression);
-
-        return await query.ProjectToType<TDTO>()
-            .FirstOrDefaultAsync(cancellationToken);
+        return await query.ProjectToType<TDTO>().FirstOrDefaultAsync(cancellationToken);
     }
 
     public async Task<IList<TDTO>> FindAsync<TDTO>(
@@ -117,19 +92,9 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         CancellationToken cancellationToken = default) where TDTO : class
     {
         IQueryable<T> query = dbSet;
-
-        if (expression != null)
-        {
-            query = query.Where(expression);
-        }
-
-        if (orderBy != null)
-        {
-            query = orderBy(query);
-        }
-
-        return await query.ProjectToType<TDTO>()
-            .ToListAsync(cancellationToken);
+        if (expression != null) query = query.Where(expression);
+        if (orderBy != null) query = orderBy(query);
+        return await query.ProjectToType<TDTO>().ToListAsync(cancellationToken);
     }
 
     public async Task<PaginatedList<TDTO>> FindAsync<TDTO>(
@@ -140,19 +105,15 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         CancellationToken cancellationToken = default) where TDTO : class
     {
         IQueryable<T> query = dbSet;
-
-        if (expression != null)
-        {
-            query = query.Where(expression);
-        }
-
-        if (orderBy != null)
-        {
-            query = orderBy(query);
-        }
-
-        return await query.ProjectToType<TDTO>()
-            .PaginatedListAsync(pageIndex, pageSize, cancellationToken);
+        if (expression != null) query = query.Where(expression);
+        if (orderBy != null) query = orderBy(query);
+        return await query.ProjectToType<TDTO>().PaginatedListAsync(pageIndex, pageSize, cancellationToken);
+    }
+    public async Task<T?> FirstOrDefaultAsync(
+    Expression<Func<T, bool>> expression,
+    CancellationToken cancellationToken = default)
+    {
+        return await dbSet.FirstOrDefaultAsync(expression, cancellationToken);
     }
 
     public async Task<int> CountAsync(
@@ -160,12 +121,10 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         CancellationToken cancellationToken = default)
     {
         IQueryable<T> query = dbSet;
-
-        if (expression != null)
-        {
-            query = query.Where(expression);
-        }
+        if (expression != null) query = query.Where(expression);
         return await query.CountAsync(cancellationToken);
     }
+
+
 
 }

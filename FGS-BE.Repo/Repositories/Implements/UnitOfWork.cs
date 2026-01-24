@@ -1,59 +1,126 @@
 ﻿using FGS_BE.Repo.Data;
 using FGS_BE.Repo.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System.Collections;
+using System.Data;
 
-namespace FGS_BE.Repo.Repositories.Implements;
-public class UnitOfWork(ApplicationDbContext _context) : IUnitOfWork
+namespace FGS_BE.Repo.Repositories.Implements
 {
-    private Hashtable? _repositories;
-    private bool disposed = false;
-
-    public IGenericRepository<T> Repository<T>() where T : class
+    public class UnitOfWork : IUnitOfWork
     {
-        if (_repositories == null)
-            _repositories = new Hashtable();
+        private readonly ApplicationDbContext _context;
+        private readonly Hashtable _repositories = new();
+        private bool disposed = false;
 
-        var type = typeof(T).Name;
+        public ISemesterRepository SemesterRepository { get; }
+        public IRewardItemRepository RewardItemRepository { get; }
+        public ITermKeywordRepository TermKeywordRepository { get; }
+        public IProjectRepository ProjectRepository { get; }
+        public IMilestoneRepository MilestoneRepository { get; }
+        public ITaskRepository TaskRepository { get; }
+        public IRedeemRequestRepository RedeemRequestRepository { get; }
+        public ISubmissionRepository SubmissionRepository { get; }
+        public IProjectMemberRepository ProjectMemberRepository { get; }
+        public IPerformanceScoreRepository PerformanceScoreRepository { get; }
+        public IUserRepository UserRepository { get; }
+        public IProjectInvitationRepository ProjectInvitationRepository { get; }
+        public INotificationRepository NotificationRepository { get; }
+        public INotificationTemplateRepository NotificationTemplateRepository { get; }
+        public IUserProjectStatsRepository UserProjectStatsRepository { get; }  // New: For escalation threshold
+        public IUserWalletRepository UserWalletRepository { get; }
 
-        if (!_repositories.ContainsKey(type))
+        public UnitOfWork(
+            ApplicationDbContext context,
+            ISemesterRepository semesterRepository,
+            IRewardItemRepository rewardItemRepository,
+            ITermKeywordRepository termKeywordRepository,
+            IProjectRepository projectRepository,
+            IMilestoneRepository milestoneRepository,
+            ITaskRepository taskRepository,
+            IRedeemRequestRepository redeemRequestRepository,
+            ISubmissionRepository submissionRepository,
+            IProjectMemberRepository projectMemberRepository,
+            IPerformanceScoreRepository performanceScoreRepository,
+            IUserRepository userRepository,
+            IProjectInvitationRepository projectInvitationRepository,
+            INotificationRepository notificationRepository,
+            INotificationTemplateRepository notificationTemplateRepository,
+            IUserProjectStatsRepository userProjectStatsRepository  // New: Inject this
+,
+            IUserWalletRepository userWalletRepository
+
+
+
+        )
         {
-            var repositoryType = typeof(GenericRepository<>);
-
-            var repositoryInstance = Activator.CreateInstance(repositoryType.MakeGenericType(typeof(T)), _context);
-
-            _repositories.Add(type, repositoryInstance);
+            _context = context;
+            SemesterRepository = semesterRepository;
+            RewardItemRepository = rewardItemRepository;
+            TermKeywordRepository = termKeywordRepository;
+            ProjectRepository = projectRepository;
+            MilestoneRepository = milestoneRepository;
+            TaskRepository = taskRepository;
+            RedeemRequestRepository = redeemRequestRepository;
+            SubmissionRepository = submissionRepository;
+            ProjectMemberRepository = projectMemberRepository;
+            PerformanceScoreRepository = performanceScoreRepository;
+            UserRepository = userRepository;
+            ProjectInvitationRepository = projectInvitationRepository;
+            NotificationRepository = notificationRepository;
+            NotificationTemplateRepository = notificationTemplateRepository;
+            UserProjectStatsRepository = userProjectStatsRepository;  // New: Assign
+            UserWalletRepository = userWalletRepository;
         }
 
-        return (IGenericRepository<T>)_repositories[type];
-    }
-
-    public async Task CommitAsync(CancellationToken cancellationToken = default)
-    {
-        await _context.SaveChangesAsync();
-    }
-
-    public Task RollbackAsync()
-    {
-        _context.ChangeTracker.Entries().ToList().ForEach(x => x.Reload());
-        return Task.CompletedTask;
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!disposed)
+        public IGenericRepository<T> Repository<T>() where T : class
         {
-            if (disposing)
+            var type = typeof(T).Name;
+            if (!_repositories.ContainsKey(type))
             {
-                _context.Dispose();
+                var repoType = typeof(GenericRepository<>).MakeGenericType(typeof(T));
+                var repoInstance = Activator.CreateInstance(repoType, _context);
+                _repositories[type] = repoInstance!;
+            }
+            return (IGenericRepository<T>)_repositories[type]!;
+        }
+
+        public async Task CommitAsync(CancellationToken cancellationToken = default)
+        {
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task<IDbContextTransaction> BeginTransactionAsync(
+            IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
+            CancellationToken cancellationToken = default)
+        {
+            return await _context.Database.BeginTransactionAsync(isolationLevel, cancellationToken);
+        }
+
+        public async Task RollbackAsync()
+        {
+            foreach (var entry in _context.ChangeTracker.Entries())
+            {
+                await entry.ReloadAsync();
             }
         }
-        disposed = true;
-    }
 
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
-    }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    _context.Dispose();
+                }
+                disposed = true;
+            }
+        }
 
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+    }
 }

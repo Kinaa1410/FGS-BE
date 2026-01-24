@@ -1,10 +1,16 @@
-﻿namespace FGS_BE.Repo.Entities;
+﻿using Microsoft.AspNetCore.Identity;
 
-public class Role
+namespace FGS_BE.Repo.Entities;
+
+public class Role : IdentityRole<int>
 {
-    public int Id { get; set; }
-    public string? Name { get; set; } = string.Empty;
-    public string? Description { get; set; } = string.Empty;
+    public Role()
+    {
+    }
 
-    public virtual ICollection<User> Users { get; set; } = new HashSet<User>();
+    public Role(string roleName) : this()
+    {
+        Name = roleName;
+    }
+    public virtual ICollection<UserRole> UserRoles { get; set; } = new HashSet<UserRole>();
 }

@@ -1,4 +1,5 @@
 ﻿namespace FGS_BE.Repo.Entities;
+
 public class UserWallet
 {
     public int Id { get; set; }

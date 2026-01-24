@@ -1,43 +1,33 @@
-﻿using System.ComponentModel.DataAnnotations;
+using EntityFrameworkCore.Projectables;
+using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FGS_BE.Repo.Entities;
 
-public class User
+public class User : IdentityUser<int>
 {
-    public int Id { get; set; }
+    public string? FullName { get; set; }
 
-    [StringLength(100, MinimumLength = 2)]
-    public string FullName { get; set; } = string.Empty;
+    public string? StudentCode { get; set; }
 
-    [EmailAddress]
-    [StringLength(255)]
-    public string Email { get; set; } = string.Empty;
-
-    [StringLength(255)]
-    public string PasswordHash { get; set; } = string.Empty;
-
-    [StringLength(20)]
-    public string StudentCode { get; set; } = string.Empty;
-
-    [Phone]
-    [StringLength(20)]
-    public string Phone { get; set; } = string.Empty;
-
-    public string? Status { get; set; } = string.Empty;
+    public string? Status { get; set; }
 
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public string? VerificationToken { get; set; } = null;
+    public virtual ICollection<UserRole> UserRoles { get; set; } = new HashSet<UserRole>();
 
-    public int? RoleId { get; set; }
-    public virtual Role? Role { get; set; } = default!;
+    [Projectable]
+    [NotMapped]
+    public IEnumerable<Role> Roles => UserRoles.Select(ur => ur.Role);
 
     public virtual UserWallet UserWallet { get; set; } = default!;
 
-    public virtual ICollection<UserAchievement> UserAchievements { get; set; } = new HashSet<UserAchievement>();
     public virtual ICollection<RedeemRequest> RedeemRequests { get; set; } = new HashSet<RedeemRequest>();
     public virtual ICollection<PerformanceScore> PerformanceScores { get; set; } = new HashSet<PerformanceScore>();
     public virtual ICollection<Submission> Submissions { get; set; } = new HashSet<Submission>();
     public virtual ICollection<ProjectMember> ProjectMembers { get; set; } = new HashSet<ProjectMember>();
+    public virtual ICollection<UserProjectStats> ProjectStats { get; set; } = new HashSet<UserProjectStats>();  // New
     public virtual ICollection<Notification> Notifications { get; set; } = new HashSet<Notification>();
 
     public virtual ICollection<ChatParticipant> ChatParticipants { get; set; } = new HashSet<ChatParticipant>();
@@ -47,5 +37,6 @@ public class User
     public virtual ICollection<ChatRoom> ChatRooms { get; set; } = new HashSet<ChatRoom>();
 
     public virtual ICollection<Task> AssignedTasks { get; set; } = new HashSet<Task>();
-
+    public virtual ICollection<UserLevel> UserLevels { get; set; } = new List<UserLevel>();
+    public virtual ICollection<SemesterMember> SemesterMembers { get; set; } = new HashSet<SemesterMember>();
 }
