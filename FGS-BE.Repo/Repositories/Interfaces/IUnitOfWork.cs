@@ -22,6 +22,8 @@ namespace FGS_BE.Repo.Repositories.Interfaces
         INotificationRepository NotificationRepository { get; }
         INotificationTemplateRepository NotificationTemplateRepository { get; }
         IUserProjectStatsRepository UserProjectStatsRepository { get; }
+        IUserWalletRepository UserWalletRepository { get; }
+        ISemesterMemberRepository SemesterMemberRepository { get; }
         IUserWalletRepository UserWalletRepository { get; }  
         IWalletRepository WalletRepository { get; }
         IGenericRepository<T> Repository<T>() where T : class;
