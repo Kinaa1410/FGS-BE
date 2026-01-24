@@ -11,7 +11,7 @@ namespace FGS_BE.Repo.Repositories.Implements
     {
         private readonly ApplicationDbContext _context;
         private readonly Hashtable _repositories = new();
-        private bool disposed = false;
+        private bool _disposed = false;
 
         public ISemesterRepository SemesterRepository { get; }
         public IRewardItemRepository RewardItemRepository { get; }
@@ -27,12 +27,10 @@ namespace FGS_BE.Repo.Repositories.Implements
         public IProjectInvitationRepository ProjectInvitationRepository { get; }
         public INotificationRepository NotificationRepository { get; }
         public INotificationTemplateRepository NotificationTemplateRepository { get; }
-        public IUserProjectStatsRepository UserProjectStatsRepository { get; }  // New: For escalation threshold
+        public IUserProjectStatsRepository UserProjectStatsRepository { get; }
         public IUserWalletRepository UserWalletRepository { get; }
         public ISemesterMemberRepository SemesterMemberRepository { get; }
-        public IUserProjectStatsRepository UserProjectStatsRepository { get; }
-        public IUserWalletRepository UserWalletRepository { get; }   // Từ remote
-        public IWalletRepository WalletRepository { get; }           // Từ local (của bạn) - giữ lại!
+        public IWalletRepository WalletRepository { get; }
 
         public UnitOfWork(
             ApplicationDbContext context,
@@ -50,14 +48,10 @@ namespace FGS_BE.Repo.Repositories.Implements
             IProjectInvitationRepository projectInvitationRepository,
             INotificationRepository notificationRepository,
             INotificationTemplateRepository notificationTemplateRepository,
-            IUserProjectStatsRepository userProjectStatsRepository  // New: Inject this
-,
-            IUserWalletRepository userWalletRepository,
-            ISemesterMemberRepository semesterMemberRepository
             IUserProjectStatsRepository userProjectStatsRepository,
-            IUserWalletRepository userWalletRepository,               // Từ remote
-            IWalletRepository walletRepository                         // Từ local (của bạn) - giữ lại!
-        )
+            IUserWalletRepository userWalletRepository,
+            ISemesterMemberRepository semesterMemberRepository,
+            IWalletRepository walletRepository)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             SemesterRepository = semesterRepository;
@@ -77,19 +71,21 @@ namespace FGS_BE.Repo.Repositories.Implements
             UserProjectStatsRepository = userProjectStatsRepository;
             UserWalletRepository = userWalletRepository;
             SemesterMemberRepository = semesterMemberRepository;
-            WalletRepository = walletRepository;                       // Gán thêm dòng này
+            WalletRepository = walletRepository;
         }
 
         public IGenericRepository<T> Repository<T>() where T : class
         {
-            var type = typeof(T).Name;
-            if (!_repositories.ContainsKey(type))
+            var typeName = typeof(T).Name;
+
+            if (!_repositories.ContainsKey(typeName))
             {
                 var repoType = typeof(GenericRepository<>).MakeGenericType(typeof(T));
                 var repoInstance = Activator.CreateInstance(repoType, _context);
-                _repositories[type] = repoInstance!;
+                _repositories[typeName] = repoInstance!;
             }
-            return (IGenericRepository<T>)_repositories[type]!;
+
+            return (IGenericRepository<T>)_repositories[typeName]!;
         }
 
         public async Task CommitAsync(CancellationToken cancellationToken = default)
@@ -114,13 +110,13 @@ namespace FGS_BE.Repo.Repositories.Implements
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposed)
+            if (!_disposed)
             {
                 if (disposing)
                 {
                     _context.Dispose();
                 }
-                disposed = true;
+                _disposed = true;
             }
         }
 

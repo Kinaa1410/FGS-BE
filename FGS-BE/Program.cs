@@ -62,7 +62,7 @@ builder.Services
     .AddScoped<IUserRepository, UserRepository>()
     .AddScoped<IUserProjectStatsRepository, UserProjectStatsRepository>()
     .AddScoped<ISemesterMemberRepository, SemesterMemberRepository>()
-.AddScoped<IUserWalletRepository, UserWalletRepository>();
+    .AddScoped<IUserWalletRepository, UserWalletRepository>()
     .AddScoped<IWalletRepository, WalletRepository>();
 
 // Services (all Scoped to match repositories/DbContext)
@@ -107,23 +107,35 @@ builder.Services.AddScoped<IUnitOfWork>(provider =>
     var projectMemberRepo = provider.GetRequiredService<IProjectMemberRepository>();
     var performanceScoreRepo = provider.GetRequiredService<IPerformanceScoreRepository>();
     var userRepo = provider.GetRequiredService<IUserRepository>();
+    var projectInvitationRepo = provider.GetRequiredService<IProjectInvitationRepository>();
     var notificationRepo = provider.GetRequiredService<INotificationRepository>();
     var notificationTemplateRepo = provider.GetRequiredService<INotificationTemplateRepository>();
-    var projectInvitationRepo = provider.GetRequiredService<IProjectInvitationRepository>();
-    var userProjectStatsRepo = provider.GetRequiredService<IUserProjectStatsRepository>();  // New: Inject for escalation
+    var userProjectStatsRepo = provider.GetRequiredService<IUserProjectStatsRepository>();
     var userWalletRepo = provider.GetRequiredService<IUserWalletRepository>();
     var semesterMemberRepo = provider.GetRequiredService<ISemesterMemberRepository>();
-    var userProjectStatsRepo = provider.GetRequiredService<IUserProjectStatsRepository>();
-    var userWalletRepo = provider.GetRequiredService<IUserWalletRepository>();   
-    var walletRepo = provider.GetRequiredService<IWalletRepository>();               
-    return new UnitOfWork(context, semesterRepo, rewardItemRepo, termKeywordRepo,
-        projectRepo, milestoneRepo, taskRepo, redeemRequestRepo, submissionRepo,
-        projectMemberRepo, performanceScoreRepo, userRepo, projectInvitationRepo,
-        notificationRepo, notificationTemplateRepo, userProjectStatsRepo, userWalletRepo, semesterMemberRepo);  // Updated: Include new repo
-        notificationRepo, notificationTemplateRepo, userProjectStatsRepo,
-        userWalletRepo, walletRepo);
-});
-// Authorization (enables [Authorize] attributes on controllers)
+    var walletRepo = provider.GetRequiredService<IWalletRepository>();
+
+    return new UnitOfWork(
+        context,
+        semesterRepo,
+        rewardItemRepo,
+        termKeywordRepo,
+        projectRepo,
+        milestoneRepo,
+        taskRepo,
+        redeemRequestRepo,
+        submissionRepo,
+        projectMemberRepo,
+        performanceScoreRepo,
+        userRepo,
+        projectInvitationRepo,
+        notificationRepo,
+        notificationTemplateRepo,
+        userProjectStatsRepo,
+        userWalletRepo,
+        semesterMemberRepo,
+        walletRepo);
+});// Authorization (enables [Authorize] attributes on controllers)
 builder.Services.AddAuthorization();
 // Hangfire (for all 3 jobs)
 builder.Services.AddHangfire(config => config
