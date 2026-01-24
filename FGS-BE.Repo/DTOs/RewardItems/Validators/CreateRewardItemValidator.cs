@@ -24,8 +24,8 @@ namespace FGS_BE.Repo.DTOs.RewardItems.Validators
             RuleFor(x => x.Quantity)
                 .GreaterThanOrEqualTo(0).WithMessage("Quantity must be >= 0.");
 
-            RuleFor(x => x.Type)
-                .IsInEnum().WithMessage("Invalid reward item type.");
+            //RuleFor(x => x.Type)
+            //    .IsInEnum().WithMessage("Invalid reward item type.");
         }
     }
 }

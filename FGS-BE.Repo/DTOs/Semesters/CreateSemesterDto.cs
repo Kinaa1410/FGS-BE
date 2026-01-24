@@ -10,7 +10,7 @@ namespace FGS_BE.Repo.DTOs.Semesters
         public string? KeywordTheme { get; set; } = string.Empty;
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public string Status { get; set; } = "Upcoming";
+        //public string Status { get; set; } = "Upcoming";
 
         public Entities.Semester ToEntity()
         {
@@ -20,7 +20,7 @@ namespace FGS_BE.Repo.DTOs.Semesters
                 KeywordTheme = KeywordTheme,
                 StartDate = StartDate,
                 EndDate = EndDate,
-                Status = Status,
+                //Status = Status,
                 CreatedAt = DateTime.UtcNow
             };
         }

@@ -126,5 +126,42 @@ namespace FGS_BE.Repo.Repositories.Implements
             }
             return await query.Where(predicate).ToListAsync(cancellationToken);
         }
+
+
+
+        public async Task<PaginatedList<Project>> GetDashboardPagedAsync(
+            int pageIndex,
+            int pageSize,
+            int? semseterId = null,
+            string? status = null,
+            string? sortColumn = "Id",
+            string? sortDir = "Asc",
+            CancellationToken cancellationToken = default)
+        {
+            var query = Entities.AsNoTracking();
+
+            if (semseterId.HasValue)
+            {
+                query = query.Where(p => p.SemesterId == semseterId.Value);
+            }
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                // Convert enum to string for comparison
+                query = query.Where(x => x.Status.ToString() == status);
+            }
+            var order = $"{sortColumn} {sortDir}";
+            query = query.OrderBy(order);
+            return await query.PaginatedListAsync(pageIndex, pageSize, cancellationToken);
+        }
+
+        public async Task<int> CountUsersBySemesterAsync(
+    int semesterId,
+    CancellationToken cancellationToken = default)
+        {
+            return await Entities
+                .AsNoTracking()
+                .Where(x => x.SemesterId == semesterId)
+                .SumAsync(x => x.CurrentMembers, cancellationToken);
+        }
     }
 }

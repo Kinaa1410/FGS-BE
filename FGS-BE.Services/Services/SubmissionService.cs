@@ -133,20 +133,33 @@ namespace FGS_BE.Service.Implements
             try
             {
                 if (id <= 0) throw new ArgumentException("Invalid submission ID.");
+
                 var entity = await _unitOfWork.SubmissionRepository.FindByIdAsync(id);
                 if (entity == null) return null;
-                entity.FileUrl = dto.FileUrl ?? entity.FileUrl;
-                entity.Status = dto.Status ?? entity.Status;
-                entity.Grade = dto.Grade ?? entity.Grade;
-                entity.Feedback = dto.Feedback ?? entity.Feedback;
-                entity.IsFinal = dto.IsFinal ?? entity.IsFinal;
+                if (dto.File != null && dto.File.Length > 0)
+                {
+                    string fileExtension = Path.GetExtension(dto.File.FileName);
+                    string newFileName = $"{Guid.NewGuid()}{fileExtension}";
+                    var uploadResult = await _cloudinaryService.UploadImage(newFileName, dto.File);
+                    if (uploadResult == null)
+                        throw new Exception("Error uploading new file.");
+                    entity.FileUrl = uploadResult.ImageUrl;
+                    entity.SubmittedAt = DateTime.UtcNow; 
+                    entity.Version += 1; 
+                }
+                if (dto.Status.HasValue) entity.Status = dto.Status.Value;
+                if (dto.Grade.HasValue) entity.Grade = dto.Grade.Value;
+                if (dto.Feedback != null) entity.Feedback = dto.Feedback;
+                if (dto.IsFinal.HasValue) entity.IsFinal = dto.IsFinal.Value;
+
                 await _unitOfWork.SubmissionRepository.UpdateAsync(entity);
                 await _unitOfWork.CommitAsync();
+
                 return new SubmissionDto(entity);
             }
             catch (Exception ex)
             {
-                throw new Exception("Không thể cập nhật submission: " + ex.Message);
+                throw new Exception("Can't update submission: " + ex.Message);
             }
         }
 
