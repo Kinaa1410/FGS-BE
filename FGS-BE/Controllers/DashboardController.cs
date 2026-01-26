@@ -17,48 +17,15 @@ namespace FGS_BE.Controllers
         }
 
 
-        /// <summary>
-        /// 1. nhập semesterID để show list project của kỳ đó
-        /// 2. nhập status để show list project của status đó (Open, InProcess, Close, Complete); nếu cần list prj của status theo semester chỉ định thì nhập cả 2
-        /// </summary>
-        /// <param name="pageIndex"></param>
-        /// <param name="pageSize"></param>
-        /// <param name="semesterId"></param>
-        /// <param name="status"></param>
-        /// <param name="sortColumn"></param>
-        /// <param name="sortDir"></param>
-        /// <returns></returns>
-        [HttpGet]
-        public async Task<IActionResult> GetAll(
-            [FromQuery] int pageIndex = 1,
-            [FromQuery] int pageSize = 10,
-            [FromQuery] int? semesterId = null,
-            [FromQuery] string? status = null,
-            [FromQuery] string? sortColumn = "Id",
-            [FromQuery] string? sortDir = "Asc")
+        [HttpGet("dashboard/count")]
+        public async Task<IActionResult> GetDashboardCount(
+    [FromQuery] int semesterId)
         {
-            try
-            {
-                var result = await _service.GetDashboardPagedAsync(pageIndex, pageSize, semesterId, status, sortColumn, sortDir);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = "An unexpected error occurred while retrieving projects." });
-            }
+            var result = await _service.GetDashboardCountAsync(semesterId);
+            return Ok(result);
         }
 
 
-        /// <summary>
-        /// tinh tổng số user tham gia vào semester
-        /// </summary>
-        /// <param name="semesterId"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         [HttpGet("{semesterId:int}/users/total")]
         public async Task<IActionResult> GetTotalProjectMembers(int semesterId)
         {
