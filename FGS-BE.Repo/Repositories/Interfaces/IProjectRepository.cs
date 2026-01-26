@@ -1,4 +1,5 @@
-﻿using FGS_BE.Repo.DTOs.Pages;
+﻿using FGS_BE.Repo.DTOs.Dashboard;
+using FGS_BE.Repo.DTOs.Pages;
 using FGS_BE.Repo.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -44,14 +45,9 @@ namespace FGS_BE.Repo.Repositories.Interfaces
             Func<IQueryable<Project>, IQueryable<Project>>? include = null,
             CancellationToken cancellationToken = default);
 
-        Task<PaginatedList<Project>> GetDashboardPagedAsync(
-            int pageIndex,
-            int pageSize,
-            int? semesterId = null,
-            string? status = null,
-            string? sortColumn = "Id",
-            string? sortDir = "Asc",
-            CancellationToken cancellationToken = default);
+        Task<ProjectDashboardCountDto> GetDashboardCountAsync(
+    int semesterId,
+    CancellationToken cancellationToken = default);
 
         Task<int> CountUsersBySemesterAsync(int semesterId, CancellationToken cancellationToken = default);
     }

@@ -1,15 +1,16 @@
 ﻿using FGS_BE.Repo.Data;
+using FGS_BE.Repo.DTOs.Dashboard;
 using FGS_BE.Repo.DTOs.Pages;
 using FGS_BE.Repo.Entities;
 using FGS_BE.Repo.Enums; // Add for ProjectStatus
 using FGS_BE.Repo.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Dynamic.Core;
 using System;
+using System.Collections.Generic;
+using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace FGS_BE.Repo.Repositories.Implements
 {
@@ -129,30 +130,32 @@ namespace FGS_BE.Repo.Repositories.Implements
 
 
 
-        public async Task<PaginatedList<Project>> GetDashboardPagedAsync(
-            int pageIndex,
-            int pageSize,
-            int? semseterId = null,
-            string? status = null,
-            string? sortColumn = "Id",
-            string? sortDir = "Asc",
-            CancellationToken cancellationToken = default)
+        public async Task<ProjectDashboardCountDto> GetDashboardCountAsync(
+    int semesterId,
+    CancellationToken cancellationToken = default)
         {
-            var query = Entities.AsNoTracking();
+            var query = Entities.AsNoTracking()
+                .Where(x => x.SemesterId == semesterId);
 
-            if (semseterId.HasValue)
+            var grouped = await query
+                .GroupBy(x => x.Status)
+                .Select(g => new
+                {
+                    Status = g.Key,
+                    Count = g.Count()
+                })
+                .ToListAsync(cancellationToken);
+
+            return new ProjectDashboardCountDto
             {
-                query = query.Where(p => p.SemesterId == semseterId.Value);
-            }
-            if (!string.IsNullOrWhiteSpace(status))
-            {
-                // Convert enum to string for comparison
-                query = query.Where(x => x.Status.ToString() == status);
-            }
-            var order = $"{sortColumn} {sortDir}";
-            query = query.OrderBy(order);
-            return await query.PaginatedListAsync(pageIndex, pageSize, cancellationToken);
+                Total = grouped.Sum(x => x.Count),
+                Open = grouped.FirstOrDefault(x => x.Status == ProjectStatus.Open)?.Count ?? 0,
+                InProcess = grouped.FirstOrDefault(x => x.Status == ProjectStatus.InProcess)?.Count ?? 0,
+                Close = grouped.FirstOrDefault(x => x.Status == ProjectStatus.Close)?.Count ?? 0,
+                Complete = grouped.FirstOrDefault(x => x.Status == ProjectStatus.Complete)?.Count ?? 0
+            };
         }
+
 
         public async Task<int> CountUsersBySemesterAsync(
     int semesterId,

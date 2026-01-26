@@ -1,4 +1,5 @@
-﻿using FGS_BE.Repo.DTOs.Pages;
+﻿using FGS_BE.Repo.DTOs.Dashboard;
+using FGS_BE.Repo.DTOs.Pages;
 using FGS_BE.Repo.DTOs.Projects;
 using FGS_BE.Repo.Repositories.Interfaces;
 using FGS_BE.Services.Interfaces;
@@ -18,24 +19,12 @@ namespace FGS_BE.Services.Implements
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<PaginatedList<ProjectDto>> GetDashboardPagedAsync(
-            int pageIndex,
-            int pageSize,
-            int? semesterId = null,
-            string? status = null,
-            string? sortColumn = "Id",
-            string? sortDir = "Asc")
+        public async Task<ProjectDashboardCountDto> GetDashboardCountAsync(int semesterId)
         {
-            var paged = await _unitOfWork.ProjectRepository.GetDashboardPagedAsync(
-                pageIndex, pageSize, semesterId, status, sortColumn, sortDir);
-            var list = paged.Select(x => new ProjectDto(x)).ToList();
-            return new PaginatedList<ProjectDto>(
-                list,
-                paged.TotalItems,
-                paged.PageIndex,
-                paged.PageSize
-            );
+            return await _unitOfWork.ProjectRepository
+                .GetDashboardCountAsync(semesterId);
         }
+
 
         public async Task<int> GetTotalMembersBySemesterAsync(int semesterId)
         {
