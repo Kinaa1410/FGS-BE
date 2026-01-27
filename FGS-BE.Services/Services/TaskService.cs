@@ -23,13 +23,15 @@ namespace FGS_BE.Service.Implements
             int? milestoneId = null,
             int? assigneeId = null,
             int? parentTaskId = null,
+            int? projectId = null,
             string? sortColumn = "Id",
             string? sortDir = "Asc")
         {
             try
             {
                 var paged = await _unitOfWork.TaskRepository.GetPagedAsync(
-                    pageIndex, pageSize, keyword, status, milestoneId, assigneeId, parentTaskId, sortColumn, sortDir);
+                    pageIndex, pageSize, keyword, status, milestoneId, assigneeId,
+                    parentTaskId, projectId, sortColumn, sortDir);
 
                 return new PaginatedList<TaskDto>(
                     paged.Select(x => new TaskDto(x)).ToList(),
@@ -39,7 +41,7 @@ namespace FGS_BE.Service.Implements
             }
             catch (Exception ex)
             {
-                throw new Exception("Không thể lấy danh sách task: " + ex.Message);
+                throw new Exception("Unable to retrieve task list: " + ex.Message);
             }
         }
 

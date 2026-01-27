@@ -24,11 +24,14 @@ namespace FGS_BE.API.Controllers
             [FromQuery] int? milestoneId = null,
             [FromQuery] int? assigneeId = null,
             [FromQuery] int? parentTaskId = null,
+            [FromQuery] int? projectId = null,            
             [FromQuery] string? sortColumn = "Id",
             [FromQuery] string? sortDir = "Asc")
         {
             var result = await _taskService.GetPagedAsync(
-                pageIndex, pageSize, keyword, status, milestoneId, assigneeId, parentTaskId, sortColumn, sortDir);
+                pageIndex, pageSize, keyword, status, milestoneId, assigneeId,
+                parentTaskId, projectId, sortColumn, sortDir);
+
             return Ok(result);
         }
 

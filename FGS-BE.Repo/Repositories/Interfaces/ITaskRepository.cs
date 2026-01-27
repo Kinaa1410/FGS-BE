@@ -13,6 +13,7 @@ namespace FGS_BE.Repo.Repositories.Interfaces
             int? milestoneId = null,
             int? assigneeId = null,
             int? parentTaskId = null,
+            int? projectId = null,                 
             string? sortColumn = "Id",
             string? sortDir = "Asc",
             CancellationToken cancellationToken = default);

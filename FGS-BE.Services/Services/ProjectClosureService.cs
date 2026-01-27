@@ -50,24 +50,28 @@ namespace FGS_BE.Service.Implements
                     await _semesterService.SyncSemesterStatusAsync(semester.Id);
                     closedSemestersCount++;
 
-                    var ongoingProjects = await _unitOfWork.ProjectRepository.GetByAsync(
-                        p => p.SemesterId == semester.Id && p.Status == ProjectStatus.InProcess,
+                    var projectsToClose = await _unitOfWork.ProjectRepository.GetByAsync(
+                        p => p.SemesterId == semester.Id &&
+                             (p.Status == ProjectStatus.InProcess || p.Status == ProjectStatus.Open),
                         q => q.Include(p => p.Semester));
 
-                    foreach (var project in ongoingProjects)
+                    foreach (var project in projectsToClose)
                     {
                         project.Status = ProjectStatus.Close;
                         await _unitOfWork.ProjectRepository.UpdateAsync(project);
                         closedProjectsCount++;
-                        _logger.LogInformation("Auto-closed project {ProjectId} (Title: {Title}) due to semester {SemesterId} end.",
-                            project.Id, project.Title, semester.Id);
+
+                        _logger.LogInformation(
+                            "Auto-closed project {ProjectId} (Title: {Title}, Previous Status: {PreviousStatus}) due to semester {SemesterId} end.",
+                            project.Id, project.Title, project.Status, semester.Id);
                     }
                 }
 
                 await _unitOfWork.CommitAsync();
                 await transaction.CommitAsync();
 
-                _logger.LogInformation("Auto-close job completed: Closed {ClosedProjectsCount} projects from {ClosedSemestersCount} semesters.",
+                _logger.LogInformation(
+                    "Auto-close job completed: Closed {ClosedProjectsCount} projects from {ClosedSemestersCount} semesters.",
                     closedProjectsCount, closedSemestersCount);
             }
             catch (Exception ex)

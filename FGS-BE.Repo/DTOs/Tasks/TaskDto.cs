@@ -18,6 +18,9 @@
         public int? AssigneeId { get; set; }
         public int? ParentTaskId { get; set; }
 
+        // NEW: Thêm dòng này để FE biết ngay task thuộc nhóm nào
+        public int ProjectId { get; set; }
+
         public TaskDto() { }
 
         public TaskDto(FGS_BE.Repo.Entities.Task entity)
@@ -37,6 +40,9 @@
             MilestoneId = entity.MilestoneId;
             AssigneeId = entity.AssigneeId;
             ParentTaskId = entity.ParentTaskId;
+
+            // NEW: Lấy ProjectId từ Milestone
+            ProjectId = entity.Milestone.ProjectId;
         }
     }
 }
