@@ -21,7 +21,10 @@ namespace FGS_BE.Service.Implements
         private readonly ISemesterService _semesterService;
         private readonly IPerformanceScoreService _performanceScoreService;
 
-        public ProjectService(IUnitOfWork unitOfWork, ISemesterService semesterService, IPerformanceScoreService performanceScoreService)
+        public ProjectService(
+            IUnitOfWork unitOfWork,
+            ISemesterService semesterService,
+            IPerformanceScoreService performanceScoreService)
         {
             _unitOfWork = unitOfWork;
             _semesterService = semesterService;
@@ -57,9 +60,11 @@ namespace FGS_BE.Service.Implements
         {
             await ValidateProposerAsync(dto.ProposerId);
             await ValidateSemesterAsync(dto.SemesterId);
+
             var exists = await _unitOfWork.ProjectRepository.ExistsByAsync(p => p.Title == dto.Title);
             if (exists)
                 throw new InvalidOperationException($"A project with title '{dto.Title}' already exists.");
+
             if (dto.MentorId.HasValue)
                 await ValidateMentorAsync(dto.MentorId.Value);
 
@@ -69,8 +74,10 @@ namespace FGS_BE.Service.Implements
 
             var entity = dto.ToEntity();
             entity.Status = ProjectStatus.Open;
+
             await _unitOfWork.ProjectRepository.CreateAsync(entity);
             await _unitOfWork.CommitAsync();
+
             var result = await _unitOfWork.ProjectRepository.FindByIdAsync(entity.Id);
             return new ProjectDto(result);
         }
@@ -80,21 +87,25 @@ namespace FGS_BE.Service.Implements
             var entity = await _unitOfWork.ProjectRepository.FindByIdAsync(id);
             if (entity == null) return null;
 
+            var semester = await _semesterService.GetByIdAsync(entity.SemesterId);
             var semesterStatus = await _semesterService.GetSemesterStatusAsync(entity.SemesterId);
+
             if (semesterStatus == "Closed")
-                throw new InvalidOperationException($"Cannot update project: Semester ended on " +
-                    (await _semesterService.GetByIdAsync(entity.SemesterId))?.EndDate.ToString("yyyy-MM-dd") + ".");
+                throw new InvalidOperationException(
+                    $"Cannot update project: Semester has ended on {semester?.EndDate:yyyy-MM-dd}.");
 
             if (dto.Title != null) entity.Title = dto.Title;
             if (dto.Description != null) entity.Description = dto.Description;
             if (dto.TotalPoints.HasValue) entity.TotalPoints = dto.TotalPoints.Value;
             if (dto.MinMembers.HasValue) entity.MinMembers = dto.MinMembers.Value;
             if (dto.MaxMembers.HasValue) entity.MaxMembers = dto.MaxMembers.Value;
+
             if (dto.MentorId.HasValue)
             {
                 await ValidateMentorAsync(dto.MentorId.Value);
                 entity.MentorId = dto.MentorId.Value;
             }
+
             if (dto.Status != null)
             {
                 if (!Enum.TryParse(dto.Status, true, out ProjectStatus newStatus))
@@ -102,30 +113,33 @@ namespace FGS_BE.Service.Implements
 
                 if (newStatus == ProjectStatus.InProcess)
                 {
-                    var semester = await _semesterService.GetByIdAsync(entity.SemesterId);
                     var now = DateTime.UtcNow;
                     if (entity.CurrentMembers < entity.MinMembers)
                         throw new InvalidOperationException($"Need at least {entity.MinMembers} members to set InProcess.");
+
                     if (semester?.StartDate > now)
                         throw new InvalidOperationException($"Cannot start project yet: Semester starts on {semester.StartDate:yyyy-MM-dd}.");
                 }
+
                 entity.Status = newStatus;
             }
+
             await _unitOfWork.ProjectRepository.UpdateAsync(entity);
             await _unitOfWork.CommitAsync();
             await _semesterService.SyncSemesterStatusAsync(entity.SemesterId);
+
             return new ProjectDto(entity);
         }
 
-        public async Task<CompleteProjectResultDto> CompleteByMentorAsync(
-    int projectId,
-    int mentorId)
+        public async Task<CompleteProjectResultDto> CompleteByMentorAsync(int projectId, int mentorId)
         {
             using var transaction = await _unitOfWork.BeginTransactionAsync();
             try
             {
+                // Load project with Semester and ProjectMembers
                 var project = await _unitOfWork.ProjectRepository
                     .Entities
+                    .Include(p => p.Semester)                   // Required for EndDate check
                     .Include(p => p.ProjectMembers)
                     .FirstOrDefaultAsync(p => p.Id == projectId);
 
@@ -139,6 +153,22 @@ namespace FGS_BE.Service.Implements
                     throw new BadRequestException(
                         $"Project must be InProcess to complete. Current status: {project.Status}");
 
+                // --- Semester date validation ---
+                if (project.Semester == null)
+                    throw new InvalidOperationException("Project has no associated semester.");
+
+                var now = DateTime.UtcNow.Date; // Compare dates only (ignore time)
+
+                if (now < project.Semester.EndDate.Date)
+                    throw new BadRequestException(
+                        $"Cannot complete the project yet. The semester ends on {project.Semester.EndDate:yyyy-MM-dd}. " +
+                        $"Current date is {now:yyyy-MM-dd}.");
+
+                // Optional: Also check StartDate if you want to ensure the semester has actually begun
+                // if (now < project.Semester.StartDate.Date)
+                //     throw new BadRequestException("The semester has not started yet.");
+
+                // --- Reward members with points ---
                 foreach (var member in project.ProjectMembers)
                 {
                     var scoreDto = await _performanceScoreService
@@ -165,12 +195,11 @@ namespace FGS_BE.Service.Implements
 
                     wallet.Balance += earnedPoint;
                     wallet.LastUpdatedAt = DateTime.UtcNow;
-
                     wallet.PointTransactions.Add(new PointTransaction
                     {
                         Amount = earnedPoint,
                         CreatedAt = DateTime.UtcNow,
-                        Note = $"Complete project #{project.Id}",
+                        Note = $"Completed project \"{project.Title}\" (ID: {project.Id})",
                         Type = PointTransactionType.Earned,
                         SourceType = PointTransactionSourceType.Project
                     });
@@ -178,10 +207,14 @@ namespace FGS_BE.Service.Implements
                     await _unitOfWork.UserWalletRepository.UpdateAsync(wallet);
                 }
 
+                // --- Mark project as Complete ---
                 project.Status = ProjectStatus.Complete;
+
+                // Optional: Track completion timestamp (add DateTime? CompletedAt to Project entity if desired)
+                // project.CompletedAt = DateTime.UtcNow;
+
                 await _unitOfWork.ProjectRepository.UpdateAsync(project);
 
-                // ✅ ĐÚNG THỨ TỰ
                 await _unitOfWork.CommitAsync();
                 await transaction.CommitAsync();
 
@@ -189,6 +222,7 @@ namespace FGS_BE.Service.Implements
                 {
                     ProjectId = project.Id,
                     Status = project.Status
+                    // CompletedAt = project.CompletedAt  // if you add the property
                 };
             }
             catch
@@ -198,16 +232,17 @@ namespace FGS_BE.Service.Implements
             }
         }
 
-
-
         public async Task<bool> DeleteAsync(int id)
         {
             var entity = await _unitOfWork.ProjectRepository.FindByIdAsync(id);
             if (entity == null) return false;
 
+            var semester = await _semesterService.GetByIdAsync(entity.SemesterId);
             var semesterStatus = await _semesterService.GetSemesterStatusAsync(entity.SemesterId);
+
             if (semesterStatus == "Closed")
-                throw new InvalidOperationException("Cannot delete project from a closed semester.");
+                throw new InvalidOperationException(
+                    $"Cannot delete project: Semester has ended on {semester?.EndDate:yyyy-MM-dd}.");
 
             await _unitOfWork.ProjectRepository.DeleteAsync(entity);
             await _unitOfWork.CommitAsync();
@@ -215,44 +250,26 @@ namespace FGS_BE.Service.Implements
         }
 
         public async Task<PaginatedList<ProjectDto>> GetByMentorIdPagedAsync(
-            int mentorId,
-            int pageIndex,
-            int pageSize,
-            string? keyword = null,
-            string? status = null,
-            string? sortColumn = "Id",
-            string? sortDir = "Asc")
+            int mentorId, int pageIndex, int pageSize,
+            string? keyword = null, string? status = null,
+            string? sortColumn = "Id", string? sortDir = "Asc")
         {
             await ValidateMentorAsync(mentorId);
             var paged = await _unitOfWork.ProjectRepository.GetByMentorIdPagedAsync(
                 mentorId, pageIndex, pageSize, keyword, status, sortColumn, sortDir);
             var list = paged.Select(x => new ProjectDto(x)).ToList();
-            return new PaginatedList<ProjectDto>(
-                list,
-                paged.TotalItems,
-                paged.PageIndex,
-                paged.PageSize
-            );
+            return new PaginatedList<ProjectDto>(list, paged.TotalItems, paged.PageIndex, paged.PageSize);
         }
 
         public async Task<PaginatedList<ProjectDto>> GetByMemberIdPagedAsync(
-            int memberId,
-            int pageIndex,
-            int pageSize,
-            string? keyword = null,
-            string? status = null,
-            string? sortColumn = "Id",
-            string? sortDir = "Asc")
+            int memberId, int pageIndex, int pageSize,
+            string? keyword = null, string? status = null,
+            string? sortColumn = "Id", string? sortDir = "Asc")
         {
             var paged = await _unitOfWork.ProjectRepository.GetByMemberIdPagedAsync(
                 memberId, pageIndex, pageSize, keyword, status, sortColumn, sortDir);
             var list = paged.Select(x => new ProjectDto(x)).ToList();
-            return new PaginatedList<ProjectDto>(
-                list,
-                paged.TotalItems,
-                paged.PageIndex,
-                paged.PageSize
-            );
+            return new PaginatedList<ProjectDto>(list, paged.TotalItems, paged.PageIndex, paged.PageSize);
         }
 
         public async Task<bool> StartByMentorAsync(int projectId, int mentorId)
@@ -264,24 +281,29 @@ namespace FGS_BE.Service.Implements
             if (entity.MentorId != mentorId)
                 throw new InvalidOperationException("You are not the mentor of this project.");
 
+            var semester = await _semesterService.GetByIdAsync(entity.SemesterId);
             var semesterStatus = await _semesterService.GetSemesterStatusAsync(entity.SemesterId);
+
             if (semesterStatus == "Closed")
-                throw new InvalidOperationException($"Cannot start project: Semester already ended on " +
-                    (await _semesterService.GetByIdAsync(entity.SemesterId))?.EndDate.ToString("yyyy-MM-dd") + ".");
+                throw new InvalidOperationException(
+                    $"Cannot start project: Semester has ended on {semester?.EndDate:yyyy-MM-dd}.");
+
             if (semesterStatus != "Active")
-                throw new InvalidOperationException($"Cannot start project: Semester is {semesterStatus}. Must be active.");
+                throw new InvalidOperationException($"Cannot start project: Semester is {semesterStatus}. Must be Active.");
 
             if (entity.Status != ProjectStatus.Open)
                 throw new InvalidOperationException($"Project must be Open to start. Current status: {entity.Status}.");
 
-            if (entity.CurrentMembers <= entity.MinMembers)
+            // FIXED: Use < instead of <=
+            if (entity.CurrentMembers < entity.MinMembers)
                 throw new InvalidOperationException(
-                    $"Need more than {entity.MinMembers} members to start project. Current: {entity.CurrentMembers}.");
+                    $"Need at least {entity.MinMembers} members to start project. Current: {entity.CurrentMembers}.");
 
             entity.Status = ProjectStatus.InProcess;
             await _unitOfWork.ProjectRepository.UpdateAsync(entity);
             await _unitOfWork.CommitAsync();
             await _semesterService.SyncSemesterStatusAsync(entity.SemesterId);
+
             return true;
         }
 
@@ -294,10 +316,12 @@ namespace FGS_BE.Service.Implements
             if (entity.MentorId != mentorId)
                 throw new InvalidOperationException("You are not the mentor of this project.");
 
+            var semester = await _semesterService.GetByIdAsync(entity.SemesterId);
             var semesterStatus = await _semesterService.GetSemesterStatusAsync(entity.SemesterId);
+
             if (semesterStatus == "Closed")
-                throw new InvalidOperationException($"Cannot close project: Semester already ended on " +
-                    (await _semesterService.GetByIdAsync(entity.SemesterId))?.EndDate.ToString("yyyy-MM-dd") + ".");
+                throw new InvalidOperationException(
+                    $"Cannot close project: Semester has ended on {semester?.EndDate:yyyy-MM-dd}.");
 
             if (entity.Status != ProjectStatus.InProcess)
                 throw new InvalidOperationException($"Project must be InProcess to close. Current status: {entity.Status}.");
@@ -306,6 +330,7 @@ namespace FGS_BE.Service.Implements
             await _unitOfWork.ProjectRepository.UpdateAsync(entity);
             await _unitOfWork.CommitAsync();
             await _semesterService.SyncSemesterStatusAsync(entity.SemesterId);
+
             return true;
         }
 

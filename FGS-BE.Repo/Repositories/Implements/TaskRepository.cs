@@ -19,11 +19,14 @@ namespace FGS_BE.Repo.Repositories.Implements
             int? milestoneId = null,
             int? assigneeId = null,
             int? parentTaskId = null,
+            int? projectId = null,
             string? sortColumn = "Id",
             string? sortDir = "Asc",
             CancellationToken cancellationToken = default)
         {
-            var query = Entities.AsNoTracking();
+            var query = Entities
+                .Include(t => t.Milestone)
+                .AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(keyword))
                 query = query.Where(x => x.Label!.Contains(keyword) || x.Description!.Contains(keyword));
@@ -40,7 +43,11 @@ namespace FGS_BE.Repo.Repositories.Implements
             if (parentTaskId.HasValue)
                 query = query.Where(x => x.ParentTaskId == parentTaskId.Value);
 
+            if (projectId.HasValue)
+                query = query.Where(x => x.Milestone.ProjectId == projectId.Value);
+
             query = query.OrderBy($"{sortColumn} {sortDir}");
+
             return await query.PaginatedListAsync(pageIndex, pageSize, cancellationToken);
         }
     }

@@ -393,4 +393,76 @@ public class UserService(
         await unitOfWork.CommitAsync();
     }
 
+    public async Task RegisterAdminAsync(RegisterStaffRequest request)
+    {
+        //// Check if an Admin already exists (prevent multiple admins if desired)
+        //var existingAdmin = await userManager.GetUsersInRoleAsync(RoleEnums.Admin.ToString());
+        //if (existingAdmin.Any())
+        //{
+        //    throw new BadRequestException("An Admin account already exists.");
+        //}
+
+        // Check if username/email is already taken
+        var userExists = await userManager.FindByNameAsync(request.Username);
+        if (userExists != null)
+        {
+            throw new BadRequestException(Resource.UsernameExisted);
+        }
+
+        var user = new User
+        {
+            UserName = request.Username,
+            Email = request.Username, // Or use a separate Email field if needed
+            FullName = request.FullName ?? "Administrator",
+            Status = "Active",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        var result = await userManager.CreateAsync(user, request.Password);
+        if (!result.Succeeded)
+        {
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new BadRequestException($"Failed to create admin: {errors}");
+        }
+
+        // Assign Admin role
+        result = await userManager.AddToRoleAsync(user, RoleEnums.Admin.ToString());
+        if (!result.Succeeded)
+        {
+            throw new BadRequestException("Failed to assign Admin role.");
+        }
+
+        // Optional: Create wallet (same as others)
+        var walletRepo = unitOfWork.Repository<UserWallet>();
+        var wallet = new UserWallet
+        {
+            UserId = user.Id,
+            Balance = 0,
+            LastUpdatedAt = DateTime.UtcNow
+        };
+        await walletRepo.CreateAsync(wallet);
+
+        // Optional: Assign level (same logic as others)
+        var levelRepo = unitOfWork.Repository<Level>();
+        var userLevelRepo = unitOfWork.Repository<UserLevel>();
+        var activeLevels = await levelRepo.Entities.Where(l => l.IsActive).ToListAsync();
+        var lowestLevel = activeLevels
+            .OrderBy(l => GetThresholdFromCondition(l.ConditionJson))
+            .FirstOrDefault();
+
+        if (lowestLevel != null)
+        {
+            var initialUserLevel = new UserLevel
+            {
+                UserId = user.Id,
+                LevelId = lowestLevel.Id,
+                UnlockedAt = DateTime.UtcNow
+            };
+            await userLevelRepo.CreateAsync(initialUserLevel);
+        }
+
+        await unitOfWork.CommitAsync();
+    }
+
 }

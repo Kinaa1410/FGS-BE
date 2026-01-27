@@ -20,4 +20,5 @@ public interface IUserService
 
     Task<User> RegisterMailAcc(RegisterDTO customer);
     Task<VerifyResponse> Verify(string token);
+    Task RegisterAdminAsync(RegisterStaffRequest request);
 }

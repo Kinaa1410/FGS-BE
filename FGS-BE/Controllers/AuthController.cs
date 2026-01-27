@@ -81,4 +81,10 @@ public class AuthController(IUserService service) : ControllerBase
         return Ok(new MessageResponse("Verify account successfully"));
     }
 
+    [HttpPost("register-admin")]
+    public async Task<IActionResult> RegisterAdmin([FromBody] RegisterStaffRequest request)
+    {
+        await service.RegisterAdminAsync(request);
+        return Ok(new { Message = "Admin account created successfully" });
+    }
 }

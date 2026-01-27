@@ -16,15 +16,19 @@ namespace FGS_BE.Repo.Entities
         public DateTime? DueDate { get; set; }
         public DateTime? CompletedAt { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
         [ForeignKey(nameof(MilestoneId))]
         public int MilestoneId { get; set; }
         public virtual Milestone Milestone { get; set; } = default!;
+
         [ForeignKey(nameof(AssigneeId))]
         public int? AssigneeId { get; set; }
         public virtual User? Assignee { get; set; }
+
         [ForeignKey(nameof(ParentTaskId))]
         public int? ParentTaskId { get; set; }
         public virtual Task? ParentTask { get; set; }
+
         public virtual ICollection<Task> SubTasks { get; set; } = new HashSet<Task>();
         public virtual ICollection<PerformanceScore> PerformanceScores { get; set; } = new HashSet<PerformanceScore>();
         public virtual ICollection<Submission> Submissions { get; set; } = new HashSet<Submission>();
